@@ -272,7 +272,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 #loginScreen{position:fixed;inset:0;background:#2C2C2A;z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;opacity:0;}
 .login-box{width:100%;max-width:360px;margin:0 auto;}
 .login-logo{text-align:center;margin-bottom:2rem;display:flex;flex-direction:column;align-items:center;}
-.login-logo-icon{width:60px;height:60px;background:rgba(241,239,232,.1);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;transition:all .6s cubic-bezier(.34,1.56,.64,1);}
+.login-logo-icon{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;transition:all .6s cubic-bezier(.34,1.56,.64,1);}
 .login-wordmark{font-size:26px;font-weight:600;letter-spacing:.22em;color:#F1EFE8;}
 .login-sub{font-size:11px;color:rgba(241,239,232,.35);margin-top:4px;letter-spacing:.12em;}
 .login-card{background:rgba(255,255,255,.06);border:0.5px solid rgba(255,255,255,.1);border-radius:14px;padding:20px;margin-bottom:12px;}
@@ -377,7 +377,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
   <div class="login-box">
     <div class="login-logo">
       <div class="login-logo-icon">
-        <svg width="32" height="32" viewBox="0 0 26 26" fill="none">
+        <svg width="64" height="64" viewBox="0 0 26 26" fill="none">
           <rect x="2" y="2" width="10" height="10" rx="2" fill="#F1EFE8"/>
           <rect x="14" y="2" width="10" height="10" rx="2" fill="#F1EFE8" opacity=".55"/>
           <rect x="2" y="14" width="10" height="10" rx="2" fill="#F1EFE8" opacity=".55"/>
@@ -1534,14 +1534,7 @@ const HT=[{n:0,F:[18,14],S:[18,12],P:[18,10]},{n:1,F:[22,16],S:[22,14],P:[22,12]
   {n:400,F:[333.4,248.5],S:[333.4,227.3],P:[333.4,209.1]},
   {n:500,F:[363.6,259.1],S:[363.6,245.5],P:[363.6,227.3]}];
 
-let works=[
-  {id:1,title:'빛의 파편들',year:2024,genre:'회화',medium:'캔버스에 아크릴',size:'53×45.5',desc:'자연광을 분해한 추상 연작.',award:'2024 서울 청년작가상',img:null,c:PAL[0],sold:false,price:3000000},
-  {id:2,title:'도시의 결',year:2024,genre:'사진',medium:'아카이벌 피그먼트 프린트',size:'60×90',desc:'서울 골목의 질감을 포착한 흑백 사진 시리즈.',award:'',img:null,c:PAL[1],sold:true,price:2500000},
-  {id:3,title:'정지된 시간',year:2023,genre:'설치미술',medium:'버려진 시계 2000개',size:'가변',desc:'시계 2000개로 구성한 공간 설치.',award:'2023 아르코 지원',img:null,c:PAL[2],sold:false},
-  {id:4,title:'기억의 층위',year:2023,genre:'혼합매체',medium:'콜라주',size:'80×60',desc:'가족 사진과 신문지를 레이어드한 콜라주 연작.',award:'',img:null,c:PAL[3],sold:true},
-  {id:5,title:'푸른 소음',year:2022,genre:'회화',medium:'캔버스에 유채',size:'200×300',desc:'소리의 파형을 시각화한 대형 캔버스 작품.',award:'2022 국립현대미술관 기획전 선정',img:null,c:PAL[4],sold:false,price:15000000},
-  {id:6,title:'경계선',year:2022,genre:'판화',medium:'목판화',size:'50×70',desc:'도시와 자연의 경계를 탐구하는 목판화 연작.',award:'',img:null,c:PAL[5],sold:false},
-];
+let works=[];
 let sel=new Set(),nextId=7,editId=null,pendingImg=null,pendingImgFile=null,soldF=false;
 let artist={name:'',phone:'',email:''};
 let pageSize=30,curPage=1,reviewItems=[];
