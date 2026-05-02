@@ -206,32 +206,51 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 .toast.on{opacity:1;}
 @media(max-width:520px){.nav{padding:0 12px;}.main{padding:12px 12px 80px;}.howgrid{grid-template-columns:1fr;}.expgrid{grid-template-columns:1fr;}.frow{grid-template-columns:1fr;}.dmodal,.ppanel,.modal,.rmodal{border-radius:var(--rlg) var(--rlg) 0 0;margin:auto 0 0;}.ov{padding:0;align-items:flex-end;}}
 
-.splash{position:fixed;inset:0;background:#2C2C2A;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .6s ease, transform .6s ease;}
+.splash{position:fixed;inset:0;background:#2C2C2A;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:opacity .9s ease;}
 .splash.hide{opacity:0;pointer-events:none;}
-.splash-icon{width:72px;height:72px;background:rgba(241,239,232,.12);border-radius:18px;display:flex;align-items:center;justify-content:center;animation:splashPop .6s cubic-bezier(.34,1.56,.64,1) both;}
-.splash-word{font-size:28px;font-weight:600;letter-spacing:.3em;color:#F1EFE8;animation:splashFade .7s ease .2s both;}
-.splash-sub{font-size:12px;letter-spacing:.15em;color:rgba(241,239,232,.4);animation:splashFade .7s ease .35s both;}
-@keyframes splashPop{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
-@keyframes splashFade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.splash-logo{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:68px;height:68px;}
+.splash-logo .sq{border-radius:7px;background:#F1EFE8;transition:opacity .35s ease;}
+.splash-word{font-size:26px;font-weight:600;letter-spacing:.3em;color:#F1EFE8;opacity:0;transition:opacity .7s ease;}
+.splash-word.show{opacity:1;}
+.splash-sub{font-size:11px;letter-spacing:.14em;color:rgba(241,239,232,.4);opacity:0;transition:opacity .7s ease .2s;}
+.splash-sub.show{opacity:1;}
+
+.filter-bar{background:#1a1a18;padding:10px 16px;margin:-14px -16px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);}
+.filter-bar .filter-row{margin-bottom:8px;}
+.filter-bar .filter-row:last-child{margin-bottom:0;}
+.filter-bar select,.filter-bar input{background:#2C2C2A;color:#F1EFE8;border:0.5px solid rgba(255,255,255,.15);font-size:13px;padding:7px 9px;border-radius:8px;outline:none;}
+.filter-bar select:focus,.filter-bar input:focus{border-color:rgba(255,255,255,.4);}
+.filter-bar input::placeholder{color:rgba(241,239,232,.35);}
+.filter-bar option{background:#2C2C2A;color:#F1EFE8;}
+.filter-bar .legend{color:rgba(241,239,232,.55);}
+.filter-bar .ldot{border-color:rgba(255,255,255,.3);}
+.filter-bar .sort-wrap{color:rgba(241,239,232,.55);}
+.filter-bar .sort-wrap select{background:#2C2C2A;color:#F1EFE8;border:0.5px solid rgba(255,255,255,.15);}
+.filter-bar .psb{background:transparent;color:rgba(241,239,232,.5);border:0.5px solid rgba(255,255,255,.15);}
+.filter-bar .psb.on{background:#F1EFE8;color:#1a1a18;border-color:#F1EFE8;}
+.filter-bar .psb:hover:not(.on){background:rgba(255,255,255,.08);color:#F1EFE8;}
+.filter-bar .selbar{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:rgba(241,239,232,.6);}
+.filter-bar .selbar strong{color:#F1EFE8;}
+.filter-bar .selbar .btn{border-color:rgba(255,255,255,.2);color:#F1EFE8;}
+.filter-bar .selbar .btn:hover{background:rgba(255,255,255,.1);}
+.filter-bar .selbar .btn-blue{background:#185FA5;color:#fff;border-color:#185FA5;}
 </style>
 </head>
 <body>
 
 <div class="splash" id="splash">
-  <div class="splash-icon">
-    <svg width="38" height="38" viewBox="0 0 26 26" fill="none">
-      <rect x="2" y="2" width="10" height="10" rx="2.5" fill="#F1EFE8"/>
-      <rect x="14" y="2" width="10" height="10" rx="2.5" fill="#F1EFE8" opacity=".55"/>
-      <rect x="2" y="14" width="10" height="10" rx="2.5" fill="#F1EFE8" opacity=".55"/>
-      <rect x="14" y="14" width="10" height="10" rx="2.5" fill="#F1EFE8" opacity=".25"/>
-    </svg>
+  <div class="splash-logo">
+    <div class="sq" id="sq0"></div>
+    <div class="sq" id="sq1"></div>
+    <div class="sq" id="sq3"></div>
+    <div class="sq" id="sq2"></div>
   </div>
-  <div class="splash-word">POPOL</div>
-  <div class="splash-sub">포트폴리오 관리</div>
+  <div class="splash-word" id="splashWord">POPOL</div>
+  <div class="splash-sub" id="splashSub">portfolio, simplified.</div>
 </div>
 
 <nav class="nav">
-  <div class="nav-logo">
+  <div class="nav-logo" onclick="showTab('portfolio')" style="cursor:pointer;">
     <div class="nav-icon">
       <svg width="16" height="16" viewBox="0 0 26 26" fill="none">
         <rect x="2" y="2" width="10" height="10" rx="2" fill="#F1EFE8"/>
@@ -251,43 +270,45 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 
 <div class="main">
   <div id="tabP">
-    <div class="filter-row">
-      <select id="fYear" onchange="goPage(1)"><option value="">전체 연도</option></select>
-      <select id="fGenre" onchange="goPage(1)"><option value="">전체 장르</option></select>
-      <select id="fHnum" onchange="goPage(1)"><option value="">전체 호수</option></select>
-      <select id="fSold" onchange="goPage(1)"><option value="">전체 상태</option><option value="0">판매 가능</option><option value="1">판매 완료</option></select>
-      <input id="fQ" placeholder="작품 검색..." oninput="goPage(1)"/>
-    </div>
-    <div class="ctrl-row">
-      <div class="legend">
-        <div class="legend-item"><div class="ldot" style="background:var(--border2);border:1px solid var(--border2);"></div>판매 가능</div>
-        <div class="legend-item"><div class="ldot" style="background:rgba(163,45,45,.55);"></div>판매 완료</div>
+    <div class="filter-bar">
+      <div class="filter-row">
+        <select id="fYear" onchange="goPage(1)"><option value="">전체 연도</option></select>
+        <select id="fGenre" onchange="goPage(1)"><option value="">전체 장르</option></select>
+        <select id="fHnum" onchange="goPage(1)"><option value="">전체 호수</option></select>
+        <select id="fSold" onchange="goPage(1)"><option value="">전체 상태</option><option value="0">판매 가능</option><option value="1">판매 완료</option></select>
+        <input id="fQ" placeholder="작품 검색..." oninput="goPage(1)"/>
       </div>
-      <div class="r-ctrl">
-        <div class="sort-wrap">정렬
-          <select id="sortBy" onchange="goPage(1)">
-            <option value="year_desc">연도 최신순</option>
-            <option value="year_asc">연도 오래된순</option>
-            <option value="hnum_asc">호수 작은순</option>
-            <option value="hnum_desc">호수 큰순</option>
-            <option value="title_asc">제목 가나다순</option>
-          </select>
+      <div class="ctrl-row" style="margin-bottom:0;">
+        <div class="legend">
+          <div class="legend-item"><div class="ldot" style="background:rgba(241,239,232,.3);border:1px solid rgba(241,239,232,.3);"></div>판매 가능</div>
+          <div class="legend-item"><div class="ldot" style="background:rgba(163,45,45,.7);"></div>판매 완료</div>
         </div>
-        <div class="ps-btns">
-          <button class="psb" data-n="20" onclick="setPS(20)">20</button>
-          <button class="psb on" data-n="30" onclick="setPS(30)">30</button>
-          <button class="psb" data-n="50" onclick="setPS(50)">50</button>
-          <button class="psb" data-n="60" onclick="setPS(60)">60</button>
-          <button class="psb" data-n="9999" onclick="setPS(9999)">전체</button>
+        <div class="r-ctrl">
+          <div class="sort-wrap">정렬
+            <select id="sortBy" onchange="goPage(1)">
+              <option value="year_desc">연도 최신순</option>
+              <option value="year_asc">연도 오래된순</option>
+              <option value="hnum_asc">호수 작은순</option>
+              <option value="hnum_desc">호수 큰순</option>
+              <option value="title_asc">제목 가나다순</option>
+            </select>
+          </div>
+          <div class="ps-btns">
+            <button class="psb" data-n="20" onclick="setPS(20)">20</button>
+            <button class="psb on" data-n="30" onclick="setPS(30)">30</button>
+            <button class="psb" data-n="50" onclick="setPS(50)">50</button>
+            <button class="psb" data-n="60" onclick="setPS(60)">60</button>
+            <button class="psb" data-n="9999" onclick="setPS(9999)">전체</button>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="selbar" id="selbar" style="display:none;">
-      <strong id="selcnt">0</strong>개 선택됨
-      <div class="r">
-        <button class="btn btn-sm" onclick="clearSel()">해제</button>
-        <button class="btn btn-sm" onclick="selAll()">전체</button>
-        <button class="btn btn-sm btn-blue" onclick="openPreview()">리스트 만들기 →</button>
+      <div class="selbar" id="selbar" style="display:none;margin-top:8px;margin-bottom:0;">
+        <strong id="selcnt">0</strong>개 선택됨
+        <div class="r">
+          <button class="btn btn-sm" onclick="clearSel()">해제</button>
+          <button class="btn btn-sm" onclick="selAll()">전체</button>
+          <button class="btn btn-sm btn-blue" onclick="openPreview()">리스트 만들기 →</button>
+        </div>
       </div>
     </div>
     <div id="list"></div>
@@ -840,12 +861,53 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 
 (function(){
   var splash = document.getElementById('splash');
-  setTimeout(function(){
-    splash.classList.add('hide');
-    setTimeout(function(){
-      splash.style.display = 'none';
-    }, 700);
-  }, 1800);
+  var sqs = [
+    document.getElementById('sq0'), // 좌상단
+    document.getElementById('sq1'), // 우상단
+    document.getElementById('sq2'), // 우하단
+    document.getElementById('sq3')  // 좌하단
+  ];
+  var word = document.getElementById('splashWord');
+  var sub = document.getElementById('splashSub');
+
+  // 시계방향: 좌상단(0) → 우상단(1) → 우하단(2) → 좌하단(3)
+  // 4단계 밝기: 가장 밝은 것 1개, 그 다음, 그 다음, 가장 어두운 것
+  var levels = [1.0, 0.55, 0.25, 0.1];
+  var step = 0;
+  var totalRounds = 2;
+  var totalSteps = 4 * totalRounds;
+  var interval = 280;
+
+  function setOpacities(brightestIdx) {
+    for(var i = 0; i < 4; i++) {
+      var levelIdx = ((i - brightestIdx) % 4 + 4) % 4;
+      sqs[i].style.opacity = levels[levelIdx];
+    }
+  }
+
+  // init all dim
+  sqs.forEach(function(s){ s.style.opacity = levels[3]; });
+
+  function tick() {
+    if(step < totalSteps) {
+      setOpacities(step % 4);
+      step++;
+      setTimeout(tick, interval);
+    } else {
+      // 마지막: 전부 밝게
+      sqs.forEach(function(s){ s.style.opacity = 1; });
+      setTimeout(function(){
+        word.classList.add('show');
+        sub.classList.add('show');
+      }, 300);
+      setTimeout(function(){
+        splash.classList.add('hide');
+        setTimeout(function(){ splash.style.display='none'; }, 950);
+      }, 2100);
+    }
+  }
+
+  setTimeout(tick, 250);
 })();
 
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}
