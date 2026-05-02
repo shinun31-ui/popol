@@ -205,9 +205,31 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--charcoal);color:var(--warm);font-size:13px;padding:9px 20px;border-radius:8px;z-index:999;pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;}
 .toast.on{opacity:1;}
 @media(max-width:520px){.nav{padding:0 12px;}.main{padding:12px 12px 80px;}.howgrid{grid-template-columns:1fr;}.expgrid{grid-template-columns:1fr;}.frow{grid-template-columns:1fr;}.dmodal,.ppanel,.modal,.rmodal{border-radius:var(--rlg) var(--rlg) 0 0;margin:auto 0 0;}.ov{padding:0;align-items:flex-end;}}
+
+.splash{position:fixed;inset:0;background:#2C2C2A;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .6s ease, transform .6s ease;}
+.splash.hide{opacity:0;pointer-events:none;}
+.splash-icon{width:72px;height:72px;background:rgba(241,239,232,.12);border-radius:18px;display:flex;align-items:center;justify-content:center;animation:splashPop .6s cubic-bezier(.34,1.56,.64,1) both;}
+.splash-word{font-size:28px;font-weight:600;letter-spacing:.3em;color:#F1EFE8;animation:splashFade .7s ease .2s both;}
+.splash-sub{font-size:12px;letter-spacing:.15em;color:rgba(241,239,232,.4);animation:splashFade .7s ease .35s both;}
+@keyframes splashPop{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+@keyframes splashFade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
 <body>
+
+<div class="splash" id="splash">
+  <div class="splash-icon">
+    <svg width="38" height="38" viewBox="0 0 26 26" fill="none">
+      <rect x="2" y="2" width="10" height="10" rx="2.5" fill="#F1EFE8"/>
+      <rect x="14" y="2" width="10" height="10" rx="2.5" fill="#F1EFE8" opacity=".55"/>
+      <rect x="2" y="14" width="10" height="10" rx="2.5" fill="#F1EFE8" opacity=".55"/>
+      <rect x="14" y="14" width="10" height="10" rx="2.5" fill="#F1EFE8" opacity=".25"/>
+    </svg>
+  </div>
+  <div class="splash-word">POPOL</div>
+  <div class="splash-sub">포트폴리오 관리</div>
+</div>
+
 <nav class="nav">
   <div class="nav-logo">
     <div class="nav-icon">
@@ -814,6 +836,17 @@ function closeOv(id){document.getElementById(id).classList.remove('on');}
 function ovClick(e,id){if(e.target.id===id)closeOv(id);}
 let toastT;
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('on');},2500);}
+
+
+(function(){
+  var splash = document.getElementById('splash');
+  setTimeout(function(){
+    splash.classList.add('hide');
+    setTimeout(function(){
+      splash.style.display = 'none';
+    }, 700);
+  }, 1800);
+})();
 
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}
 render();
