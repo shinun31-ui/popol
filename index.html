@@ -807,8 +807,8 @@ function importSel(){
 }
 
 function showTab(t){
-  document.getElementById('tabP').style.display=t==='portfolio'?'':'none';
-  document.getElementById('tabU').style.display=t==='upload'?'':'none';
+  document.getElementById('tabP').style.display=t==='portfolio'?'block':'none';
+  document.getElementById('tabU').style.display=t==='upload'?'block':'none';
 }
 function closeOv(id){document.getElementById(id).classList.remove('on');}
 function ovClick(e,id){if(e.target.id===id)closeOv(id);}
