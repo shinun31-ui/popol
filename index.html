@@ -1391,7 +1391,7 @@ function logout(){
 }
 
 async function loadWorksFromDB(){
-  var res=await supa.from('works').select('*').order('created_at',{ascending:false});
+  var res=await supa.from('works').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false});
   if(res.error){console.error('로드 오류:',res.error);return;}
   works=(res.data||[]).map(function(w){
     return{id:w.id,title:w.title||'',year:w.year||new Date().getFullYear(),genre:w.genre||'회화',medium:w.medium||'',size:w.size||'',desc:w.description||'',award:w.award||'',price:w.price||0,sold:w.sold||false,img:w.img_url||null,c:[w.color_bg||PAL[0][0],w.color_fg||PAL[0][1]],dbId:w.id};
@@ -1637,11 +1637,16 @@ function toggleEditMode(){
 async function deleteSelected(){
   if(sel.size===0){showToast('삭제할 작품을 선택해주세요');return;}
   var ids=[...sel];
-  var names=works.filter(function(w){return ids.indexOf(w.id)>=0;}).map(function(w){return w.title;});
-  if(!confirm(names.join(', ')+' 외 '+ids.length+'개 작품을 삭제할까요?'))return;
+  var selWorks=works.filter(function(w){return ids.indexOf(w.id)>=0;});
+  var names=selWorks.map(function(w){return w.title;}).slice(0,3);
+  var msg=names.join(', ')+(ids.length>3?' 외 '+(ids.length-3)+'개':'');
+  if(!confirm(msg+' 총 '+ids.length+'개 작품을 삭제할까요?'))return;
   if(currentUser){
-    for(var i=0;i<ids.length;i++){
-      await supa.from('works').delete().eq('id',ids[i]);
+    // dbId(UUID)로 삭제
+    for(var i=0;i<selWorks.length;i++){
+      var dbId=selWorks[i].dbId||selWorks[i].id;
+      var res=await supa.from('works').delete().eq('id',dbId);
+      if(res.error)console.error('삭제 오류:',res.error);
     }
     await loadWorksFromDB();
   } else {
