@@ -357,6 +357,21 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 .dlink-btn:hover{background:var(--bg);color:var(--text);}
 .add-dcard{border:0.5px dashed var(--border2);border-radius:var(--rlg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:200px;cursor:pointer;font-size:12px;color:var(--text3);}
 .add-dcard:hover{background:var(--bg2);}
+
+#portfolioHome{display:none;position:fixed;inset:0;background:#2C2C2A;z-index:9990;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+.ph-logo{display:flex;align-items:center;gap:10px;margin-bottom:48px;}
+.ph-logo-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;}
+.ph-logo-word{font-size:18px;font-weight:600;letter-spacing:.2em;color:#F1EFE8;}
+.ph-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;max-width:480px;}
+.ph-card{background:rgba(255,255,255,.06);border:0.5px solid rgba(255,255,255,.12);border-radius:18px;padding:28px 24px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:flex-start;gap:14px;}
+.ph-card:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);transform:translateY(-2px);}
+.ph-card:active{transform:scale(.98);}
+.ph-card-ico{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+.ph-card-title{font-size:17px;font-weight:600;color:#F1EFE8;letter-spacing:.01em;}
+.ph-card-sub{font-size:12px;color:rgba(241,239,232,.45);line-height:1.6;margin-top:-8px;}
+.ph-card-arrow{margin-top:auto;font-size:18px;color:rgba(241,239,232,.3);}
+.ph-greeting{font-size:13px;color:rgba(241,239,232,.4);margin-bottom:28px;text-align:center;}
+@media(max-width:420px){.ph-cards{grid-template-columns:1fr;}.ph-card{flex-direction:row;align-items:center;padding:20px;}.ph-card-arrow{display:none;}}
 </style>
 </head>
 <body>
@@ -419,6 +434,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 </div>
 
 <nav class="nav" id="mainNav" style="display:none;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button id="navBack" onclick="goPortfolioHome()" style="display:none;background:transparent;border:none;cursor:pointer;padding:4px;color:var(--text2);display:none;align-items:center;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
   <div class="nav-logo" onclick="showTab('portfolio')" style="cursor:pointer;">
     <div class="nav-icon">
       <svg width="16" height="16" viewBox="0 0 26 26" fill="none">
@@ -429,6 +448,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
       </svg>
     </div>
     <span class="nav-word">POPOL</span>
+  </div>
   </div>
   <div class="nav-right" style="position:relative;align-items:center;">
   <div class="user-bar" id="userBar" style="margin-right:4px;"><span id="userEmail"></span><button class="logout-btn" onclick="logout()">로그아웃</button></div>
@@ -453,14 +473,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 <div id="appScreen" style="display:none;">
 <div class="main">
   <div id="tabP">
-    <div class="ptabs" id="portfolioTabs">
-      <button class="ptab on" data-type="artist" onclick="switchPortfolio('artist')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="margin-right:5px;vertical-align:middle;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>작가 작품
-      </button>
-      <button class="ptab" data-type="design" onclick="switchPortfolio('design')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="margin-right:5px;vertical-align:middle;"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>디자인
-      </button>
-    </div>
+
     <div class="edit-bar" id="editBar" style="display:none;">
       <span class="edit-bar-title">편집 모드</span>
       <span class="edit-bar-sub" id="editSelCount"></span>
@@ -753,6 +766,49 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
     <div class="mact">
       <button class="btn" onclick="closeOv('designAddOv')">취소</button>
       <button class="btn btn-dark" onclick="saveDesignWork()">저장</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- 포트폴리오 선택 홈 -->
+<div id="portfolioHome">
+  <div class="ph-logo">
+    <div class="ph-logo-icon">
+      <svg width="28" height="28" viewBox="0 0 26 26" fill="none">
+        <rect x="2" y="2" width="10" height="10" rx="2" fill="#F1EFE8"/>
+        <rect x="14" y="2" width="10" height="10" rx="2" fill="#F1EFE8" opacity=".55"/>
+        <rect x="2" y="14" width="10" height="10" rx="2" fill="#F1EFE8" opacity=".55"/>
+        <rect x="14" y="14" width="10" height="10" rx="2" fill="#F1EFE8" opacity=".25"/>
+      </svg>
+    </div>
+    <span class="ph-logo-word">POPOL</span>
+  </div>
+  <div class="ph-greeting" id="phGreeting">어떤 포트폴리오를 볼까요?</div>
+  <div class="ph-cards">
+    <div class="ph-card" onclick="enterPortfolio('artist')">
+      <div class="ph-card-ico" style="background:rgba(24,95,165,.25);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#85B7EB" stroke-width="1.5" stroke-linecap="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+      </div>
+      <div class="ph-card-title">작가 작품</div>
+      <div class="ph-card-sub">회화·조각·설치·사진 등 순수예술 작품 관리</div>
+      <div class="ph-card-arrow">→</div>
+    </div>
+    <div class="ph-card" onclick="enterPortfolio('design')">
+      <div class="ph-card-ico" style="background:rgba(83,74,183,.25);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#AFA9EC" stroke-width="1.5" stroke-linecap="round">
+          <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+          <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+          <circle cx="11" cy="11" r="2"/>
+        </svg>
+      </div>
+      <div class="ph-card-title">디자인</div>
+      <div class="ph-card-sub">브랜딩·UI·포스터·영상 등 디자인 프로젝트 관리</div>
+      <div class="ph-card-arrow">→</div>
     </div>
   </div>
 </div>
@@ -1331,13 +1387,17 @@ supa.auth.onAuthStateChange(async function(event,session){
   var splashEl=document.getElementById('splash');
   var splashVisible = splashEl && splashEl.style.display !== 'none' && splashEl.style.opacity !== '0';
   if(currentUser){
+    var homeEl=document.getElementById('portfolioHome');
     if(!splashVisible){
       if(loginEl)loginEl.style.display='none';
-      if(appEl)appEl.style.display='';
-      if(navEl)navEl.style.display='flex';
+      // 앱화면 대신 포트폴리오 홈으로
+      if(appEl)appEl.style.display='none';
+      if(navEl)navEl.style.display='none';
+      if(homeEl)homeEl.style.display='flex';
     } else {
-      if(appEl)appEl.style.display='';
-      if(navEl)navEl.style.display='flex';
+      if(appEl)appEl.style.display='none';
+      if(navEl)navEl.style.display='none';
+      if(homeEl)homeEl.style.display='flex';
     }
     var em=document.getElementById('userEmail');
     if(em)em.textContent=currentUser.user_metadata&&currentUser.user_metadata.full_name?currentUser.user_metadata.full_name:(currentUser.email||'');
@@ -1379,14 +1439,43 @@ var signupMode = false;
 
 var editMode = false;
 
-var portfolioType = 'artist'; // 'artist' or 'design'
+var portfolioType = 'artist';
+
+function enterPortfolio(type) {
+  portfolioType = type;
+  // 홈 화면 숨기기
+  var home = document.getElementById('portfolioHome');
+  if(home) home.style.display = 'none';
+  // 앱 화면 표시
+  var appEl = document.getElementById('appScreen');
+  var navEl = document.getElementById('mainNav');
+  if(appEl) appEl.style.display = '';
+  if(navEl) navEl.style.display = 'flex';
+  // 뒤로가기 버튼 표시
+  var backBtn = document.getElementById('navBack');
+  if(backBtn) backBtn.style.display = 'flex';
+  // 포트폴리오 타입에 따라 필터바 표시
+  var filterBar = document.querySelector('.filter-bar');
+  if(filterBar) filterBar.style.display = type === 'artist' ? '' : 'none';
+  var editBar = document.getElementById('editBar');
+  if(editBar) editBar.style.display = 'none';
+  render();
+}
+
+function goPortfolioHome() {
+  // 앱 화면 숨기고 홈으로
+  var appEl = document.getElementById('appScreen');
+  var navEl = document.getElementById('mainNav');
+  var home = document.getElementById('portfolioHome');
+  if(appEl) appEl.style.display = 'none';
+  if(navEl) navEl.style.display = 'none';
+  if(home) home.style.display = 'flex';
+  editMode = false;
+  sel.clear();
+}
 
 function switchPortfolio(type) {
   portfolioType = type;
-  document.querySelectorAll('.ptab').forEach(function(t){
-    t.classList.toggle('on', t.dataset.type === type);
-  });
-  // 필터바 표시/숨김
   var filterBar = document.querySelector('.filter-bar');
   if(filterBar) filterBar.style.display = type === 'artist' ? '' : 'none';
   render();
@@ -1505,6 +1594,8 @@ async function uploadImageToDB(file){
 async function loadProfileFromDB(){
   var res=await supa.from('profiles').select('*').eq('id',currentUser.id).single();
   if(res.data){artist.name=res.data.artist_name||'';artist.phone=res.data.phone||'';artist.email=res.data.email||'';}
+  var pg=document.getElementById('phGreeting');
+  if(pg&&artist.name)pg.textContent=artist.name+'님, 어떤 포트폴리오를 볼까요?';
 }
 
 async function saveProfileToDB(){
@@ -2178,9 +2269,8 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
       loginEl.style.display = 'flex';
       loginEl.style.opacity = '0';
     }
-    // 로그인 상태면 nav 표시
-    var navEl2=document.getElementById('mainNav');
-    if(isLoggedIn && navEl2) navEl2.style.display='flex';
+    var homeEl3=document.getElementById('portfolioHome');
+    if(isLoggedIn && homeEl3) homeEl3.style.display='flex';
 
     // 2. POPOL 글자 서서히 사라짐
     word.style.transition = 'opacity .4s ease';
