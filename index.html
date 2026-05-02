@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="POPOL"/>
 <link rel="manifest" href="/manifest.json"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <link rel="apple-touch-icon" href="/icon-192.png"/>
 <title>POPOL</title>
 <style>
@@ -1339,19 +1339,21 @@ async function signupWithEmail(){
   }
 }
 
-async function logout(){
-  await supa.auth.signOut();
-  works=[];artist={name:'',phone:'',email:''};sel.clear();
-  // 로그인 화면으로 전환
+function logout(){
+  // signOut 먼저 시도 (실패해도 화면 전환)
+  try { supa.auth.signOut(); } catch(e) {}
+  currentUser = null;
+  works=[];
+  artist={name:'',phone:'',email:''};
+  sel.clear();
   var appEl=document.getElementById('appScreen');
+  var navEl=document.getElementById('mainNav');
   var loginEl=document.getElementById('loginScreen');
-  if(appEl)appEl.style.display='none';
-  var navEl2=document.getElementById('mainNav');
-  if(navEl2)navEl2.style.display='none';
+  if(appEl) appEl.style.display='none';
+  if(navEl) navEl.style.display='none';
   if(loginEl){
-    loginEl.style.display='flex';
     loginEl.style.opacity='1';
-    // 로그인 아이템 애니메이션 초기화
+    loginEl.style.display='flex';
     var box=loginEl.querySelector('.login-box');
     if(box){
       box.classList.remove('login-item-ready');
