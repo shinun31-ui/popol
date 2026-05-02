@@ -353,12 +353,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
     </div>
 
     <div class="login-card">
-      <div class="login-label">이메일로 계속하기</div>
+      <div class="login-label" id="loginCardLabel">이메일로 계속하기</div>
+      <input id="loginArtistName" class="login-input" type="text" placeholder="작가 이름" style="display:none;"/>
       <input id="loginEmail" class="login-input" type="email" placeholder="이메일 주소"/>
       <input id="loginPassword" class="login-input" type="password" placeholder="비밀번호 (6자 이상)" onkeydown="if(event.key==='Enter')loginWithEmail()"/>
       <div class="login-btn-row">
         <button id="loginEmailBtn" class="login-btn login-btn-primary" onclick="loginWithEmail()">로그인</button>
-        <button class="login-btn login-btn-secondary" onclick="signupWithEmail()">회원가입</button>
+        <button id="signupBtn" class="login-btn login-btn-secondary" onclick="toggleSignupMode()">회원가입</button>
       </div>
       <div class="login-error" id="loginError"></div>
     </div>
@@ -1274,16 +1275,61 @@ async function loginWithEmail(){
   }
 }
 
+var signupMode = false;
+
+function toggleSignupMode(){
+  signupMode = !signupMode;
+  var nameEl = document.getElementById('loginArtistName');
+  var label = document.getElementById('loginCardLabel');
+  var loginBtn = document.getElementById('loginEmailBtn');
+  var signupBtn = document.getElementById('signupBtn');
+  if(signupMode){
+    nameEl.style.display = '';
+    label.textContent = '새 계정 만들기';
+    loginBtn.textContent = '가입 완료';
+    loginBtn.onclick = signupWithEmail;
+    signupBtn.textContent = '로그인으로';
+    signupBtn.onclick = toggleSignupMode;
+  } else {
+    nameEl.style.display = 'none';
+    label.textContent = '이메일로 계속하기';
+    loginBtn.textContent = '로그인';
+    loginBtn.onclick = loginWithEmail;
+    signupBtn.textContent = '회원가입';
+    signupBtn.onclick = toggleSignupMode;
+  }
+  document.getElementById('loginError').textContent = '';
+}
+
 async function signupWithEmail(){
+  var artistName=document.getElementById('loginArtistName').value.trim();
   var email=document.getElementById('loginEmail').value.trim();
   var pw=document.getElementById('loginPassword').value;
   var errEl=document.getElementById('loginError');
   errEl.textContent='';
+  if(!artistName){errEl.textContent='작가 이름을 입력해주세요';return;}
   if(!email||!pw){errEl.textContent='이메일과 비밀번호를 입력해주세요';return;}
   if(pw.length<6){errEl.textContent='비밀번호는 6자 이상이어야 해요';return;}
-  var res=await supa.auth.signUp({email:email,password:pw});
-  if(res.error)errEl.textContent=res.error.message;
-  else errEl.style.color='#9FE1CB',errEl.textContent='확인 이메일을 보냈어요! 메일함을 확인해주세요';
+  var btn=document.getElementById('loginEmailBtn');
+  btn.textContent='가입 중...';btn.disabled=true;
+  var res=await supa.auth.signUp({email:email,password:pw,options:{data:{full_name:artistName}}});
+  if(res.error){
+    errEl.textContent=res.error.message;
+    btn.textContent='가입 완료';btn.disabled=false;
+  } else {
+    // 가입 성공 → 프로필에 작가 이름 저장
+    artist.name = artistName;
+    if(res.data && res.data.user){
+      await supa.from('profiles').upsert({
+        id: res.data.user.id,
+        artist_name: artistName,
+        email: email,
+        updated_at: new Date().toISOString()
+      });
+    }
+    errEl.style.color='#9FE1CB';
+    errEl.textContent='가입 완료! 로그인되었어요';
+  }
 }
 
 async function logout(){
@@ -1606,7 +1652,18 @@ async function saveArtist(){
 function openPreview(){
   var ids=sel.size>0?[...sel]:works.map(function(w){return w.id;});
   selSizeForPreview=ids;
-  document.getElementById('pArtistName').textContent=artist.name||t('previewNoArtist');
+  var aName = artist.name || t('previewNoArtist');
+  document.getElementById('pArtistName').textContent = aName;
+  // 작가 이름 있으면 "홍길동 작가의 작품 목록" 형식
+  var titleEl = document.getElementById('prevPanelTitle');
+  if(titleEl){
+    if(artist.name){
+      var suffix = curLang==='en' ? artist.name+"'s Portfolio" : curLang==='ja' ? artist.name+'さんの作品リスト' : artist.name+' 작가의 작품 목록';
+      titleEl.textContent = suffix;
+    } else {
+      titleEl.textContent = t('previewTitle');
+    }
+  }
   document.getElementById('pArtistContact').textContent=[artist.phone,artist.email].filter(Boolean).join('  ·  ');
   fetchRates().then(function(){renderPreviewList(ids);});
   renderPreviewList(ids);
