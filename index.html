@@ -1233,25 +1233,31 @@ supa.auth.onAuthStateChange(async function(event,session){
   currentUser=session?session.user:null;
   var loginEl=document.getElementById('loginScreen');
   var appEl=document.getElementById('appScreen');
+  var navEl=document.getElementById('mainNav');
   var splashEl=document.getElementById('splash');
-  // 스플래시가 아직 보이는 중이면 auth 결과만 저장하고 화면 전환은 스플래시 끝난 후에
   var splashVisible = splashEl && splashEl.style.display !== 'none' && splashEl.style.opacity !== '0';
   if(currentUser){
     if(!splashVisible){
       if(loginEl)loginEl.style.display='none';
       if(appEl)appEl.style.display='';
+      if(navEl)navEl.style.display='flex';
     } else {
-      // 스플래시 끝나면 앱 화면으로
       if(appEl)appEl.style.display='';
+      if(navEl)navEl.style.display='flex';
     }
     var em=document.getElementById('userEmail');
     if(em)em.textContent=currentUser.user_metadata&&currentUser.user_metadata.full_name?currentUser.user_metadata.full_name:(currentUser.email||'');
     await loadProfileFromDB();
+    if(!artist.name && currentUser.user_metadata && currentUser.user_metadata.full_name){
+      artist.name = currentUser.user_metadata.full_name;
+      await saveProfileToDB();
+    }
     await loadWorksFromDB();
   }else{
     if(!splashVisible){
       if(loginEl)loginEl.style.display='flex';
       if(appEl)appEl.style.display='none';
+      if(navEl)navEl.style.display='none';
     }
   }
 });
@@ -1867,6 +1873,9 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
       loginEl.style.display = 'flex';
       loginEl.style.opacity = '0';
     }
+    // 로그인 상태면 nav 표시
+    var navEl2=document.getElementById('mainNav');
+    if(isLoggedIn && navEl2) navEl2.style.display='flex';
 
     // 2. POPOL 글자 서서히 사라짐
     word.style.transition = 'opacity .4s ease';
