@@ -209,7 +209,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 
 .splash{position:fixed;inset:0;background:#2C2C2A;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:opacity .9s ease;}
 .splash.hide{opacity:0;pointer-events:none;}
-.splash-logo{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:68px;height:68px;}
+.splash-logo{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:68px;height:68px;position:relative;transform-origin:center center;}
 .splash-logo .sq{border-radius:7px;background:#F1EFE8;transition:opacity .35s ease;}
 .splash-word{font-size:26px;font-weight:600;letter-spacing:.3em;color:#F1EFE8;opacity:0;transition:opacity .7s ease;}
 .splash-word.show{opacity:1;}
@@ -268,10 +268,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 .upload-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .upload-header-title{font-size:18px;font-weight:600;color:var(--text);}
 
-#loginScreen{position:fixed;inset:0;background:#2C2C2A;z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
-.login-box{width:100%;max-width:360px;}
-.login-logo{text-align:center;margin-bottom:2rem;}
-.login-logo-icon{width:60px;height:60px;background:rgba(241,239,232,.1);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+#loginScreen{position:fixed;inset:0;background:#2C2C2A;z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;opacity:0;}
+.login-box{width:100%;max-width:360px;margin:0 auto;}
+.login-logo{text-align:center;margin-bottom:2rem;display:flex;flex-direction:column;align-items:center;}
+.login-logo-icon{width:60px;height:60px;background:rgba(241,239,232,.1);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;transition:all .6s cubic-bezier(.34,1.56,.64,1);}
 .login-wordmark{font-size:26px;font-weight:600;letter-spacing:.22em;color:#F1EFE8;}
 .login-sub{font-size:11px;color:rgba(241,239,232,.35);margin-top:4px;letter-spacing:.12em;}
 .login-card{background:rgba(255,255,255,.06);border:0.5px solid rgba(255,255,255,.1);border-radius:14px;padding:20px;margin-bottom:12px;}
@@ -295,6 +295,32 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 .user-bar span{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .logout-btn{font-size:11px;padding:4px 9px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;}
 .logout-btn:hover{background:var(--bg2);}
+
+.splash-to-login{animation:splashShrink .7s cubic-bezier(.4,0,.2,1) forwards;}
+@keyframes splashShrink{
+  0%{transform:scale(1);opacity:1;}
+  100%{transform:scale(0) translateY(-20px);opacity:0;}
+}
+.login-card{opacity:0;transform:translateY(16px);}
+.login-divider{opacity:0;transform:translateY(10px);}
+.login-social-btn{opacity:0;transform:translateY(10px);}
+.login-wordmark{opacity:0;}
+.login-sub{opacity:0;}
+.login-logo-icon{opacity:0;}
+.login-item-ready .login-logo-icon{animation:loginItemIn .5s cubic-bezier(.34,1.56,.64,1) 0s forwards;}
+.login-item-ready .login-wordmark{animation:loginItemIn .45s ease .1s forwards;}
+.login-item-ready .login-sub{animation:loginItemIn .45s ease .18s forwards;}
+.login-item-ready .login-card{animation:loginItemIn .5s ease .22s forwards;}
+.login-item-ready .login-divider{animation:loginItemIn .45s ease .38s forwards;}
+.login-item-ready .login-social-btn{animation:loginItemIn .45s ease .46s forwards;}
+@keyframes loginItemIn{
+  from{opacity:0;transform:translateY(14px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes logoAppear{
+  from{opacity:0;transform:translateY(12px);}
+  to{opacity:1;transform:translateY(0);}
+}
 </style>
 </head>
 <body>
@@ -1204,16 +1230,28 @@ let currentUser=null;
 // 인증 상태 감지
 supa.auth.onAuthStateChange(async function(event,session){
   currentUser=session?session.user:null;
+  var loginEl=document.getElementById('loginScreen');
+  var appEl=document.getElementById('appScreen');
+  var splashEl=document.getElementById('splash');
+  // 스플래시가 아직 보이는 중이면 auth 결과만 저장하고 화면 전환은 스플래시 끝난 후에
+  var splashVisible = splashEl && splashEl.style.display !== 'none' && splashEl.style.opacity !== '0';
   if(currentUser){
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('appScreen').style.display='';
+    if(!splashVisible){
+      if(loginEl)loginEl.style.display='none';
+      if(appEl)appEl.style.display='';
+    } else {
+      // 스플래시 끝나면 앱 화면으로
+      if(appEl)appEl.style.display='';
+    }
     var em=document.getElementById('userEmail');
     if(em)em.textContent=currentUser.user_metadata&&currentUser.user_metadata.full_name?currentUser.user_metadata.full_name:(currentUser.email||'');
     await loadProfileFromDB();
     await loadWorksFromDB();
   }else{
-    document.getElementById('loginScreen').style.display='flex';
-    document.getElementById('appScreen').style.display='none';
+    if(!splashVisible){
+      if(loginEl)loginEl.style.display='flex';
+      if(appEl)appEl.style.display='none';
+    }
   }
 });
 
@@ -1692,50 +1730,115 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 
 (function(){
   var splash = document.getElementById('splash');
+  var splashLogoEl = document.querySelector('.splash-logo');
   var sqs = [
-    document.getElementById('sq0'), // 좌상단
-    document.getElementById('sq1'), // 우상단
-    document.getElementById('sq2'), // 우하단
-    document.getElementById('sq3')  // 좌하단
+    document.getElementById('sq0'),
+    document.getElementById('sq1'),
+    document.getElementById('sq2'),
+    document.getElementById('sq3')
   ];
   var word = document.getElementById('splashWord');
   var sub = document.getElementById('splashSub');
 
-  // 시계방향: 좌상단(0) → 우상단(1) → 우하단(2) → 좌하단(3)
-  // 4단계 밝기: 가장 밝은 것 1개, 그 다음, 그 다음, 가장 어두운 것
-  var levels = [1.0, 0.55, 0.25, 0.1];
-  var step = 0;
-  var totalRounds = 2;
-  var totalSteps = 4 * totalRounds;
-  var interval = 280;
+  // 로딩 중 밝기 단계
+  var loadLevels = [1.0, 0.55, 0.25, 0.1];
+  // 완성형 로고 명암 (원래 로고: 좌상단 100%, 우상단 55%, 좌하단 55%, 우하단 25%)
+  // HTML 순서: sq0(좌상), sq1(우상), sq3(좌하), sq2(우하)
+  var finalOpacity = {sq0:1.0, sq1:0.55, sq3:0.55, sq2:0.25};
 
-  function setOpacities(brightestIdx) {
-    for(var i = 0; i < 4; i++) {
-      var levelIdx = ((i - brightestIdx) % 4 + 4) % 4;
-      sqs[i].style.opacity = levels[levelIdx];
+  var step = 0, totalSteps = 8, interval = 280;
+
+  function setLoadOpacity(brightestIdx){
+    for(var i=0;i<4;i++){
+      var li=((i-brightestIdx)%4+4)%4;
+      sqs[i].style.opacity=loadLevels[li];
     }
   }
+  sqs.forEach(function(s){s.style.opacity=loadLevels[3];});
 
-  // init all dim
-  sqs.forEach(function(s){ s.style.opacity = levels[3]; });
-
-  function tick() {
-    if(step < totalSteps) {
-      setOpacities(step % 4);
+  function tick(){
+    if(step<totalSteps){
+      setLoadOpacity(step%4);
       step++;
-      setTimeout(tick, interval);
+      setTimeout(tick,interval);
     } else {
-      // 마지막: 전부 밝게
-      sqs.forEach(function(s){ s.style.opacity = 1; });
+      // 로딩 완료 → 원래 로고 명암으로 부드럽게 전환
+      sqs.forEach(function(s){
+        s.style.transition='opacity .4s ease';
+      });
+      document.getElementById('sq0').style.opacity = finalOpacity.sq0;
+      document.getElementById('sq1').style.opacity = finalOpacity.sq1;
+      document.getElementById('sq3').style.opacity = finalOpacity.sq3;
+      document.getElementById('sq2').style.opacity = finalOpacity.sq2;
+
+      // POPOL 글자 등장
       setTimeout(function(){
         word.classList.add('show');
         sub.classList.add('show');
-      }, 300);
+      }, 350);
+
+      // 2초 후 로그인 화면으로 전환 시작
       setTimeout(function(){
-        splash.classList.add('hide');
-        setTimeout(function(){ splash.style.display='none'; }, 950);
-      }, 2100);
+        startTransitionToLogin();
+      }, 2000);
     }
+  }
+
+  function startTransitionToLogin(){
+    // 1. 로그인 화면 display:flex로 바꾸되 opacity:0 유지
+    var loginEl = document.getElementById('loginScreen');
+    var appEl = document.getElementById('appScreen');
+    var isLoggedIn = appEl && appEl.style.display === '';
+
+    if(!isLoggedIn && loginEl){
+      loginEl.style.display = 'flex';
+      loginEl.style.opacity = '0';
+    }
+
+    // 2. POPOL 글자 서서히 사라짐
+    word.style.transition = 'opacity .4s ease';
+    word.style.opacity = '0';
+    sub.style.transition = 'opacity .3s ease';
+    sub.style.opacity = '0';
+
+    // 3. 로고가 로그인 화면 로고 자리로 날아가기
+    setTimeout(function(){
+      var fromRect = splashLogoEl.getBoundingClientRect();
+      var loginIcon = loginEl ? loginEl.querySelector('.login-logo-icon') : null;
+      var toRect = loginIcon ? loginIcon.getBoundingClientRect() : null;
+
+      var scale = toRect ? Math.min(toRect.width/fromRect.width, toRect.height/fromRect.height) : 0.88;
+      var dx = toRect ? (toRect.left + toRect.width/2) - (fromRect.left + fromRect.width/2) : 0;
+      var dy = toRect ? (toRect.top + toRect.height/2) - (fromRect.top + fromRect.height/2) : -window.innerHeight*0.22;
+
+      splashLogoEl.style.transition = 'transform .7s cubic-bezier(.4,0,.2,1)';
+      splashLogoEl.style.transform = 'translate('+dx+'px,'+dy+'px) scale('+scale+')';
+
+      // 4. 배경 페이드아웃 + 로그인 화면 페이드인 동시에
+      setTimeout(function(){
+        splash.style.transition = 'opacity .5s ease';
+        splash.style.opacity = '0';
+
+        if(!isLoggedIn && loginEl){
+          loginEl.style.transition = 'opacity .5s ease';
+          loginEl.style.opacity = '1';
+        } else if(isLoggedIn && appEl){
+          appEl.style.transition = 'opacity .5s ease';
+          appEl.style.opacity = '1';
+        }
+
+        // 5. 로그인 아이템들 순차 등장
+        setTimeout(function(){
+          if(!isLoggedIn && loginEl){
+            var box = loginEl.querySelector('.login-box');
+            if(box) box.classList.add('login-item-ready');
+          }
+          splash.style.display = 'none';
+          splashLogoEl.style.transition = '';
+          splashLogoEl.style.transform = '';
+        }, 500);
+      }, 350);
+    }, 100);
   }
 
   setTimeout(tick, 250);
