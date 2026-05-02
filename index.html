@@ -322,6 +322,21 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
   from{opacity:0;transform:translateY(12px);}
   to{opacity:1;transform:translateY(0);}
 }
+
+.btn-red{background:#A32D2D;color:#fff;border-color:#A32D2D;}
+.btn-red:hover{background:#872525;}
+.drag-handle{position:absolute;top:50%;right:7px;transform:translateY(-50%);width:20px;height:20px;display:none;align-items:center;justify-content:center;cursor:grab;z-index:5;opacity:.4;}
+.drag-handle:hover{opacity:.8;}
+.drag-handle:active{cursor:grabbing;}
+.edit-mode .drag-handle{display:flex;}
+.edit-mode .card{cursor:default;}
+.edit-mode .thumb{cursor:default;}
+.edit-mode .cbody{cursor:default;}
+.card.dragging{opacity:.4;border:1.5px dashed var(--blue);}
+.card.drag-over{border:1.5px solid var(--blue);background:var(--blue-bg);}
+.edit-bar{background:#1a1a18;padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:0.5px solid rgba(255,255,255,.1);}
+.edit-bar-title{font-size:13px;font-weight:500;color:#F1EFE8;}
+.edit-bar-sub{font-size:11px;color:rgba(241,239,232,.4);margin-left:4px;}
 </style>
 </head>
 <body>
@@ -408,6 +423,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
       <div class="lang-opt" onclick="setLang('ja')"><span class="lang-flag">🇯🇵</span>日本語</div>
     </div>
   </div>
+    <button class="btn btn-sm" id="editModeBtn" onclick="toggleEditMode()">편집</button>
     <button class="btn btn-sm" id="navUpload" onclick="showTab('upload')">간편 업로드</button>
     <button class="btn btn-sm" id="navList" onclick="openPreview()">리스트 →</button>
     <button class="btn btn-sm btn-dark" id="navAdd" onclick="openAdd()">+ 추가</button>
@@ -417,6 +433,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 <div id="appScreen" style="display:none;">
 <div class="main">
   <div id="tabP">
+    <div class="edit-bar" id="editBar" style="display:none;">
+      <span class="edit-bar-title">편집 모드</span>
+      <span class="edit-bar-sub" id="editSelCount"></span>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <button class="btn btn-sm" onclick="selAll()">전체 선택</button>
+        <button class="btn btn-sm btn-red" onclick="deleteSelected()">선택 삭제</button>
+      </div>
+    </div>
     <div class="filter-bar">
       <div class="filter-row">
         <select id="fYear" onchange="goPage(1)"><option value="">전체 연도</option></select>
@@ -1284,6 +1308,10 @@ async function loginWithEmail(){
 
 var signupMode = false;
 
+var editMode = false;
+var dragSrcId = null;
+
+
 function toggleSignupMode(){
   signupMode = !signupMode;
   var nameEl = document.getElementById('loginArtistName');
@@ -1542,6 +1570,7 @@ function render(){
   const page=all.slice((curPage-1)*ps,curPage*ps);
   const sb=document.getElementById('selbar');sb.style.display=sel.size>0?'flex':'none';
   document.getElementById('selcnt').textContent=sel.size+t('selCount');
+  var esc2=document.getElementById('editSelCount');if(esc2)esc2.textContent=sel.size>0?sel.size+'개 선택됨':'';
   const sv=document.getElementById('sortBy').value;
   const byY=sv==='year_desc'||sv==='year_asc';
   const gc=pageSize<=20?'g20':pageSize<=30?'g30':pageSize<=50?'g50':pageSize<=60?'g60':'g30';
@@ -1560,9 +1589,10 @@ function render(){
 function cHtml(w){
   const s=sel.has(w.id),h=getHN(w);
   const ph='<div style="width:100%;height:100%;background:'+w.c[0]+';display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="3" fill="'+w.c[1]+'" opacity=".18"/><circle cx="9" cy="9" r="3" fill="'+w.c[1]+'" opacity=".45"/><path d="M1 21l6-8 4 5 4-4 8 7H1z" fill="'+w.c[1]+'" opacity=".45"/></svg></div>';
-  return '<div class="card'+(s?' sel':'')+(w.sold?' sold-card':'')+'">'+
+  var dragAttrs = editMode ? ' draggable="true" ondragstart="onDragStart(event,\'' + w.id + '\')" ondragover="onDragOver(event,\'' + w.id + '\')" ondrop="onDrop(event,\'' + w.id + '\')" ondragend="onDragEnd()"' : '';
+  return '<div class="card'+(s?' sel':'')+(w.sold?' sold-card':'')+'" data-id="'+w.id+'"'+dragAttrs+'>'+
     (w.sold?'<div class="sold-ov"></div><div class="sold-badge">'+t('soldBadge')+'</div>':'')+
-    '<div class="chkbtn" onclick="event.stopPropagation();toggleSel('+w.id+')"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+
+    '<div class="chkbtn" onclick="event.stopPropagation();toggleSel('+w.id+')"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+'<div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg></div>'+
     '<div class="thumb" onclick="toggleSel('+w.id+')">'+(w.img?'<img src="'+w.img+'"/>':ph)+'</div>'+
     '<div class="cbody" onclick="toggleSel('+w.id+')">'+
     '<div class="ctitle'+(w.sold?' sold-text':'')+'">'+w.title+'</div>'+
@@ -1584,6 +1614,85 @@ function renderPgn(tp,total){
   h+='<button class="pgb" onclick="goPage('+(curPage+1)+')" '+(curPage===tp?'disabled':'')+'>›</button>';
   h+='<span class="pgi">총 '+total+'점</span>';
   el.innerHTML=h;
+}
+
+function toggleEditMode(){
+  editMode = !editMode;
+  var btn = document.getElementById('editModeBtn');
+  var bar = document.getElementById('editBar');
+  var listEl = document.getElementById('list');
+  if(editMode){
+    if(btn){btn.textContent='편집 완료';btn.className='btn btn-sm btn-blue';}
+    if(bar)bar.style.display='flex';
+    if(listEl)listEl.classList.add('edit-mode');
+  } else {
+    if(btn){btn.textContent='편집';btn.className='btn btn-sm';}
+    if(bar)bar.style.display='none';
+    if(listEl)listEl.classList.remove('edit-mode');
+    sel.clear();
+  }
+  render();
+}
+
+async function deleteSelected(){
+  if(sel.size===0){showToast('삭제할 작품을 선택해주세요');return;}
+  var ids=[...sel];
+  var names=works.filter(function(w){return ids.indexOf(w.id)>=0;}).map(function(w){return w.title;});
+  if(!confirm(names.join(', ')+' 외 '+ids.length+'개 작품을 삭제할까요?'))return;
+  if(currentUser){
+    for(var i=0;i<ids.length;i++){
+      await supa.from('works').delete().eq('id',ids[i]);
+    }
+    await loadWorksFromDB();
+  } else {
+    works=works.filter(function(w){return ids.indexOf(w.id)<0;});
+    render();
+  }
+  sel.clear();
+  showToast(ids.length+'개 작품을 삭제했어요');
+}
+
+async function saveOrder(){
+  if(!currentUser)return;
+  for(var i=0;i<works.length;i++){
+    await supa.from('works').update({sort_order:i}).eq('id',works[i].id);
+  }
+}
+
+function onDragStart(e,id){
+  dragSrcId=id;
+  e.dataTransfer.effectAllowed='move';
+  setTimeout(function(){
+    var el=document.querySelector('.card[data-id="'+id+'"]');
+    if(el)el.classList.add('dragging');
+  },0);
+}
+
+function onDragOver(e,id){
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  document.querySelectorAll('.card').forEach(function(c){c.classList.remove('drag-over');});
+  var el=document.querySelector('.card[data-id="'+id+'"]');
+  if(el&&id!==dragSrcId)el.classList.add('drag-over');
+}
+
+function onDragEnd(){
+  document.querySelectorAll('.card').forEach(function(c){
+    c.classList.remove('dragging');c.classList.remove('drag-over');
+  });
+}
+
+function onDrop(e,targetId){
+  e.preventDefault();
+  if(!dragSrcId||dragSrcId===targetId)return;
+  var srcIdx=works.findIndex(function(w){return w.id===dragSrcId;});
+  var tgtIdx=works.findIndex(function(w){return w.id===targetId;});
+  if(srcIdx<0||tgtIdx<0)return;
+  var moved=works.splice(srcIdx,1)[0];
+  works.splice(tgtIdx,0,moved);
+  saveOrder();
+  render();
+  dragSrcId=null;
 }
 
 function toggleSel(id){if(sel.has(id))sel.delete(id);else sel.add(id);render();}
