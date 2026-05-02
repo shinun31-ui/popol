@@ -682,7 +682,7 @@ function openPreview(){
   document.getElementById('pList').innerHTML=tw.map(function(w,i){
     const h=getHN(w);
     const ph='<div style="width:46px;height:46px;border-radius:7px;background:'+w.c[0]+';display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 16 16" fill="'+w.c[1]+'" opacity=".5"><rect width="16" height="16" rx="2"/><circle cx="5" cy="5" r="2"/><path d="M0 12l3-4 2 3 3-3 5 4H0z"/></svg></div>';
-    return '<div class="pitem'+(w.sold?' psold')+'">'+(w.sold?'<div class="psoldb"></div>':'')+'<div class="pnum">'+(i+1)+'</div><div class="pthumb">'+(w.img?'<img src="'+w.img+'"/>':ph)+'</div><div class="pinfo"><div class="ptrow">'+w.title+(h?'<span class="phn">'+h+'</span>':'')+(w.sold?'<span class="pstag">판매 완료</span>':'')+'</div><div class="pmeta">'+w.year+' · '+w.genre+(w.medium?' · '+w.medium:'')+(w.size?' · '+w.size:'')+'</div><div class="pdesc">'+w.desc+'</div></div></div>';
+    return '<div class="pitem'+(w.sold?' psold':'')+'">'+(w.sold?'<div class="psoldb"></div>':'')+'<div class="pnum">'+(i+1)+'</div><div class="pthumb">'+(w.img?'<img src="'+w.img+'"/>':ph)+'</div><div class="pinfo"><div class="ptrow">'+w.title+(h?'<span class="phn">'+h+'</span>':'')+(w.sold?'<span class="pstag">판매 완료</span>':'')+'</div><div class="pmeta">'+w.year+' · '+w.genre+(w.medium?' · '+w.medium:'')+(w.size?' · '+w.size:'')+'</div><div class="pdesc">'+w.desc+'</div></div></div>';
   }).join('');
   document.getElementById('prevOv').classList.add('on');
 }
