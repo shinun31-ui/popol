@@ -1288,7 +1288,21 @@ async function signupWithEmail(){
 
 async function logout(){
   await supa.auth.signOut();
-  works=[];artist={name:'',phone:'',email:''};sel.clear();render();
+  works=[];artist={name:'',phone:'',email:''};sel.clear();
+  // 로그인 화면으로 전환
+  var appEl=document.getElementById('appScreen');
+  var loginEl=document.getElementById('loginScreen');
+  if(appEl)appEl.style.display='none';
+  if(loginEl){
+    loginEl.style.display='flex';
+    loginEl.style.opacity='1';
+    // 로그인 아이템 애니메이션 초기화
+    var box=loginEl.querySelector('.login-box');
+    if(box){
+      box.classList.remove('login-item-ready');
+      setTimeout(function(){box.classList.add('login-item-ready');},50);
+    }
+  }
 }
 
 async function loadWorksFromDB(){
