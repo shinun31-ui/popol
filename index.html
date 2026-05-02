@@ -382,8 +382,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
   </div>
 </div>
 
-<div id="appScreen" style="display:none;">
-<nav class="nav">
+<nav class="nav" id="mainNav" style="display:none;">
   <div class="nav-logo" onclick="showTab('portfolio')" style="cursor:pointer;">
     <div class="nav-icon">
       <svg width="16" height="16" viewBox="0 0 26 26" fill="none">
@@ -414,6 +413,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
   </div>
 </nav>
 
+<div id="appScreen" style="display:none;">
 <div class="main">
   <div id="tabP">
     <div class="filter-bar">
@@ -1339,6 +1339,8 @@ async function logout(){
   var appEl=document.getElementById('appScreen');
   var loginEl=document.getElementById('loginScreen');
   if(appEl)appEl.style.display='none';
+  var navEl2=document.getElementById('mainNav');
+  if(navEl2)navEl2.style.display='none';
   if(loginEl){
     loginEl.style.display='flex';
     loginEl.style.opacity='1';
