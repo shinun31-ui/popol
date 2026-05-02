@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="POPOL"/>
 <link rel="manifest" href="/manifest.json"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <link rel="apple-touch-icon" href="/icon-192.png"/>
 <title>POPOL</title>
 <style>
@@ -49,30 +50,30 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 .ygroup{margin-bottom:18px;}
 .ylabel{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.06em;margin-bottom:9px;padding-bottom:6px;border-bottom:0.5px solid var(--border);}
 .grid{display:grid;gap:9px;}
-.g20{grid-template-columns:repeat(auto-fill,minmax(165px,1fr));}
-.g30{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}
-.g50{grid-template-columns:repeat(auto-fill,minmax(115px,1fr));}
-.g60{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));}
-.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rlg);overflow:hidden;position:relative;display:flex;flex-direction:column;transition:border-color .15s;}
+.g20{grid-template-columns:repeat(auto-fill,minmax(155px,1fr));}
+.g30{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
+.g50{grid-template-columns:repeat(auto-fill,minmax(108px,1fr));}
+.g60{grid-template-columns:repeat(auto-fill,minmax(92px,1fr));}
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:12px;overflow:hidden;position:relative;display:flex;flex-direction:column;transition:border-color .15s, box-shadow .15s;}
 .card:hover{border-color:var(--border2);}
 .card.sel{border:1.5px solid var(--blue);}
 .card.sold-card{border-color:rgba(163,45,45,.3);}
-.sold-ov{position:absolute;inset:0;background:rgba(163,45,45,.1);pointer-events:none;z-index:1;border-radius:var(--rlg);}
-.sold-badge{position:absolute;top:7px;right:7px;z-index:3;background:rgba(163,45,45,.82);color:#fff;font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px;pointer-events:none;}
+.sold-ov{position:absolute;inset:0;background:rgba(163,45,45,.08);pointer-events:none;z-index:1;}
+.sold-badge{position:absolute;bottom:7px;left:7px;z-index:3;background:rgba(163,45,45,.85);color:#fff;font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;pointer-events:none;letter-spacing:.02em;}
 .chkbtn{position:absolute;top:7px;left:7px;width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(255,255,255,.88);background:rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;z-index:4;cursor:pointer;}
 .card.sel .chkbtn{background:var(--blue);border-color:var(--blue);}
 .chkbtn svg{display:none;width:11px;height:11px;}
 .card.sel .chkbtn svg{display:block;}
-.thumb{width:100%;height:108px;overflow:hidden;cursor:pointer;position:relative;z-index:2;display:flex;align-items:center;justify-content:center;}
+.thumb{width:100%;aspect-ratio:1/1;overflow:hidden;cursor:pointer;position:relative;z-index:2;display:flex;align-items:center;justify-content:center;}
 .thumb img{width:100%;height:100%;object-fit:cover;}
-.cbody{padding:8px 10px 4px;cursor:pointer;z-index:2;position:relative;flex:1;}
-.ctitle{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+.cbody{padding:6px 8px 2px;cursor:pointer;z-index:2;position:relative;}
+.ctitle{font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px;}
 .ctitle.sold-text{color:var(--text2);}
-.cmeta{font-size:10px;color:var(--text2);}
-.hntag{display:inline-block;font-size:9px;padding:1px 6px;border-radius:20px;margin-top:4px;background:var(--bluebg);color:#0C447C;border:0.5px solid #B5D4F4;font-weight:500;}
+.cmeta{font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hntag{display:none;}
 .hntag.vari{background:#EEEDFE;color:#534AB7;border-color:#CECBF6;}
-.prevrow{padding:5px 9px 9px;z-index:2;position:relative;}
-.prevbtn{width:100%;font-size:10px;padding:4px 0;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;}
+.prevrow{padding:4px 8px 7px;z-index:2;position:relative;}
+.prevbtn{width:100%;font-size:10px;padding:3px 0;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;}
 .prevbtn:hover{background:var(--bg);border-color:var(--border2);color:var(--text);}
 .addcard{border:0.5px dashed var(--border2);border-radius:var(--rlg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:170px;cursor:pointer;font-size:11px;color:var(--text3);}
 .addcard:hover{background:var(--bg2);}
@@ -234,6 +235,66 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 .filter-bar .selbar .btn{border-color:rgba(255,255,255,.2);color:#F1EFE8;}
 .filter-bar .selbar .btn:hover{background:rgba(255,255,255,.1);}
 .filter-bar .selbar .btn-blue{background:#185FA5;color:#fff;border-color:#185FA5;}
+
+.lang-btn{display:flex;align-items:center;gap:2px;padding:5px 8px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-size:12px;}
+.lang-btn:hover{background:var(--bg2);}
+.lang-menu{position:absolute;top:48px;right:16px;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--rlg);padding:6px;z-index:200;min-width:130px;box-shadow:0 8px 24px rgba(0,0,0,.12);}
+.lang-menu.hide{display:none;}
+.lang-opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text);}
+.lang-opt:hover{background:var(--bg2);}
+.lang-opt.active{font-weight:600;color:var(--text);}
+.lang-flag{font-size:16px;width:22px;text-align:center;}
+
+.price-tag{display:inline-block;font-size:9px;padding:1px 6px;border-radius:20px;margin-top:3px;background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97;font-weight:500;}
+.currency-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:8px 0;}
+.cur-btn{padding:7px 4px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;font-size:11px;text-align:center;transition:all .15s;}
+.cur-btn:hover{background:var(--bg2);}
+.cur-btn.on{background:#2C2C2A;color:#F1EFE8;border-color:#2C2C2A;}
+.cur-btn .cur-symbol{font-size:14px;font-weight:600;display:block;margin-bottom:2px;}
+.price-section{background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:13px;}
+.price-section-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;}
+.rate-info{font-size:10px;color:var(--text3);margin-top:6px;}
+.price-toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.price-toggle-label{font-size:13px;color:var(--text);font-weight:500;}
+.price-checkbox{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;}
+.price-checkbox.on{background:var(--blue);border-color:var(--blue);}
+.price-checkbox svg{display:none;width:10px;height:10px;}
+.price-checkbox.on svg{display:block;}
+
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.modal-header h2{font-size:17px;font-weight:600;color:var(--text);margin:0;}
+.modal-close{width:30px;height:30px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.modal-close:hover{background:var(--bg2);color:var(--text);}
+.upload-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.upload-header-title{font-size:18px;font-weight:600;color:var(--text);}
+
+#loginScreen{position:fixed;inset:0;background:#2C2C2A;z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+.login-box{width:100%;max-width:360px;}
+.login-logo{text-align:center;margin-bottom:2rem;}
+.login-logo-icon{width:60px;height:60px;background:rgba(241,239,232,.1);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+.login-wordmark{font-size:26px;font-weight:600;letter-spacing:.22em;color:#F1EFE8;}
+.login-sub{font-size:11px;color:rgba(241,239,232,.35);margin-top:4px;letter-spacing:.12em;}
+.login-card{background:rgba(255,255,255,.06);border:0.5px solid rgba(255,255,255,.1);border-radius:14px;padding:20px;margin-bottom:12px;}
+.login-label{font-size:12px;color:rgba(241,239,232,.45);margin-bottom:8px;}
+.login-input{width:100%;background:rgba(255,255,255,.08);border:0.5px solid rgba(255,255,255,.15);border-radius:8px;padding:11px 13px;color:#F1EFE8;font-size:14px;margin-bottom:8px;outline:none;font-family:inherit;}
+.login-input:focus{border-color:rgba(255,255,255,.4);}
+.login-input::placeholder{color:rgba(241,239,232,.3);}
+.login-btn-row{display:flex;gap:8px;margin-top:4px;}
+.login-btn{flex:1;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;}
+.login-btn-primary{background:#F1EFE8;color:#2C2C2A;}
+.login-btn-primary:hover{background:#fff;}
+.login-btn-secondary{background:transparent;color:#F1EFE8;border:0.5px solid rgba(255,255,255,.2);}
+.login-btn-secondary:hover{background:rgba(255,255,255,.08);}
+.login-divider{display:flex;align-items:center;gap:10px;margin:12px 0;}
+.login-divider-line{flex:1;height:0.5px;background:rgba(255,255,255,.1);}
+.login-divider-text{font-size:11px;color:rgba(241,239,232,.25);}
+.login-social-btn{width:100%;background:rgba(255,255,255,.06);border:0.5px solid rgba(255,255,255,.12);border-radius:8px;padding:11px;font-size:13px;color:#F1EFE8;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;font-family:inherit;}
+.login-social-btn:hover{background:rgba(255,255,255,.1);}
+.login-error{font-size:12px;color:#F09595;margin-top:6px;min-height:16px;text-align:center;}
+.user-bar{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);}
+.user-bar span{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.logout-btn{font-size:11px;padding:4px 9px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;}
+.logout-btn:hover{background:var(--bg2);}
 </style>
 </head>
 <body>
@@ -249,6 +310,52 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
   <div class="splash-sub" id="splashSub">portfolio, simplified.</div>
 </div>
 
+
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg width="32" height="32" viewBox="0 0 26 26" fill="none">
+          <rect x="2" y="2" width="10" height="10" rx="2" fill="#F1EFE8"/>
+          <rect x="14" y="2" width="10" height="10" rx="2" fill="#F1EFE8" opacity=".55"/>
+          <rect x="2" y="14" width="10" height="10" rx="2" fill="#F1EFE8" opacity=".55"/>
+          <rect x="14" y="14" width="10" height="10" rx="2" fill="#F1EFE8" opacity=".25"/>
+        </svg>
+      </div>
+      <div class="login-wordmark">POPOL</div>
+      <div class="login-sub">portfolio, simplified.</div>
+    </div>
+
+    <div class="login-card">
+      <div class="login-label">이메일로 계속하기</div>
+      <input id="loginEmail" class="login-input" type="email" placeholder="이메일 주소"/>
+      <input id="loginPassword" class="login-input" type="password" placeholder="비밀번호 (6자 이상)" onkeydown="if(event.key==='Enter')loginWithEmail()"/>
+      <div class="login-btn-row">
+        <button id="loginEmailBtn" class="login-btn login-btn-primary" onclick="loginWithEmail()">로그인</button>
+        <button class="login-btn login-btn-secondary" onclick="signupWithEmail()">회원가입</button>
+      </div>
+      <div class="login-error" id="loginError"></div>
+    </div>
+
+    <div class="login-divider">
+      <div class="login-divider-line"></div>
+      <span class="login-divider-text">또는 소셜 로그인</span>
+      <div class="login-divider-line"></div>
+    </div>
+
+    <button class="login-social-btn" onclick="loginWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Google로 계속하기
+    </button>
+  </div>
+</div>
+
+<div id="appScreen" style="display:none;">
 <nav class="nav">
   <div class="nav-logo" onclick="showTab('portfolio')" style="cursor:pointer;">
     <div class="nav-icon">
@@ -261,10 +368,22 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
     </div>
     <span class="nav-word">POPOL</span>
   </div>
-  <div class="nav-right">
-    <button class="btn btn-sm" onclick="showTab('upload')">간편 업로드</button>
-    <button class="btn btn-sm" onclick="openPreview()">리스트 →</button>
-    <button class="btn btn-sm btn-dark" onclick="openAdd()">+ 추가</button>
+  <div class="nav-right" style="position:relative;align-items:center;">
+  <div class="user-bar" id="userBar" style="margin-right:4px;"><span id="userEmail"></span><button class="logout-btn" onclick="logout()">로그아웃</button></div>
+  <div style="position:relative;display:inline-block;">
+    <button class="lang-btn" id="langBtn" onclick="toggleLangMenu()">
+      <span id="langBtnLabel">한국어</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="lang-menu hide" id="langMenu">
+      <div class="lang-opt" onclick="setLang('ko')"><span class="lang-flag">🇰🇷</span>한국어</div>
+      <div class="lang-opt" onclick="setLang('en')"><span class="lang-flag">🇺🇸</span>English</div>
+      <div class="lang-opt" onclick="setLang('ja')"><span class="lang-flag">🇯🇵</span>日本語</div>
+    </div>
+  </div>
+    <button class="btn btn-sm" id="navUpload" onclick="showTab('upload')">간편 업로드</button>
+    <button class="btn btn-sm" id="navList" onclick="openPreview()">리스트 →</button>
+    <button class="btn btn-sm btn-dark" id="navAdd" onclick="openAdd()">+ 추가</button>
   </div>
 </nav>
 
@@ -303,10 +422,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
         </div>
       </div>
       <div class="selbar" id="selbar" style="display:none;margin-top:8px;margin-bottom:0;">
-        <strong id="selcnt">0</strong>개 선택됨
+        <strong id="selcnt">0</strong>
         <div class="r">
-          <button class="btn btn-sm" onclick="clearSel()">해제</button>
-          <button class="btn btn-sm" onclick="selAll()">전체</button>
+          <button class="btn btn-sm" id="selClearBtn" onclick="clearSel()">해제</button>
+          <button class="btn btn-sm" id="selAllBtn2" onclick="selAll()">전체</button>
           <button class="btn btn-sm btn-blue" onclick="openPreview()">리스트 만들기 →</button>
         </div>
       </div>
@@ -316,6 +435,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
   </div>
 
   <div id="tabU" style="display:none;">
+    <div class="upload-header">
+      <div>
+        <div id="uploadTitle" style="font-size:18px;font-weight:600;color:var(--text);margin-bottom:2px;">간편 업로드</div>
+        <div id="uploadSubTitle" style="font-size:13px;color:var(--text2);">이미지나 CSV를 올리면 작품 정보를 자동으로 읽어와요.</div>
+      </div>
+      <button class="modal-close" onclick="showTab('portfolio')" title="닫기">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
     <div class="uzzone" id="uzzone"
       ondragover="event.preventDefault();this.classList.add('drag')"
       ondragleave="this.classList.remove('drag')"
@@ -324,8 +452,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
       <div class="uzico">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       </div>
-      <div class="uztitle">파일을 끌어다 놓거나 클릭해서 선택</div>
-      <div class="uzsub">파일명에서 제목·연도·재료·크기 자동 추출<br/>CSV 작품 목록 일괄 등록 · 여러 파일 동시 가능</div>
+      <div class="uztitle" id="uzTitle">파일을 끌어다 놓거나 클릭해서 선택</div>
+      <div class="uzsub" id="uzSub">파일명에서 제목·연도·재료·크기 자동 추출<br/>CSV 작품 목록 일괄 등록 · 여러 파일 동시 가능</div>
       <div class="uztypes">
         <span class="uztype">JPG · PNG · WEBP</span>
         <span class="uztype">CSV</span>
@@ -334,9 +462,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
     </div>
     <input type="file" id="fileInp" multiple accept="image/*,.csv" style="display:none" onchange="handleFiles(this.files)"/>
     <div class="howgrid">
-      <div class="howcard"><div class="hown">방법 1 — 이미지</div><div class="howt">파일명 자동 파싱</div><div class="howd">제목_연도_재료_크기 순서로 저장하면 자동 인식해요.</div></div>
-      <div class="howcard"><div class="hown">방법 2 — CSV</div><div class="howt">목록 일괄 등록</div><div class="howd">엑셀을 CSV로 저장해서 올리면 컬럼 자동 매핑해요.</div></div>
-      <div class="howcard"><div class="hown">방법 3 — 함께</div><div class="howt">이미지 + CSV 매칭</div><div class="howd">둘 다 올리면 제목 기준으로 이미지를 자동 연결해요.</div></div>
+      <div class="howcard"><div class="hown" id="how1n">방법 1 — 이미지</div><div class="howt" id="how1t">파일명 자동 파싱</div><div class="howd" id="how1d">제목_연도_재료_크기 순서로 저장하면 자동 인식해요.</div></div>
+      <div class="howcard"><div class="hown" id="how2n">방법 2 — CSV</div><div class="howt" id="how2t">목록 일괄 등록</div><div class="howd" id="how2d">엑셀을 CSV로 저장해서 올리면 컬럼 자동 매핑해요.</div></div>
+      <div class="howcard"><div class="hown" id="how3n">방법 3 — 함께</div><div class="howt" id="how3t">이미지 + CSV 매칭</div><div class="howd" id="how3d">둘 다 올리면 제목 기준으로 이미지를 자동 연결해요.</div></div>
     </div>
     <div id="impSec"></div>
   </div>
@@ -345,32 +473,38 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 <!-- ADD MODAL -->
 <div class="ov" id="addOv" onclick="ovClick(event,'addOv')">
   <div class="modal">
-    <h2 id="modalTitle">새 작품 추가</h2>
-    <div class="frow">
-      <div class="ff"><label>제목</label><input id="fTitle" placeholder="작품 제목"/></div>
-      <div class="ff"><label>연도</label><input id="fYear2" type="number" value="2024"/></div>
+    <div class="modal-header">
+      <h2 id="modalTitle">새 작품 추가</h2>
+      <button class="modal-close" onclick="closeOv('addOv')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
     <div class="frow">
-      <div class="ff"><label>장르</label><select id="fGenre2"><option>회화</option><option>조각</option><option>사진</option><option>설치미술</option><option>판화</option><option>드로잉</option><option>디지털아트</option><option>혼합매체</option></select></div>
-      <div class="ff"><label>크기 (cm)</label><input id="fSize" placeholder="예: 53×45.5" oninput="previewHN()"/><div class="hnpreview" id="hnprev"></div></div>
+      <div class="ff"><label id="lbTitle">제목</label><input id="fTitle" placeholder="작품 제목"/></div>
+      <div class="ff"><label id="lbYear">연도</label><input id="fYear2" type="number" value="2024"/></div>
     </div>
-    <div class="ff"><label>매체</label><input id="fMedium" placeholder="예: 캔버스에 아크릴"/></div>
-    <div class="ff"><label>작품 설명</label><textarea id="fDesc" placeholder="작가 노트, 작품 배경 등..."></textarea></div>
-    <div class="ff"><label>수상 / 출판 이력</label><input id="fAward" placeholder="예: 2024 서울 청년작가상"/></div>
-    <div class="ff"><label>이미지</label>
+    <div class="frow">
+      <div class="ff"><label id="lbGenre">장르</label><select id="fGenre2"><option>회화</option><option>조각</option><option>사진</option><option>설치미술</option><option>판화</option><option>드로잉</option><option>디지털아트</option><option>혼합매체</option></select></div>
+      <div class="ff"><label id="lbSize">크기 (cm)</label><input id="fSize" placeholder="예: 53×45.5" oninput="previewHN()"/><div class="hnpreview" id="hnprev"></div></div>
+    </div>
+    <div class="ff"><label id="lbMedium">매체</label><input id="fMedium" placeholder="예: 캔버스에 아크릴"/></div>
+    <div class="ff"><label id="lbPrice">가격 (원)</label><input id="fPrice" type="number" placeholder="예: 3000000" oninput="updatePricePreview()"/><div id="pricePreview" style="margin-top:5px;font-size:12px;color:var(--text3);min-height:18px;"></div></div>
+    <div class="ff"><label id="lbDesc">작품 설명</label><textarea id="fDesc" placeholder="작가 노트, 작품 배경 등..."></textarea></div>
+    <div class="ff"><label id="lbAward">수상 / 출판 이력</label><input id="fAward" placeholder="예: 2024 서울 청년작가상"/></div>
+    <div class="ff"><label id="lbImage">이미지</label>
       <div class="imgdrop" id="dropZone" onclick="document.getElementById('imgFile').click()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        클릭해서 이미지 업로드
+        <span id="dropZoneText">클릭해서 이미지 업로드</span>
       </div>
       <input type="file" id="imgFile" accept="image/*" style="display:none;" onchange="loadImg(this)"/>
     </div>
     <div class="togglerow" onclick="toggleSoldF()">
       <div class="track" id="soldTrack"><div class="tdot"></div></div>
-      <div><div class="tlbl">판매 완료</div><div class="tsub">켜면 카드에 판매 완료 표시가 나타나요</div></div>
+      <div><div class="tlbl" id="soldToggleLbl">판매 완료</div><div class="tsub" id="soldToggleSub">켜면 카드에 판매 완료 표시가 나타나요</div></div>
     </div>
     <div class="mact">
-      <button class="btn" onclick="closeOv('addOv')">취소</button>
-      <button class="btn btn-dark" onclick="saveWork()">저장</button>
+      <button class="btn" id="btnCancel1" onclick="closeOv('addOv')">취소</button>
+      <button class="btn btn-dark" id="btnSave1" onclick="saveWork()">저장</button>
     </div>
   </div>
 </div>
@@ -378,7 +512,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 <!-- DETAIL MODAL -->
 <div class="ov" id="detailOv" onclick="ovClick(event,'detailOv')">
   <div class="dmodal">
-    <div class="dimg" id="dImg"></div>
+    <div style="position:relative;">
+      <div class="dimg" id="dImg"></div>
+      <button class="modal-close" onclick="closeOv('detailOv')" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,.45);border-color:rgba(255,255,255,.3);color:#fff;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
     <div class="dbody">
       <div class="dtitle" id="dTitle"></div>
       <div class="dchips" id="dChips"></div>
@@ -386,7 +525,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
       <div class="ddesc" id="dDesc"></div>
       <div class="daward" id="dAward" style="display:none;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#185FA5" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="6" r="4"/><path d="M5 10l-2 5 5-2 5 2-2-5"/></svg><span id="dAwardTxt"></span></div>
       <div class="dacts">
-        <button class="btn" style="flex:1;" onclick="closeOv('detailOv')">닫기</button>
         <button class="btn btn-dark" id="dEditBtn">수정하기</button>
         <button class="btn btn-blue" id="dSelBtn">선택에 추가</button>
       </div>
@@ -397,13 +535,18 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 <!-- ARTIST MODAL -->
 <div class="ov" id="artistOv" onclick="ovClick(event,'artistOv')">
   <div class="modal" style="max-width:360px;">
-    <h2>작가 정보</h2>
-    <div class="ff"><label>작가 이름</label><input id="aName" placeholder="홍길동"/></div>
-    <div class="ff"><label>연락처</label><input id="aPhone" placeholder="010-0000-0000"/></div>
-    <div class="ff"><label>이메일</label><input id="aEmail" placeholder="artist@email.com"/></div>
+    <div class="modal-header">
+      <h2 id="artistModalTitle">작가 정보</h2>
+      <button class="modal-close" onclick="closeOv('artistOv')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="ff"><label id="lbArtistName">작가 이름</label><input id="aName" placeholder="홍길동"/></div>
+    <div class="ff"><label id="lbArtistPhone">연락처</label><input id="aPhone" placeholder="010-0000-0000"/></div>
+    <div class="ff"><label id="lbArtistEmail">이메일</label><input id="aEmail" placeholder="artist@email.com"/></div>
     <div class="mact">
-      <button class="btn" onclick="closeOv('artistOv')">취소</button>
-      <button class="btn btn-dark" onclick="saveArtist()">저장</button>
+      <button class="btn" id="btnCancelArtist" onclick="closeOv('artistOv')">취소</button>
+      <button class="btn btn-dark" id="btnSaveArtist" onclick="saveArtist()">저장</button>
     </div>
   </div>
 </div>
@@ -411,60 +554,743 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 <!-- PREVIEW PANEL -->
 <div class="ov" id="prevOv" onclick="ovClick(event,'prevOv')">
   <div class="ppanel">
-    <h2>작품 리스트 미리보기</h2>
+    <div class="modal-header">
+      <h2 id="prevPanelTitle">작품 리스트 미리보기</h2>
+      <button class="modal-close" onclick="closeOv('prevOv')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
     <p class="psub" id="prevSub"></p>
     <div class="artbar">
       <div><div class="aname" id="pArtistName">작가 이름 미설정</div><div class="acontact" id="pArtistContact"></div></div>
-      <button class="btn btn-sm" onclick="closeOv('prevOv');openArtist()">정보 편집</button>
+      <button class="btn btn-sm" id="btnEditArtist" onclick="closeOv('prevOv');openArtist()">정보 편집</button>
+    </div>
+    <div class="price-section" id="priceSectionUI">
+      <div class="price-toggle-row">
+        <span class="price-toggle-label" id="priceSectionTitle">가격 표시</span>
+        <div class="price-checkbox on" id="priceToggle" onclick="togglePriceShow()">
+          <svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div id="currencyPicker">
+        <div class="currency-grid">
+          <button class="cur-btn on" data-cur="KRW" onclick="setCur('KRW')"><span class="cur-symbol">₩</span>한화</button>
+          <button class="cur-btn" data-cur="USD" onclick="setCur('USD')"><span class="cur-symbol">$</span>USD</button>
+          <button class="cur-btn" data-cur="EUR" onclick="setCur('EUR')"><span class="cur-symbol">€</span>EUR</button>
+          <button class="cur-btn" data-cur="JPY" onclick="setCur('JPY')"><span class="cur-symbol">¥</span>엔화</button>
+          <button class="cur-btn" data-cur="CNY" onclick="setCur('CNY')"><span class="cur-symbol">元</span>위안</button>
+        </div>
+        <div class="rate-info" id="rateInfo">환율 불러오는 중...</div>
+      </div>
     </div>
     <div class="plist" id="pList"></div>
-    <div class="sttl">내보내기</div>
+    <div class="sttl" id="expSectionTitle">내보내기</div>
     <div class="expgrid">
       <button class="expbtn" onclick="doExport('csv')">
         <div class="expico" style="background:#EAF3DE;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
-        <div><div class="expname">엑셀 (CSV)</div><div class="expdesc">번호·제목·연도·장르·호수·매체·크기·판매여부</div></div>
+        <div><div class="expname" id="expCsvName">엑셀 (CSV)</div><div class="expdesc" id="expCsvDesc">번호·제목·연도·장르·호수·매체·크기·판매여부</div></div>
       </button>
       <button class="expbtn" onclick="doExport('pdf')">
         <div class="expico" style="background:#FCEBEB;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/></svg></div>
-        <div><div class="expname">PDF (A4)</div><div class="expdesc">깔끔한 표, 작가 헤더 포함</div></div>
+        <div><div class="expname" id="expPdfName">PDF (A4)</div><div class="expdesc" id="expPdfDesc">깔끔한 표, 작가 헤더 포함</div></div>
       </button>
       <button class="expbtn" onclick="doExport('img')">
         <div class="expico" style="background:#E6F1FB;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
-        <div><div class="expname">이미지만</div><div class="expdesc">작품 사진 개별 다운로드</div></div>
+        <div><div class="expname" id="expImgName">이미지만</div><div class="expdesc" id="expImgDesc">작품 사진 개별 다운로드</div></div>
       </button>
       <button class="expbtn" onclick="doExport('txt')">
         <div class="expico" style="background:#EEEDFE;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg></div>
-        <div><div class="expname">캡션 텍스트</div><div class="expdesc">클립보드에 복사</div></div>
+        <div><div class="expname" id="expTxtName">캡션 텍스트</div><div class="expdesc" id="expTxtDesc">클립보드에 복사</div></div>
       </button>
     </div>
-    <div class="sttl">공유</div>
+    <div class="sttl" id="shareSectionTitle">공유</div>
     <div class="sharerow">
-      <button class="shbtn" onclick="shareVia('sms')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>문자</button>
-      <button class="shbtn" onclick="shareVia('email')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>메일</button>
-      <button class="shbtn" onclick="shareVia('copy')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>링크 복사</button>
+      <button class="shbtn" id="btnSms" onclick="shareVia('sms')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span id="btnSmsText">문자</span></button>
+      <button class="shbtn" id="btnShareMail" onclick="shareVia('email')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span id="btnMailText">메일</span></button>
+      <button class="shbtn" id="btnCopyLink" onclick="shareVia('copy')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><span id="btnCopyText">링크 복사</span></button>
     </div>
-    <div class="mact" style="margin-top:14px;"><button class="btn" onclick="closeOv('prevOv')">닫기</button></div>
+    <div class="mact" style="margin-top:14px;"><button class="btn" id="btnClosePrev" onclick="closeOv('prevOv')">닫기</button></div>
   </div>
 </div>
 
 <!-- REVIEW MODAL -->
 <div class="ov" id="reviewOv" onclick="ovClick(event,'reviewOv')">
   <div class="rmodal">
-    <div class="rmhead"><h2>인식 결과 확인</h2><p id="reviewSub"></p></div>
+    <div class="rmhead">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <h2 id="reviewModalTitle">인식 결과 확인</h2>
+        <button class="modal-close" onclick="closeOv('reviewOv')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <p id="reviewSub"></p>
+    </div>
     <div class="rmbody" id="reviewBody"></div>
     <div class="rmfoot">
       <div class="rmfl" id="footInfo"></div>
       <div class="rmfr">
-        <button class="btn btn-sm" onclick="closeOv('reviewOv')">취소</button>
-        <button class="btn btn-sm btn-dark" onclick="importSel()">선택 항목 등록 →</button>
+        <button class="btn btn-sm" id="btnCancelReview" onclick="closeOv('reviewOv')">취소</button>
+        <button class="btn btn-sm btn-dark" id="btnImportSel" onclick="importSel()">선택 항목 등록 →</button>
       </div>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
+</div><!-- /appScreen -->
 
 <script>
+
+var LANG = {
+  ko: {
+    appSub: 'portfolio, simplified.',
+    navUpload: '간편 업로드',
+    navList: '리스트 →',
+    navAdd: '+ 추가',
+    filterYear: '전체 연도',
+    filterGenre: '전체 장르',
+    filterHnum: '전체 호수',
+    filterAll: '전체 상태',
+    filterAvail: '판매 가능',
+    filterSold: '판매 완료',
+    sortLabel: '정렬',
+    sortYearDesc: '연도 최신순',
+    sortYearAsc: '연도 오래된순',
+    sortHnumAsc: '호수 작은순',
+    sortHnumDesc: '호수 큰순',
+    sortTitleAsc: '제목 가나다순',
+    psAll: '전체',
+    selClear: '해제',
+    selAllBtn: '전체',
+    selListBtn: '리스트 만들기 →',
+    soldBadge: '판매 완료',
+    prevBtn: '미리보기',
+    addCardBtn: '추가',
+    addTitle: '새 작품 추가',
+    editTitle: '작품 수정',
+    fTitle: '제목',
+    fTitlePh: '작품 제목',
+    fYear: '연도',
+    fGenre: '장르',
+    fSize: '크기 (cm)',
+    fSizePh: '예: 53×45.5',
+    fMedium: '매체',
+    fMediumPh: '예: 캔버스에 아크릴',
+    fDesc: '작품 설명',
+    fDescPh: '작가 노트, 작품 배경 등...',
+    fAward: '수상 / 출판 이력',
+    fAwardPh: '예: 2024 서울 청년작가상',
+    fImage: '이미지',
+    fImagePh: '클릭해서 이미지 업로드',
+    soldToggle: '판매 완료',
+    soldToggleSub: '켜면 카드에 판매 완료 표시가 나타나요',
+    cancel: '취소',
+    save: '저장',
+    close: '닫기',
+    edit: '수정하기',
+    addToSel: '선택에 추가',
+    removeSel: '선택 해제',
+    artistTitle: '작가 정보',
+    artistName: '작가 이름',
+    artistNamePh: '홍길동',
+    artistPhone: '연락처',
+    artistPhonePh: '010-0000-0000',
+    artistEmail: '이메일',
+    artistEmailPh: 'artist@email.com',
+    previewTitle: '작품 리스트 미리보기',
+    previewNoArtist: '작가 이름 미설정',
+    previewEditInfo: '정보 편집',
+    exportTitle: '내보내기',
+    expCsvName: '엑셀 (CSV)',
+    expCsvDesc: '번호·제목·연도·장르·호수·매체·크기·판매여부',
+    expPdfName: 'PDF (A4)',
+    expPdfDesc: '깔끔한 표, 작가 헤더 포함',
+    expImgName: '이미지만',
+    expImgDesc: '작품 사진 개별 다운로드',
+    expTxtName: '캡션 텍스트',
+    expTxtDesc: '클립보드에 복사',
+    shareTitle: '공유',
+    shareSms: '문자',
+    shareMail: '메일',
+    shareCopy: '링크 복사',
+    uploadTitle: '간편 업로드',
+    uploadSub: '이미지나 CSV를 올리면 작품 정보를 자동으로 읽어와요.',
+    uploadDrop: '파일을 끌어다 놓거나 클릭해서 선택',
+    uploadDropSub: '파일명에서 제목·연도·재료·크기 자동 추출 / CSV 작품 목록 일괄 등록 · 여러 파일 동시 가능',
+    how1title: '파일명 자동 파싱', how1n: '방법 1 — 이미지', how1d: '제목_연도_재료_크기 순서로 저장하면 자동 인식해요.',
+    how2title: '목록 일괄 등록', how2n: '방법 2 — CSV', how2d: '엑셀을 CSV로 저장해서 올리면 컬럼 자동 매핑해요.',
+    how3title: '이미지 + CSV 매칭', how3n: '방법 3 — 함께', how3d: '둘 다 올리면 제목 기준으로 이미지를 자동 연결해요.',
+    reviewTitle: '인식 결과 확인',
+    reviewImport: '선택 항목 등록 →',
+    reviewSelAll: '전체 선택 / 해제',
+    reviewEdit: '수정 ✎',
+    reviewCollapse: '접기 ↑',
+    reviewNoTitle: '제목 없음',
+    reviewNoMed: '재료 미인식',
+    reviewNoSize: '크기 미인식',
+    reviewSrcImg: '이미지',
+    reviewSrcCsv: '엑셀',
+    toastSaved: '저장됐어요',
+    toastNoTitle: '제목을 입력해주세요',
+    toastCsv: 'CSV 파일 다운로드됐어요',
+    toastPdf: 'PDF 인쇄 창이 열렸어요',
+    toastNoImg: '업로드된 이미지가 없어요',
+    toastImgDl: '개 다운로드 중...',
+    toastTxt: '캡션 텍스트가 복사됐어요',
+    toastCopied: '복사됐어요',
+    toastImported: '개 작품이 추가됐어요',
+    toastNone: '선택된 항목이 없어요',
+    toastNoWork: '인식된 작품이 없어요',
+    toastAnalyzing: '파일 분석 중...',
+    toastAnalyzingSub: '제목·연도·재료·크기를 자동 추출하고 있어요',
+    goPortfolio: '포트폴리오 보기 →',
+    selCount: '개 선택됨',
+    soldLabel: '판매 완료',
+    availLabel: '판매 가능',
+    genres: ['회화','조각','사진','설치미술','판화','드로잉','디지털아트','혼합매체'],
+    efTitle: '제목', efYear: '연도', efGenre: '장르', efMed: '재료/매체', efSize: '크기',
+    expPortfolio: '포트폴리오',
+    hnUnknown: '호수 인식 불가',
+    totalWorks: '점',
+    selWorks: '개 작품 선택됨',
+    soldIncluded: '점 포함)',
+    soldCount: '판매 완료 ',
+    pdfSoldLabel: '판매 완료',
+    pdfWorkList: '작품 목록',
+  },
+  en: {
+    appSub: 'portfolio, simplified.',
+    navUpload: 'Quick Upload',
+    navList: 'List →',
+    navAdd: '+ Add',
+    filterYear: 'All Years',
+    filterGenre: 'All Genres',
+    filterHnum: 'All Sizes',
+    filterAll: 'All Status',
+    filterAvail: 'Available',
+    filterSold: 'Sold',
+    sortLabel: 'Sort',
+    sortYearDesc: 'Newest First',
+    sortYearAsc: 'Oldest First',
+    sortHnumAsc: 'Size: Small–Large',
+    sortHnumDesc: 'Size: Large–Small',
+    sortTitleAsc: 'Title A–Z',
+    psAll: 'All',
+    selClear: 'Clear',
+    selAllBtn: 'All',
+    selListBtn: 'Make List →',
+    soldBadge: 'Sold',
+    prevBtn: 'Preview',
+    addCardBtn: 'Add',
+    addTitle: 'Add New Work',
+    editTitle: 'Edit Work',
+    fTitle: 'Title',
+    fTitlePh: 'Work title',
+    fYear: 'Year',
+    fGenre: 'Genre',
+    fSize: 'Size (cm)',
+    fSizePh: 'e.g. 53×45.5',
+    fMedium: 'Medium',
+    fMediumPh: 'e.g. Acrylic on canvas',
+    fDesc: 'Description',
+    fDescPh: "Artist's note, background...",
+    fAward: 'Awards / Publications',
+    fAwardPh: 'e.g. 2024 Young Artist Award',
+    fImage: 'Image',
+    fImagePh: 'Click to upload image',
+    soldToggle: 'Mark as Sold',
+    soldToggleSub: 'Displays a sold badge on the card',
+    cancel: 'Cancel',
+    save: 'Save',
+    close: 'Close',
+    edit: 'Edit',
+    addToSel: 'Add to Selection',
+    removeSel: 'Remove',
+    artistTitle: 'Artist Info',
+    artistName: 'Name',
+    artistNamePh: 'Your name',
+    artistPhone: 'Phone',
+    artistPhonePh: '+82 10-0000-0000',
+    artistEmail: 'Email',
+    artistEmailPh: 'artist@email.com',
+    previewTitle: 'Preview List',
+    previewNoArtist: 'Artist name not set',
+    previewEditInfo: 'Edit Info',
+    exportTitle: 'Export',
+    expCsvName: 'Excel (CSV)',
+    expCsvDesc: 'No.·title·year·genre·size·medium·sold',
+    expPdfName: 'PDF (A4)',
+    expPdfDesc: 'Clean table with artist header',
+    expImgName: 'Images Only',
+    expImgDesc: 'Download artwork photos',
+    expTxtName: 'Caption Text',
+    expTxtDesc: 'Copy to clipboard',
+    shareTitle: 'Share',
+    shareSms: 'Text',
+    shareMail: 'Email',
+    shareCopy: 'Copy Link',
+    uploadTitle: 'Quick Upload',
+    uploadSub: 'Drop images or CSV files — artwork info is parsed automatically.',
+    uploadDrop: 'Drop files here or click to select',
+    uploadDropSub: 'Auto-extract title, year, medium & size from filenames / Bulk import from CSV',
+    how1title: 'Auto-parse filename', how1n: 'Method 1 — Images', how1d: "Save as title_year_medium_size and it's recognized automatically.",
+    how2title: 'Bulk import list', how2n: 'Method 2 — CSV', how2d: 'Upload your spreadsheet as CSV and columns are mapped automatically.',
+    how3title: 'Image + CSV match', how3n: 'Method 3 — Together', how3d: 'Upload both and images are matched to works by title.',
+    reviewTitle: 'Review Results',
+    reviewImport: 'Import Selected →',
+    reviewSelAll: 'Select / Deselect All',
+    reviewEdit: 'Edit ✎',
+    reviewCollapse: 'Collapse ↑',
+    reviewNoTitle: 'No title',
+    reviewNoMed: 'Medium not detected',
+    reviewNoSize: 'Size not detected',
+    reviewSrcImg: 'Image',
+    reviewSrcCsv: 'CSV',
+    toastSaved: 'Saved!',
+    toastNoTitle: 'Please enter a title',
+    toastCsv: 'CSV file downloaded',
+    toastPdf: 'Print dialog opened',
+    toastNoImg: 'No uploaded images found',
+    toastImgDl: ' images downloading...',
+    toastTxt: 'Caption text copied',
+    toastCopied: 'Copied!',
+    toastImported: ' works added',
+    toastNone: 'No items selected',
+    toastNoWork: 'No works detected',
+    toastAnalyzing: 'Analyzing files...',
+    toastAnalyzingSub: 'Extracting title, year, medium & size',
+    goPortfolio: 'View Portfolio →',
+    selCount: ' selected',
+    soldLabel: 'Sold',
+    availLabel: 'Available',
+    genres: ['Painting','Sculpture','Photography','Installation','Printmaking','Drawing','Digital Art','Mixed Media'],
+    efTitle: 'Title', efYear: 'Year', efGenre: 'Genre', efMed: 'Medium', efSize: 'Size',
+    expPortfolio: 'Portfolio',
+    hnUnknown: 'Size not recognized',
+    totalWorks: ' works',
+    selWorks: ' works selected',
+    soldIncluded: ' sold)',
+    soldCount: 'Sold: ',
+    pdfSoldLabel: 'Sold',
+    pdfWorkList: 'Works',
+  },
+  ja: {
+    appSub: 'portfolio, simplified.',
+    navUpload: '簡単アップ',
+    navList: 'リスト →',
+    navAdd: '+ 追加',
+    filterYear: '全ての年',
+    filterGenre: '全てのジャンル',
+    filterHnum: '全てのサイズ',
+    filterAll: '全ての状態',
+    filterAvail: '販売中',
+    filterSold: '売却済み',
+    sortLabel: '並び替え',
+    sortYearDesc: '新しい順',
+    sortYearAsc: '古い順',
+    sortHnumAsc: '号数：小→大',
+    sortHnumDesc: '号数：大→小',
+    sortTitleAsc: 'タイトル順',
+    psAll: '全て',
+    selClear: '解除',
+    selAllBtn: '全選択',
+    selListBtn: 'リスト作成 →',
+    soldBadge: '売却済み',
+    prevBtn: 'プレビュー',
+    addCardBtn: '追加',
+    addTitle: '作品を追加',
+    editTitle: '作品を編集',
+    fTitle: 'タイトル',
+    fTitlePh: '作品タイトル',
+    fYear: '制作年',
+    fGenre: 'ジャンル',
+    fSize: 'サイズ (cm)',
+    fSizePh: '例：53×45.5',
+    fMedium: '素材・技法',
+    fMediumPh: '例：キャンバスにアクリル',
+    fDesc: '作品説明',
+    fDescPh: 'アーティストノート、制作背景など...',
+    fAward: '受賞・出版歴',
+    fAwardPh: '例：2024年 新人アーティスト賞',
+    fImage: '画像',
+    fImagePh: 'クリックして画像をアップロード',
+    soldToggle: '売却済みにする',
+    soldToggleSub: 'カードに売却済みバッジが表示されます',
+    cancel: 'キャンセル',
+    save: '保存',
+    close: '閉じる',
+    edit: '編集',
+    addToSel: '選択に追加',
+    removeSel: '選択解除',
+    artistTitle: 'アーティスト情報',
+    artistName: '氏名',
+    artistNamePh: '山田 太郎',
+    artistPhone: '電話番号',
+    artistPhonePh: '090-0000-0000',
+    artistEmail: 'メール',
+    artistEmailPh: 'artist@email.com',
+    previewTitle: '作品リストのプレビュー',
+    previewNoArtist: 'アーティスト名未設定',
+    previewEditInfo: '情報を編集',
+    exportTitle: 'エクスポート',
+    expCsvName: 'Excel (CSV)',
+    expCsvDesc: '番号・タイトル・年・ジャンル・素材・サイズ',
+    expPdfName: 'PDF (A4)',
+    expPdfDesc: 'アーティスト情報付きの一覧表',
+    expImgName: '画像のみ',
+    expImgDesc: '作品画像を個別にダウンロード',
+    expTxtName: 'キャプションテキスト',
+    expTxtDesc: 'クリップボードにコピー',
+    shareTitle: 'シェア',
+    shareSms: 'SMS',
+    shareMail: 'メール',
+    shareCopy: 'リンクをコピー',
+    uploadTitle: '簡単アップロード',
+    uploadSub: '画像やCSVをアップロードすると、作品情報を自動で読み取ります。',
+    uploadDrop: 'ここにファイルをドロップ、またはクリックして選択',
+    uploadDropSub: 'ファイル名からタイトル・年・素材・サイズを自動抽出 / CSVで一括登録',
+    how1title: 'ファイル名を自動解析', how1n: '方法 1 — 画像', how1d: 'タイトル_年_素材_サイズの形式で保存すると自動認識します。',
+    how2title: 'リストを一括登録', how2n: '方法 2 — CSV', how2d: 'ExcelをCSV形式で保存してアップロードすると、列が自動マッピングされます。',
+    how3title: '画像とCSVを照合', how3n: '方法 3 — 組み合わせ', how3d: '両方アップロードすると、タイトルを基準に画像が自動的に紐付けられます。',
+    reviewTitle: '認識結果の確認',
+    reviewImport: '選択した項目を登録 →',
+    reviewSelAll: '全て選択 / 解除',
+    reviewEdit: '編集 ✎',
+    reviewCollapse: '折りたたむ ↑',
+    reviewNoTitle: 'タイトルなし',
+    reviewNoMed: '素材が認識できません',
+    reviewNoSize: 'サイズが認識できません',
+    reviewSrcImg: '画像',
+    reviewSrcCsv: 'CSV',
+    toastSaved: '保存しました',
+    toastNoTitle: 'タイトルを入力してください',
+    toastCsv: 'CSVファイルをダウンロードしました',
+    toastPdf: '印刷ダイアログを開きました',
+    toastNoImg: 'アップロードされた画像がありません',
+    toastImgDl: '枚をダウンロード中...',
+    toastTxt: 'キャプションをコピーしました',
+    toastCopied: 'コピーしました',
+    toastImported: '点の作品を追加しました',
+    toastNone: '選択された項目がありません',
+    toastNoWork: '作品が認識されませんでした',
+    toastAnalyzing: 'ファイルを解析中...',
+    toastAnalyzingSub: 'タイトル・年・素材・サイズを抽出しています',
+    goPortfolio: 'ポートフォリオを見る →',
+    selCount: '件選択中',
+    soldLabel: '売却済み',
+    availLabel: '販売中',
+    genres: ['絵画','彫刻','写真','インスタレーション','版画','ドローイング','デジタルアート','ミクストメディア'],
+    efTitle: 'タイトル', efYear: '制作年', efGenre: 'ジャンル', efMed: '素材・技法', efSize: 'サイズ',
+    expPortfolio: 'ポートフォリオ',
+    hnUnknown: 'サイズ不明',
+    totalWorks: '点',
+    selWorks: '点選択中',
+    soldIncluded: '点含む)',
+    soldCount: '売却済み：',
+    pdfSoldLabel: '売却済み',
+    pdfWorkList: '作品一覧',
+  }
+};
+
+var curLang = localStorage.getItem('popol_lang') || 'ko';
+function t(key){ return (LANG[curLang] && LANG[curLang][key]) || LANG['ko'][key] || key; }
+
+function applyLang() {
+  var l = curLang;
+  function set(id,val){var el=document.getElementById(id);if(el)el.textContent=val;}
+  function setph(id,val){var el=document.getElementById(id);if(el)el.placeholder=val;}
+  // nav
+  set('navUpload',t('navUpload'));set('navList',t('navList'));set('navAdd',t('navAdd'));
+  // lang btn
+  set('langBtnLabel',l==='ko'?'한국어':l==='en'?'English':'日本語');
+  // search
+  setph('fQ',l==='ko'?'작품 검색...':l==='en'?'Search works...':'作品を検索...');
+  // fSold
+  var fs=document.getElementById('fSold');
+  if(fs&&fs.options.length>=3){fs.options[0].text=t('filterAll');fs.options[1].text=t('filterAvail');fs.options[2].text=t('filterSold');}
+  // sort
+  var sb=document.getElementById('sortBy');
+  if(sb&&sb.options.length>=5){sb.options[0].text=t('sortYearDesc');sb.options[1].text=t('sortYearAsc');sb.options[2].text=t('sortHnumAsc');sb.options[3].text=t('sortHnumDesc');sb.options[4].text=t('sortTitleAsc');}
+  // ps-btns
+  var psa=document.querySelector('.psb[data-n="9999"]');if(psa)psa.textContent=t('psAll');
+  // selbar buttons
+  set('selClearBtn',t('selClear'));set('selAllBtn2',t('selAllBtn'));
+  // add modal
+  set('lbTitle',t('fTitle'));setph('fTitle',t('fTitlePh'));
+  set('lbYear',t('fYear'));
+  set('lbGenre',t('fGenre'));
+  set('lbSize',t('fSize'));setph('fSize',t('fSizePh'));
+  set('lbMedium',t('fMedium'));setph('fMedium',t('fMediumPh'));
+  set('lbDesc',t('fDesc'));setph('fDesc',t('fDescPh'));
+  set('lbAward',t('fAward'));setph('fAward',t('fAwardPh'));
+  set('lbImage',t('fImage'));
+  set('dropZoneText',t('fImagePh'));
+  set('soldToggleLbl',t('soldToggle'));set('soldToggleSub',t('soldToggleSub'));
+  set('btnCancel1',t('cancel'));set('btnSave1',t('save'));
+  // genre select in add modal
+  var fg2=document.getElementById('fGenre2');
+  if(fg2){var genres=t('genres');for(var i=0;i<fg2.options.length&&i<genres.length;i++){fg2.options[i].text=genres[i];}}
+  // artist modal
+  set('artistModalTitle',t('artistTitle'));
+  set('lbArtistName',t('artistName'));setph('aName',t('artistNamePh'));
+  set('lbArtistPhone',t('artistPhone'));setph('aPhone',t('artistPhonePh'));
+  set('lbArtistEmail',t('artistEmail'));setph('aEmail',t('artistEmailPh'));
+  set('btnCancelArtist',t('cancel'));set('btnSaveArtist',t('save'));
+  // preview panel
+  set('prevPanelTitle',t('previewTitle'));
+  set('btnEditArtist',t('previewEditInfo'));
+  set('expSectionTitle',t('exportTitle'));set('shareSectionTitle',t('shareTitle'));
+  set('expCsvName',t('expCsvName'));set('expCsvDesc',t('expCsvDesc'));
+  set('expPdfName',t('expPdfName'));set('expPdfDesc',t('expPdfDesc'));
+  set('expImgName',t('expImgName'));set('expImgDesc',t('expImgDesc'));
+  set('expTxtName',t('expTxtName'));set('expTxtDesc',t('expTxtDesc'));
+  // share buttons (keep icon, replace text node)
+  set('btnSmsText',t('shareSms'));
+  set('btnMailText',t('shareMail'));
+  set('btnCopyText',t('shareCopy'));
+  set('btnClosePrev',t('close'));
+  // review modal
+  set('reviewModalTitle',t('reviewTitle'));
+  set('btnImportSel',t('reviewImport'));set('btnCancelReview',t('cancel'));
+  // upload section
+  set('uploadTitle',t('uploadTitle'));set('uploadSubTitle',t('uploadSub'));
+  set('uzTitle',t('uploadDrop'));
+  set('how1n',t('how1n'));set('how1t',t('how1title'));set('how1d',t('how1d'));
+  set('how2n',t('how2n'));set('how2t',t('how2title'));set('how2d',t('how2d'));
+  set('how3n',t('how3n'));set('how3t',t('how3title'));set('how3d',t('how3d'));
+  // pArtistName default
+  var pan=document.getElementById('pArtistName');
+  if(pan&&(pan.textContent===t('previewNoArtist')||pan.textContent==='작가 이름 미설정'||pan.textContent==='Artist name not set'||pan.textContent==='アーティスト名未設定'))pan.textContent=t('previewNoArtist');
+  // re-render
+  render();
+}
+
+function setLang(l) {
+  curLang = l;
+  localStorage.setItem('popol_lang', l);
+  document.getElementById('langMenu').classList.add('hide');
+  applyLang();
+}
+
+function toggleLangMenu() {
+  document.getElementById('langMenu').classList.toggle('hide');
+}
+
+// close menu on outside click
+document.addEventListener('click', function(e){
+  var menu = document.getElementById('langMenu');
+  var btn = document.getElementById('langBtn');
+  if(menu && btn && !menu.contains(e.target) && !btn.contains(e.target)){
+    menu.classList.add('hide');
+  }
+});
+
+
+var showPrice = true;
+var selCur = 'KRW';
+var rates = {KRW:1, USD:0, EUR:0, JPY:0, CNY:0};
+var ratesLoaded = false;
+
+function fmtKRW(won) {
+  if(!won) return '';
+  return won.toLocaleString()+'원';
+}
+
+function fmtPrice(won, cur) {
+  if(!won) return '';
+  if(cur === 'KRW') return won.toLocaleString()+'원';
+  var rate = rates[cur];
+  if(!rate) return won.toLocaleString()+'원';
+  var converted = won * rate;
+  var sym = {USD:'$', EUR:'€', JPY:'¥', CNY:'¥'}[cur]||'';
+  var name = {USD:'USD', EUR:'EUR', JPY:'JPY', CNY:'CNY'}[cur]||cur;
+  if(cur==='JPY') return sym+Math.round(converted).toLocaleString()+' '+name;
+  return sym+converted.toFixed(2)+' '+name;
+}
+
+async function fetchRates() {
+  try {
+    var res = await fetch('https://open.er-api.com/v6/latest/KRW');
+    var data = await res.json();
+    if(data && data.rates) {
+      rates.USD = data.rates.USD || 0;
+      rates.EUR = data.rates.EUR || 0;
+      rates.JPY = data.rates.JPY || 0;
+      rates.CNY = data.rates.CNY || 0;
+      ratesLoaded = true;
+      updateRateInfo();
+    }
+  } catch(e) {
+    // fallback rates (approximate)
+    rates.USD = 0.000735;
+    rates.EUR = 0.000675;
+    rates.JPY = 0.108;
+    rates.CNY = 0.00533;
+    ratesLoaded = true;
+    updateRateInfo();
+  }
+}
+
+function updateRateInfo() {
+  var el = document.getElementById('rateInfo');
+  if(!el) return;
+  if(!ratesLoaded) { el.textContent = '환율 불러오는 중...'; return; }
+  if(selCur === 'KRW') { el.textContent = ''; return; }
+  var sym = {USD:'$',EUR:'€',JPY:'¥',CNY:'¥'}[selCur]||'';
+  var r = rates[selCur];
+  if(!r) { el.textContent = '환율 정보 없음'; return; }
+  var per10k = (10000 * r);
+  var disp = selCur==='JPY' ? Math.round(per10k).toLocaleString() : per10k.toFixed(2);
+  el.textContent = '현재 환율: ₩10,000 = '+sym+disp+' (실시간)';
+}
+
+function setCur(cur) {
+  selCur = cur;
+  document.querySelectorAll('.cur-btn').forEach(function(b){
+    b.classList.toggle('on', b.dataset.cur === cur);
+  });
+  updateRateInfo();
+  refreshPreviewList();
+}
+
+function togglePriceShow() {
+  showPrice = !showPrice;
+  document.getElementById('priceToggle').classList.toggle('on', showPrice);
+  document.getElementById('currencyPicker').style.display = showPrice ? '' : 'none';
+  refreshPreviewList();
+}
+
+function refreshPreviewList() {
+  var ids = selSizeForPreview;
+  if(!ids) return;
+  renderPreviewList(ids);
+}
+
+var selSizeForPreview = null;
+
+function renderPreviewList(ids) {
+  selSizeForPreview = ids;
+  var tw = sortW(works.filter(function(w){return ids.indexOf(w.id)>=0;}));
+  var sc = tw.filter(function(w){return w.sold;}).length;
+  var scMsg = sc>0?' ('+t('soldCount')+sc+t('soldIncluded'):''; document.getElementById('prevSub').textContent = tw.length+t('selWorks')+scMsg;
+  document.getElementById('pList').innerHTML = tw.map(function(w, i){
+    var h = getHN(w);
+    var priceStr = (showPrice && w.price) ? fmtPrice(w.price, selCur) : '';
+    var ph = '<div style="width:46px;height:46px;border-radius:7px;background:'+w.c[0]+';display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 16 16" fill="'+w.c[1]+'" opacity=".5"><rect width="16" height="16" rx="2"/><circle cx="5" cy="5" r="2"/><path d="M0 12l3-4 2 3 3-3 5 4H0z"/></svg></div>';
+    return '<div class="pitem'+(w.sold?' psold':'')+'">'+(w.sold?'<div class="psoldb"></div>':'')+'<div class="pnum">'+(i+1)+'</div><div class="pthumb">'+(w.img?'<img src="'+w.img+'"/>':ph)+'</div><div class="pinfo"><div class="ptrow">'+w.title+(h?'<span class="phn">'+h+'</span>':'')+(priceStr?'<span style="font-size:9px;padding:1px 6px;border-radius:20px;background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97;font-weight:500;">'+priceStr+'</span>':'')+(w.sold?'<span class="pstag">'+t('soldBadge')+'</span>':'')+'</div><div class="pmeta">'+w.year+' · '+w.genre+(w.medium?' · '+w.medium:'')+(w.size?' · '+w.size:'')+'</div><div class="pdesc">'+w.desc+'</div></div></div>';
+  }).join('');
+}
+
+function updatePricePreview() {
+  var val = parseInt(document.getElementById('fPrice').value);
+  var el = document.getElementById('pricePreview');
+  if(!val || val <= 0) { el.textContent = ''; return; }
+  var parts = [fmtKRW(val)];
+  if(ratesLoaded) {
+    if(rates.USD) parts.push('$'+(val*rates.USD).toFixed(2)+' USD');
+    if(rates.EUR) parts.push('€'+(val*rates.EUR).toFixed(2)+' EUR');
+    if(rates.JPY) parts.push('¥'+Math.round(val*rates.JPY)+' JPY');
+  }
+  el.textContent = parts.join('  ·  ');
+  el.style.color = 'var(--text2)';
+}
+
+
+const SUPA_URL='https://jriljajqtseoedeqlxag.supabase.co';
+const SUPA_KEY='sb_publishable_NoBKTQlRsF7F_3V6OwWvWw_xobEF8e2';
+const supa=supabase.createClient(SUPA_URL,SUPA_KEY);
+let currentUser=null;
+
+// 인증 상태 감지
+supa.auth.onAuthStateChange(async function(event,session){
+  currentUser=session?session.user:null;
+  if(currentUser){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('appScreen').style.display='';
+    var em=document.getElementById('userEmail');
+    if(em)em.textContent=currentUser.user_metadata&&currentUser.user_metadata.full_name?currentUser.user_metadata.full_name:(currentUser.email||'');
+    await loadProfileFromDB();
+    await loadWorksFromDB();
+  }else{
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('appScreen').style.display='none';
+  }
+});
+
+async function loginWithGoogle(){
+  await supa.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin}});
+}
+
+async function loginWithEmail(){
+  var email=document.getElementById('loginEmail').value.trim();
+  var pw=document.getElementById('loginPassword').value;
+  var errEl=document.getElementById('loginError');
+  errEl.textContent='';
+  if(!email||!pw){errEl.textContent='이메일과 비밀번호를 입력해주세요';return;}
+  var btn=document.getElementById('loginEmailBtn');
+  btn.textContent='로그인 중...';btn.disabled=true;
+  var res=await supa.auth.signInWithPassword({email:email,password:pw});
+  if(res.error){
+    errEl.textContent=res.error.message==='Invalid login credentials'?'이메일 또는 비밀번호가 틀렸어요':res.error.message;
+    btn.textContent='로그인';btn.disabled=false;
+  }
+}
+
+async function signupWithEmail(){
+  var email=document.getElementById('loginEmail').value.trim();
+  var pw=document.getElementById('loginPassword').value;
+  var errEl=document.getElementById('loginError');
+  errEl.textContent='';
+  if(!email||!pw){errEl.textContent='이메일과 비밀번호를 입력해주세요';return;}
+  if(pw.length<6){errEl.textContent='비밀번호는 6자 이상이어야 해요';return;}
+  var res=await supa.auth.signUp({email:email,password:pw});
+  if(res.error)errEl.textContent=res.error.message;
+  else errEl.style.color='#9FE1CB',errEl.textContent='확인 이메일을 보냈어요! 메일함을 확인해주세요';
+}
+
+async function logout(){
+  await supa.auth.signOut();
+  works=[];artist={name:'',phone:'',email:''};sel.clear();render();
+}
+
+async function loadWorksFromDB(){
+  var res=await supa.from('works').select('*').order('created_at',{ascending:false});
+  if(res.error){console.error('로드 오류:',res.error);return;}
+  works=(res.data||[]).map(function(w){
+    return{id:w.id,title:w.title||'',year:w.year||new Date().getFullYear(),genre:w.genre||'회화',medium:w.medium||'',size:w.size||'',desc:w.description||'',award:w.award||'',price:w.price||0,sold:w.sold||false,img:w.img_url||null,c:[w.color_bg||PAL[0][0],w.color_fg||PAL[0][1]],dbId:w.id};
+  });
+  render();
+}
+
+async function saveWorkToDB(data,isEdit,dbId){
+  var row={user_id:currentUser.id,title:data.title,year:data.year,genre:data.genre,medium:data.medium,size:data.size,description:data.desc,award:data.award,price:data.price||0,sold:data.sold,img_url:data.img||null,color_bg:data.c?data.c[0]:PAL[0][0],color_fg:data.c?data.c[1]:PAL[0][1],updated_at:new Date().toISOString()};
+  if(isEdit&&dbId){
+    var res=await supa.from('works').update(row).eq('id',dbId);
+    if(res.error){showToast('저장 실패: '+res.error.message);return false;}
+  }else{
+    var res2=await supa.from('works').insert(row).select().single();
+    if(res2.error){showToast('저장 실패: '+res2.error.message);return false;}
+  }
+  return true;
+}
+
+async function uploadImageToDB(file){
+  var ext=file.name.split('.').pop();
+  var path=currentUser.id+'/'+Date.now()+'.'+ext;
+  var res=await supa.storage.from('artwork-images').upload(path,file);
+  if(res.error){console.error('이미지 업로드 오류:',res.error);return null;}
+  return supa.storage.from('artwork-images').getPublicUrl(path).data.publicUrl;
+}
+
+async function loadProfileFromDB(){
+  var res=await supa.from('profiles').select('*').eq('id',currentUser.id).single();
+  if(res.data){artist.name=res.data.artist_name||'';artist.phone=res.data.phone||'';artist.email=res.data.email||'';}
+}
+
+async function saveProfileToDB(){
+  await supa.from('profiles').upsert({id:currentUser.id,artist_name:artist.name,phone:artist.phone,email:artist.email,updated_at:new Date().toISOString()});
+}
+
 const PAL=[['#B5D4F4','#185FA5'],['#9FE1CB','#0F6E56'],['#CECBF6','#534AB7'],['#F5C4B3','#993C1D'],['#C0DD97','#3B6D11'],['#FAC775','#854F0B']];
 const GENRES=['회화','조각','사진','설치미술','판화','드로잉','디지털아트','혼합매체'];
 const MEDS=[
@@ -482,17 +1308,21 @@ const MEDS=[
   {k:'콜라주',e:['collage','콜라주'],c:'콜라주 (Collage)'},
   {k:'오일파스텔',e:['oil pastel','오일파스텔'],c:'오일파스텔'},
 ];
-const HT=[{n:0,F:[18,14],S:[18,12],P:[18,10]},{n:1,F:[22,16],S:[22,14],P:[22,12]},{n:2,F:[24,19],S:[24,16],P:[24,14]},{n:3,F:[27.3,22],S:[27.3,19],P:[27.3,16]},{n:4,F:[33.4,24.2],S:[33.4,21.2],P:[33.4,18.2]},{n:5,F:[35,27],S:[35,24],P:[35,22]},{n:6,F:[40.9,31.8],S:[40.9,27.3],P:[40.9,24.2]},{n:8,F:[45.5,38],S:[45.5,33.4],P:[45.5,27.3]},{n:10,F:[53,45.5],S:[53,40.9],P:[53,33.4]},{n:12,F:[60.6,50],S:[60.6,45.5],P:[60.6,40.9]},{n:15,F:[65.2,53],S:[65.2,50],P:[65.2,45.5]},{n:20,F:[72.7,60.6],S:[72.7,53],P:[72.7,45.5]},{n:25,F:[80.3,65.2],S:[80.3,60.6],P:[80.3,53]},{n:30,F:[90.9,72.7],S:[90.9,65.2],P:[90.9,60.6]},{n:40,F:[100,80.3],S:[100,72.7],P:[100,65.2]},{n:50,F:[116.7,90.9],S:[116.7,80.3],P:[116.7,72.7]},{n:60,F:[130.3,97],S:[130.3,89.4],P:[130.3,80.3]},{n:80,F:[145.5,112.1],S:[145.5,97],P:[145.5,89.4]},{n:100,F:[162.2,130.3],S:[162.2,112.1],P:[162.2,97]},{n:120,F:[193.9,130.3],S:[193.9,112.1],P:[193.9,97]},{n:150,F:[227.3,181.8],S:[227.3,162.2],P:[227.3,145.5]}];
+const HT=[{n:0,F:[18,14],S:[18,12],P:[18,10]},{n:1,F:[22,16],S:[22,14],P:[22,12]},{n:2,F:[24,19],S:[24,16],P:[24,14]},{n:3,F:[27.3,22],S:[27.3,19],P:[27.3,16]},{n:4,F:[33.4,24.2],S:[33.4,21.2],P:[33.4,18.2]},{n:5,F:[35,27],S:[35,24],P:[35,22]},{n:6,F:[40.9,31.8],S:[40.9,27.3],P:[40.9,24.2]},{n:8,F:[45.5,38],S:[45.5,33.4],P:[45.5,27.3]},{n:10,F:[53,45.5],S:[53,40.9],P:[53,33.4]},{n:12,F:[60.6,50],S:[60.6,45.5],P:[60.6,40.9]},{n:15,F:[65.2,53],S:[65.2,50],P:[65.2,45.5]},{n:20,F:[72.7,60.6],S:[72.7,53],P:[72.7,45.5]},{n:25,F:[80.3,65.2],S:[80.3,60.6],P:[80.3,53]},{n:30,F:[90.9,72.7],S:[90.9,65.2],P:[90.9,60.6]},{n:40,F:[100,80.3],S:[100,72.7],P:[100,65.2]},{n:50,F:[116.7,90.9],S:[116.7,80.3],P:[116.7,72.7]},{n:60,F:[130.3,97],S:[130.3,89.4],P:[130.3,80.3]},{n:80,F:[145.5,112.1],S:[145.5,97],P:[145.5,89.4]},{n:100,F:[162.2,130.3],S:[162.2,112.1],P:[162.2,97]},{n:120,F:[193.9,130.3],S:[193.9,112.1],P:[193.9,97]},{n:150,F:[227.3,181.8],S:[227.3,162.2],P:[227.3,145.5]},
+  {n:200,F:[259.1,193.9],S:[259.1,181.8],P:[259.1,162.2]},
+  {n:300,F:[290.9,218.2],S:[290.9,197.0],P:[290.9,181.8]},
+  {n:400,F:[333.4,248.5],S:[333.4,227.3],P:[333.4,209.1]},
+  {n:500,F:[363.6,259.1],S:[363.6,245.5],P:[363.6,227.3]}];
 
 let works=[
-  {id:1,title:'빛의 파편들',year:2024,genre:'회화',medium:'캔버스에 아크릴',size:'53×45.5',desc:'자연광을 분해한 추상 연작.',award:'2024 서울 청년작가상',img:null,c:PAL[0],sold:false},
-  {id:2,title:'도시의 결',year:2024,genre:'사진',medium:'아카이벌 피그먼트 프린트',size:'60×90',desc:'서울 골목의 질감을 포착한 흑백 사진 시리즈.',award:'',img:null,c:PAL[1],sold:true},
+  {id:1,title:'빛의 파편들',year:2024,genre:'회화',medium:'캔버스에 아크릴',size:'53×45.5',desc:'자연광을 분해한 추상 연작.',award:'2024 서울 청년작가상',img:null,c:PAL[0],sold:false,price:3000000},
+  {id:2,title:'도시의 결',year:2024,genre:'사진',medium:'아카이벌 피그먼트 프린트',size:'60×90',desc:'서울 골목의 질감을 포착한 흑백 사진 시리즈.',award:'',img:null,c:PAL[1],sold:true,price:2500000},
   {id:3,title:'정지된 시간',year:2023,genre:'설치미술',medium:'버려진 시계 2000개',size:'가변',desc:'시계 2000개로 구성한 공간 설치.',award:'2023 아르코 지원',img:null,c:PAL[2],sold:false},
   {id:4,title:'기억의 층위',year:2023,genre:'혼합매체',medium:'콜라주',size:'80×60',desc:'가족 사진과 신문지를 레이어드한 콜라주 연작.',award:'',img:null,c:PAL[3],sold:true},
-  {id:5,title:'푸른 소음',year:2022,genre:'회화',medium:'캔버스에 유채',size:'200×300',desc:'소리의 파형을 시각화한 대형 캔버스 작품.',award:'2022 국립현대미술관 기획전 선정',img:null,c:PAL[4],sold:false},
+  {id:5,title:'푸른 소음',year:2022,genre:'회화',medium:'캔버스에 유채',size:'200×300',desc:'소리의 파형을 시각화한 대형 캔버스 작품.',award:'2022 국립현대미술관 기획전 선정',img:null,c:PAL[4],sold:false,price:15000000},
   {id:6,title:'경계선',year:2022,genre:'판화',medium:'목판화',size:'50×70',desc:'도시와 자연의 경계를 탐구하는 목판화 연작.',award:'',img:null,c:PAL[5],sold:false},
 ];
-let sel=new Set(),nextId=7,editId=null,pendingImg=null,soldF=false;
+let sel=new Set(),nextId=7,editId=null,pendingImg=null,pendingImgFile=null,soldF=false;
 let artist={name:'',phone:'',email:''};
 let pageSize=30,curPage=1,reviewItems=[];
 
@@ -551,7 +1381,7 @@ function previewHN(){
   const s=document.getElementById('fSize').value;
   const h=detHN(s);
   const el=document.getElementById('hnprev');
-  if(!h){el.textContent=s?'호수 인식 불가':'';el.style.color='var(--text3)';return;}
+  if(!h){el.textContent=s?t('hnUnknown'):'';el.style.color='var(--text3)';return;}
   el.innerHTML='<span style="display:inline-block;padding:2px 10px;border-radius:20px;background:'+(h.includes('변형')?'#EEEDFE':'#E6F1FB')+';color:'+(h.includes('변형')?'#534AB7':'#0C447C')+';font-size:12px;font-weight:500;border:0.5px solid '+(h.includes('변형')?'#CECBF6':'#B5D4F4')+';">'+h+'</span>';
 }
 
@@ -584,10 +1414,11 @@ function sortW(list){
 function updFilters(){
   const yr=document.getElementById('fYear'),gn=document.getElementById('fGenre'),hn=document.getElementById('fHnum');
   const cy=yr.value,cg=gn.value,ch=hn.value;
-  yr.innerHTML='<option value="">전체 연도</option>'+[...new Set(works.map(w=>w.year))].sort((a,b)=>b-a).map(y=>'<option value="'+y+'"'+(y==cy?' selected':'')+'>'+y+'</option>').join('');
-  gn.innerHTML='<option value="">전체 장르</option>'+[...new Set(works.map(w=>w.genre))].sort().map(g=>'<option value="'+g+'"'+(g===cg?' selected':'')+'>'+g+'</option>').join('');
+  yr.innerHTML='<option value="">'+t('filterYear')+'</option>'+[...new Set(works.map(w=>w.year))].sort((a,b)=>b-a).map(y=>'<option value="'+y+'"'+(y==cy?' selected':'')+'>'+y+'</option>').join('');
+  gn.innerHTML='<option value="">'+t('filterGenre')+'</option>'+[...new Set(works.map(w=>w.genre))].sort().map(g=>'<option value="'+g+'"'+(g===cg?' selected':'')+'>'+g+'</option>').join('');
   const hns=[...new Set(works.map(w=>{const h=getHN(w);return h?parseInt(h):null}).filter(v=>v!==null))].sort((a,b)=>a-b);
-  hn.innerHTML='<option value="">전체 호수</option>'+hns.map(n=>'<option value="'+n+'"'+(String(n)===ch?' selected':'')+'>'+n+'호</option>').join('');
+  var hnUnit=curLang==='ja'?'号':curLang==='en'?' (no.)':'호';
+  hn.innerHTML='<option value="">'+t('filterHnum')+'</option>'+hns.map(n=>'<option value="'+n+'"'+(String(n)===ch?' selected':'')+'>'+n+hnUnit+'</option>').join('');
 }
 function setPS(n){pageSize=n;document.querySelectorAll('.psb').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.n)===n||(n===9999&&b.dataset.n==='9999')));goPage(1);}
 function goPage(p){curPage=p;render();}
@@ -601,16 +1432,16 @@ function render(){
   if(curPage>tp)curPage=tp;
   const page=all.slice((curPage-1)*ps,curPage*ps);
   const sb=document.getElementById('selbar');sb.style.display=sel.size>0?'flex':'none';
-  document.getElementById('selcnt').textContent=sel.size;
+  document.getElementById('selcnt').textContent=sel.size+t('selCount');
   const sv=document.getElementById('sortBy').value;
   const byY=sv==='year_desc'||sv==='year_asc';
   const gc=pageSize<=20?'g20':pageSize<=30?'g30':pageSize<=50?'g50':pageSize<=60?'g60':'g30';
   const el=document.getElementById('list');
-  if(!page.length){el.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text3);font-size:14px;">등록된 작품이 없어요. + 추가 버튼으로 시작해보세요.</div>';document.getElementById('pgn').innerHTML='';return;}
+  if(!page.length){el.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text3);font-size:14px;">'+(curLang==="en"?"No works yet. Tap + Add to get started.":curLang==="ja"?"作品がありません。+ 追加ボタンで始めましょう。":"등록된 작품이 없어요. + 추가 버튼으로 시작해보세요.")+'</div>';document.getElementById('pgn').innerHTML='';return;}
   if(byY){
     const bY={};page.forEach(w=>{if(!bY[w.year])bY[w.year]=[];bY[w.year].push(w);});
     const yrs=Object.keys(bY).sort((a,b)=>sv==='year_asc'?a-b:b-a);
-    el.innerHTML=yrs.map((yr,yi)=>'<div class="ygroup"><div class="ylabel">'+yr+'</div><div class="grid '+gc+'">'+bY[yr].map(w=>cHtml(w)).join('')+(yi===0&&curPage===1?'<div class="addcard" onclick="openAdd()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</div>':'')+'</div></div>').join('');
+    el.innerHTML=yrs.map((yr,yi)=>'<div class="ygroup"><div class="ylabel">'+yr+'</div><div class="grid '+gc+'">'+bY[yr].map(w=>cHtml(w)).join('')+(yi===0&&curPage===1?'<div class="addcard" onclick="openAdd()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'+t('addCardBtn')+'</div>':'')+'</div></div>').join('');
   } else {
     el.innerHTML='<div class="grid '+gc+'">'+page.map(w=>cHtml(w)).join('')+'</div>';
   }
@@ -621,7 +1452,7 @@ function cHtml(w){
   const s=sel.has(w.id),h=getHN(w);
   const ph='<div style="width:100%;height:100%;background:'+w.c[0]+';display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="3" fill="'+w.c[1]+'" opacity=".18"/><circle cx="9" cy="9" r="3" fill="'+w.c[1]+'" opacity=".45"/><path d="M1 21l6-8 4 5 4-4 8 7H1z" fill="'+w.c[1]+'" opacity=".45"/></svg></div>';
   return '<div class="card'+(s?' sel':'')+(w.sold?' sold-card':'')+'">'+
-    (w.sold?'<div class="sold-ov"></div><div class="sold-badge">판매 완료</div>':'')+
+    (w.sold?'<div class="sold-ov"></div><div class="sold-badge">'+t('soldBadge')+'</div>':'')+
     '<div class="chkbtn" onclick="event.stopPropagation();toggleSel('+w.id+')"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+
     '<div class="thumb" onclick="toggleSel('+w.id+')">'+(w.img?'<img src="'+w.img+'"/>':ph)+'</div>'+
     '<div class="cbody" onclick="toggleSel('+w.id+')">'+
@@ -652,11 +1483,13 @@ function selAll(){allFiltered().forEach(w=>sel.add(w.id));render();}
 
 function toggleSoldF(){soldF=!soldF;document.getElementById('soldTrack').classList.toggle('on',soldF);}
 function openAdd(id=null){
-  editId=id;pendingImg=null;
+  editId=id;pendingImg=null;pendingImgFile=null;
   const w=id?works.find(x=>x.id===id):null;
   soldF=w?w.sold:false;
-  document.getElementById('modalTitle').textContent=w?'작품 수정':'새 작품 추가';
+  document.getElementById('modalTitle').textContent=w?t('editTitle'):t('addTitle');
   document.getElementById('fTitle').value=w?w.title:'';
+  document.getElementById('fPrice').value=w&&w.price?w.price:'';
+  document.getElementById('pricePreview').textContent='';
   document.getElementById('fYear2').value=w?w.year:2024;
   document.getElementById('fSize').value=w?w.size:'';
   document.getElementById('fMedium').value=w?w.medium:'';
@@ -671,28 +1504,30 @@ function openAdd(id=null){
   document.getElementById('addOv').classList.add('on');
 }
 function loadImg(input){
-  const f=input.files[0];if(!f)return;
-  const r=new FileReader();r.onload=e=>{pendingImg=e.target.result;document.getElementById('dropZone').innerHTML='<img class="imgpt" src="'+e.target.result+'"/>';};r.readAsDataURL(f);
+  var f=input.files[0];if(!f)return;
+  pendingImgFile=f;
+  var r=new FileReader();r.onload=function(e){pendingImg=e.target.result;document.getElementById('dropZone').innerHTML='<img class="imgpt" src="'+e.target.result+'"/>';};r.readAsDataURL(f);
 }
 function saveWork(){
   const title=document.getElementById('fTitle').value.trim();
-  if(!title){showToast('제목을 입력해주세요');return;}
-  const data={title,year:parseInt(document.getElementById('fYear2').value),genre:document.getElementById('fGenre2').value,medium:document.getElementById('fMedium').value.trim(),size:document.getElementById('fSize').value.trim(),desc:document.getElementById('fDesc').value.trim(),award:document.getElementById('fAward').value.trim(),sold:soldF};
+  if(!title){showToast(t('toastNoTitle'));return;}
+  const priceVal=parseInt(document.getElementById('fPrice').value)||0;const data={title,year:parseInt(document.getElementById('fYear2').value),genre:document.getElementById('fGenre2').value,medium:document.getElementById('fMedium').value.trim(),size:document.getElementById('fSize').value.trim(),desc:document.getElementById('fDesc').value.trim(),award:document.getElementById('fAward').value.trim(),sold:soldF,price:priceVal};
   if(editId){const w=works.find(x=>x.id===editId);Object.assign(w,data);if(pendingImg)w.img=pendingImg;}
   else works.push({id:nextId++,...data,img:pendingImg,c:PAL[nextId%PAL.length]});
-  closeOv('addOv');render();showToast('저장됐어요');
+  closeOv('addOv');render();showToast(t('toastSaved'));
 }
 
 function openDetail(id){
   const w=works.find(x=>x.id===id);
   const h=getHN(w);
   const ph='<div style="width:100%;height:100%;background:'+w.c[0]+';display:flex;align-items:center;justify-content:center;"><svg width="60" height="60" viewBox="0 0 60 60" fill="none"><rect width="60" height="60" rx="6" fill="'+w.c[1]+'" opacity=".15"/><circle cx="20" cy="20" r="8" fill="'+w.c[1]+'" opacity=".4"/><path d="M4 46l12-16 9 11 7-9 17 14H4z" fill="'+w.c[1]+'" opacity=".4"/></svg></div>';
-  document.getElementById('dImg').innerHTML=(w.img?'<img src="'+w.img+'"/>':ph)+(w.sold?'<div class="dsoldrib">판매 완료</div>':'');
+  document.getElementById('dImg').innerHTML=(w.img?'<img src="'+w.img+'"/>':ph)+(w.sold?'<div class="dsoldrib">'+t('soldBadge')+'</div>':'');
   document.getElementById('dTitle').textContent=w.title;
   const chips=[w.year,w.genre,w.medium,w.size].filter(Boolean).map(v=>'<span class="chip">'+v+'</span>').join('');
   const hnC=h?'<span class="chip hn'+(h.includes('변형')?' vari':'')+'">'+h+'</span>':'';
   const solC=w.sold?'<span class="chip sold">판매 완료</span>':'';
-  document.getElementById('dChips').innerHTML=hnC+chips+solC;
+  const priceChip=w.price?'<span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD99;font-weight:500;">'+fmtKRW(w.price)+'</span>':'';
+  document.getElementById('dChips').innerHTML=hnC+priceChip+chips+solC;
   document.getElementById('dDesc').textContent=w.desc;
   const aw=document.getElementById('dAward');
   if(w.award){aw.style.display='flex';document.getElementById('dAwardTxt').textContent=w.award;}else aw.style.display='none';
@@ -709,24 +1544,20 @@ function openArtist(){
   document.getElementById('aEmail').value=artist.email;
   document.getElementById('artistOv').classList.add('on');
 }
-function saveArtist(){
+async function saveArtist(){
   artist.name=document.getElementById('aName').value.trim();
   artist.phone=document.getElementById('aPhone').value.trim();
   artist.email=document.getElementById('aEmail').value.trim();
+  if(currentUser)await saveProfileToDB();
   closeOv('artistOv');openPreview();
 }
 function openPreview(){
-  const ids=sel.size>0?[...sel]:works.map(w=>w.id);
-  const tw=sortW(works.filter(w=>ids.includes(w.id)));
-  const sc=tw.filter(w=>w.sold).length;
-  document.getElementById('prevSub').textContent=tw.length+'개 작품 선택됨'+(sc>0?' (판매 완료 '+sc+'점 포함)':'');
-  document.getElementById('pArtistName').textContent=artist.name||'작가 이름 미설정';
+  var ids=sel.size>0?[...sel]:works.map(function(w){return w.id;});
+  selSizeForPreview=ids;
+  document.getElementById('pArtistName').textContent=artist.name||t('previewNoArtist');
   document.getElementById('pArtistContact').textContent=[artist.phone,artist.email].filter(Boolean).join('  ·  ');
-  document.getElementById('pList').innerHTML=tw.map(function(w,i){
-    const h=getHN(w);
-    const ph='<div style="width:46px;height:46px;border-radius:7px;background:'+w.c[0]+';display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 16 16" fill="'+w.c[1]+'" opacity=".5"><rect width="16" height="16" rx="2"/><circle cx="5" cy="5" r="2"/><path d="M0 12l3-4 2 3 3-3 5 4H0z"/></svg></div>';
-    return '<div class="pitem'+(w.sold?' psold':'')+'">'+(w.sold?'<div class="psoldb"></div>':'')+'<div class="pnum">'+(i+1)+'</div><div class="pthumb">'+(w.img?'<img src="'+w.img+'"/>':ph)+'</div><div class="pinfo"><div class="ptrow">'+w.title+(h?'<span class="phn">'+h+'</span>':'')+(w.sold?'<span class="pstag">판매 완료</span>':'')+'</div><div class="pmeta">'+w.year+' · '+w.genre+(w.medium?' · '+w.medium:'')+(w.size?' · '+w.size:'')+'</div><div class="pdesc">'+w.desc+'</div></div></div>';
-  }).join('');
+  fetchRates().then(function(){renderPreviewList(ids);});
+  renderPreviewList(ids);
   document.getElementById('prevOv').classList.add('on');
 }
 
@@ -734,26 +1565,26 @@ function doExport(type){
   const ids=sel.size>0?[...sel]:works.map(w=>w.id);
   const tw=sortW(works.filter(w=>ids.includes(w.id)));
   if(type==='csv'){
-    const hdr='번호,제목,연도,장르,호수,매체,크기,작품 설명,판매여부';
-    const rows=tw.map(function(w,i){const h=getHN(w);return[i+1,'"'+w.title+'"',w.year,w.genre,h||'-','"'+w.medium+'"','"'+w.size+'"','"'+(w.desc||'').replace(/"/g,'""')+'"',w.sold?'판매 완료':'판매 가능'].join(',');});
+    const hdr='번호,제목,연도,장르,호수,매체,크기,작품 설명,가격(원),가격('+selCur+'),판매여부';
+    const rows=tw.map(function(w,i){const h=getHN(w);const priceKRW=w.price?w.price.toLocaleString()+'원':'-';const priceForeign=(showPrice&&w.price&&selCur!=='KRW')?fmtPrice(w.price,selCur):'-';return[i+1,'"'+w.title+'"',w.year,w.genre,h||'-','"'+w.medium+'"','"'+w.size+'"','"'+(w.desc||'').replace(/"/g,'""')+'"',priceKRW,priceForeign,w.sold?'판매 완료':'판매 가능'].join(',');});
     const blob=new Blob(['\uFEFF'+[hdr,...rows].join('\n')],{type:'text/csv;charset=utf-8'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='POPOL_'+(artist.name||'포트폴리오')+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
-    showToast('CSV 파일 다운로드됐어요');
+    showToast(t('toastCsv'));
   } else if(type==='pdf'){
     const pw=window.open('','_blank');
     const aName=artist.name||'작가 이름',aC=[artist.phone,artist.email].filter(Boolean).join(' · ');
     const today=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
     const rows=tw.map(function(w,i){const h=getHN(w);return '<tr'+(w.sold?' style="background:#fff5f5;"':'')+'><td style="width:24px;text-align:center;color:#aaa;">'+( i+1)+'</td><td style="width:120px;"><b>'+w.title+'</b>'+(w.sold?'<br/><span style="font-size:7.5pt;color:#A32D2D;">판매 완료</span>':'')+'</td><td style="text-align:center;">'+w.year+'</td><td>'+w.genre+'</td><td>'+(h||'-')+'</td><td>'+(w.medium||'-')+'</td><td>'+(w.size||'-')+'</td><td style="font-size:8pt;color:#555;">'+w.desc+'</td></tr>';}).join('');
     pw.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>작품 목록 — '+aName+'</title><style>@page{size:A4 landscape;margin:15mm 14mm;}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:#111;font-size:10pt;}.hd{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:10px;border-bottom:2px solid #111;margin-bottom:14px;}.name{font-size:17pt;font-weight:700;}.sub{font-size:8.5pt;color:#666;margin-top:4px;}.hr{text-align:right;font-size:8.5pt;color:#555;line-height:1.7;}table{width:100%;border-collapse:collapse;font-size:8.5pt;}thead tr{border-bottom:1.5px solid #222;}th{padding:6px 8px;text-align:left;font-weight:600;font-size:7.5pt;color:#444;}tr{border-bottom:0.5px solid #e0e0e0;}td{padding:7px 8px;vertical-align:middle;}.ft{margin-top:12px;padding-top:8px;border-top:0.5px solid #ddd;display:flex;justify-content:space-between;font-size:7.5pt;color:#bbb;}</style></head><body><div class="hd"><div><div class="name">'+aName+'</div><div class="sub">작품 목록 '+tw.length+'점'+(tw.filter(w=>w.sold).length>0?' · 판매 완료 '+tw.filter(w=>w.sold).length+'점':'')+'</div></div><div class="hr">'+(aC?aC+'<br/>':'')+'<span style="font-size:7.5pt;color:#999;">'+today+'</span></div></div><table><thead><tr><th>No.</th><th>제목</th><th>연도</th><th>장르</th><th>호수</th><th>매체</th><th>크기</th><th>작품 설명</th></tr></thead><tbody>'+rows+'</tbody></table><div class="ft"><span>POPOL · '+aName+'</span><span>'+today+'</span></div></body></html>');
-    pw.document.close();setTimeout(function(){pw.print();},500);showToast('PDF 인쇄 창이 열렸어요');
+    pw.document.close();setTimeout(function(){pw.print();},500);showToast(t('toastPdf'));
   } else if(type==='img'){
     const imgs=tw.filter(w=>w.img);
-    if(!imgs.length){showToast('업로드된 이미지가 없어요');return;}
+    if(!imgs.length){showToast(t('toastNoImg'));return;}
     imgs.forEach(function(w,i){setTimeout(function(){const a=document.createElement('a');a.href=w.img;a.download=w.year+'_'+w.title+'.jpg';a.click();},i*400);});
-    showToast('이미지 '+imgs.length+'개 다운로드 중...');
+    showToast(imgs.length+t('toastImgDl'));
   } else if(type==='txt'){
     const txt=tw.map(function(w,i){const h=getHN(w);return(i+1)+'. '+w.title+(h?' ['+h+']':'')+(w.sold?' [판매 완료]':'')+'\n   '+[w.year,w.genre,w.medium,w.size].filter(Boolean).join(' · ')+'\n   '+w.desc;}).join('\n\n');
-    navigator.clipboard.writeText(txt).then(function(){showToast('캡션 텍스트가 복사됐어요');});
+    navigator.clipboard.writeText(txt).then(function(){showToast(t('toastTxt'));});
   }
 }
 function shareVia(type){
@@ -762,7 +1593,7 @@ function shareVia(type){
   const txt=(artist.name?artist.name+' ':'')+'포트폴리오 ('+tw.length+'개 작품)\n'+tw.map(function(w,i){const h=getHN(w);return(i+1)+'. '+w.title+' ('+w.year+', '+w.genre+(h?', '+h:'')+(w.sold?', 판매 완료':'')+')';}).join('\n');
   if(type==='sms')window.open('sms:?body='+encodeURIComponent(txt));
   else if(type==='email')window.open('mailto:?subject='+encodeURIComponent((artist.name||'작가')+' 작품 목록')+'&body='+encodeURIComponent(txt));
-  else if(type==='copy')navigator.clipboard.writeText(txt).then(function(){showToast('복사됐어요');});
+  else if(type==='copy')navigator.clipboard.writeText(txt).then(function(){showToast(t('toastCopied'));});
 }
 
 function norm(s){return(s||'').toLowerCase().replace(/[\s_.]/g,'');}
@@ -807,11 +1638,11 @@ async function handleFiles(files){
     if(ex)ex.img=url;
     else items.push({...p,img:url,source:'img',checked:true,editing:false,desc:'',award:''});
   }
-  if(!items.length){closeOv('reviewOv');showToast('인식된 작품이 없어요');return;}
+  if(!items.length){closeOv('reviewOv');showToast(t('toastNoWork'));return;}
   reviewItems=items;showReview();
 }
 function showLoading(){
-  document.getElementById('reviewBody').innerHTML='<div class="loadwrap"><div class="spinner"></div><div style="font-size:13px;color:var(--text2);">파일 분석 중...</div></div>';
+  document.getElementById('reviewBody').innerHTML='<div class="loadwrap"><div class="spinner"></div><div style="font-size:13px;color:var(--text2);">'+t('toastAnalyzing')+'</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">'+t('toastAnalyzingSub')+'</div></div>';
   document.getElementById('reviewSub').textContent='잠시만 기다려주세요';
   document.getElementById('reviewOv').classList.add('on');
 }
@@ -827,9 +1658,9 @@ function renderReview(){
     const hn=detHN(it.size);
     const ph='<div style="width:52px;height:52px;border-radius:8px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
     if(it.editing){
-      h+='<div class="ritem"><div class="chkbox'+(it.checked?' on':'')+'" onclick="toggleRC('+i+')"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rthumb">'+(it.img?'<img src="'+it.img+'"/>':ph)+'</div><div class="rbody"><div class="editform"><div class="efgrid"><div class="effield" style="grid-column:1/-1;"><label class="eflabel">제목</label><input class="efinput" value="'+esc(it.title)+'" oninput="reviewItems['+i+'].title=this.value"/></div><div class="effield"><label class="eflabel">연도</label><input class="efinput" type="number" value="'+it.year+'" oninput="reviewItems['+i+'].year=parseInt(this.value)"/></div><div class="effield"><label class="eflabel">장르</label><select class="efinput" onchange="reviewItems['+i+'].genre=this.value">'+GENRES.map(g=>'<option'+(g===it.genre?' selected':'')+'>'+g+'</option>').join('')+'</select></div><div class="effield" style="grid-column:1/-1;"><label class="eflabel">재료/매체</label><input class="efinput" value="'+esc(it.medium)+'" oninput="reviewItems['+i+'].medium=this.value"/></div><div class="effield" style="grid-column:1/-1;"><label class="eflabel">크기</label><input class="efinput" value="'+esc(it.size)+'" oninput="reviewItems['+i+'].size=this.value"/></div></div></div><span class="redit" onclick="reviewItems['+i+'].editing=false;renderReview()">접기 ↑</span></div></div>';
+      h+='<div class="ritem"><div class="chkbox'+(it.checked?' on':'')+'" onclick="toggleRC('+i+')"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rthumb">'+(it.img?'<img src="'+it.img+'"/>':ph)+'</div><div class="rbody"><div class="editform"><div class="efgrid"><div class="effield" style="grid-column:1/-1;"><label class="eflabel">제목</label><input class="efinput" value="'+esc(it.title)+'" oninput="reviewItems['+i+'].title=this.value"/></div><div class="effield"><label class="eflabel">연도</label><input class="efinput" type="number" value="'+it.year+'" oninput="reviewItems['+i+'].year=parseInt(this.value)"/></div><div class="effield"><label class="eflabel">장르</label><select class="efinput" onchange="reviewItems['+i+'].genre=this.value">'+GENRES.map(g=>'<option'+(g===it.genre?' selected':'')+'>'+g+'</option>').join('')+'</select></div><div class="effield" style="grid-column:1/-1;"><label class="eflabel">재료/매체</label><input class="efinput" value="'+esc(it.medium)+'" oninput="reviewItems['+i+'].medium=this.value"/></div><div class="effield" style="grid-column:1/-1;"><label class="eflabel">크기</label><input class="efinput" value="'+esc(it.size)+'" oninput="reviewItems['+i+'].size=this.value"/></div></div></div><span class="redit" onclick="reviewItems['+i+'].editing=false;renderReview()">'+ t('reviewCollapse') +'</span></div></div>';
     } else {
-      h+='<div class="ritem"><div class="chkbox'+(it.checked?' on':'')+'" onclick="toggleRC('+i+')"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rthumb">'+(it.img?'<img src="'+it.img+'"/>':ph)+'</div><div class="rbody"><div class="rtop"><div class="rtitle">'+(it.title||'<span style="color:var(--text3)">제목 없음</span>')+'</div><span class="redit" onclick="reviewItems['+i+'].editing=true;renderReview()">수정 ✎</span></div><div class="rtags"><span class="rtag rt-year">'+it.year+'</span><span class="rtag rt-genre">'+it.genre+'</span>'+(it.medium?'<span class="rtag rt-med">'+esc(it.medium)+'</span>':'<span class="rtag rt-warn">재료 미인식</span>')+(it.size?'<span class="rtag rt-size">'+esc(it.size)+'</span>':'<span class="rtag rt-warn">크기 미인식</span>')+(hn?'<span class="rtag rt-hnum">'+hn+'</span>':'')+'<span class="rtag rt-src">'+(it.source==='csv'?'엑셀':'이미지')+'</span></div></div></div>';
+      h+='<div class="ritem"><div class="chkbox'+(it.checked?' on':'')+'" onclick="toggleRC('+i+')"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rthumb">'+(it.img?'<img src="'+it.img+'"/>':ph)+'</div><div class="rbody"><div class="rtop"><div class="rtitle">'+(it.title||'<span style="color:var(--text3)">'+t('reviewNoTitle')+'</span>')+'</div><span class="redit" onclick="reviewItems['+i+'].editing=true;renderReview()">'+ t('reviewEdit') +'</span></div><div class="rtags"><span class="rtag rt-year">'+it.year+'</span><span class="rtag rt-genre">'+it.genre+'</span>'+(it.medium?'<span class="rtag rt-med">'+esc(it.medium)+'</span>':'<span class="rtag rt-warn">'+t('reviewNoMed')+'</span>')+(it.size?'<span class="rtag rt-size">'+esc(it.size)+'</span>':'<span class="rtag rt-warn">'+t('reviewNoSize')+'</span>')+(hn?'<span class="rtag rt-hnum">'+hn+'</span>':'')+'<span class="rtag rt-src">'+(it.source==='csv'?'엑셀':'이미지')+'</span></div></div></div>';
     }
   });
   document.getElementById('reviewBody').innerHTML=h;
@@ -840,13 +1671,13 @@ function toggleRC(i){reviewItems[i].checked=!reviewItems[i].checked;renderReview
 function toggleAllR(){const a=reviewItems.every(r=>r.checked);reviewItems.forEach(r=>r.checked=!a);renderReview();}
 function importSel(){
   const toAdd=reviewItems.filter(r=>r.checked);
-  if(!toAdd.length){showToast('선택된 항목이 없어요');return;}
+  if(!toAdd.length){showToast(t('toastNone'));return;}
   let base=Date.now();
   toAdd.forEach(function(it,i){works.push({id:base+i,title:it.title,year:it.year,genre:it.genre,medium:it.medium||'',size:it.size||'',desc:it.desc||'',award:it.award||'',img:it.img||null,sold:false,c:PAL[(base+i)%PAL.length]});});
   nextId=Date.now()+1000;
   closeOv('reviewOv');reviewItems=[];render();
-  showToast(toAdd.length+'개 작품이 추가됐어요');
-  document.getElementById('impSec').innerHTML='<div class="resbanner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>'+toAdd.length+'개 작품이 추가됐어요! <button class="btn btn-sm btn-dark" onclick="showTab(\'portfolio\')" style="margin-left:auto;">포트폴리오 보기 →</button></div>';
+  showToast(toAdd.length+t('toastImported'));
+  document.getElementById('impSec').innerHTML='<div class="resbanner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>'+toAdd.length+t('toastImported')+'! <button class="btn btn-sm btn-dark" onclick="showTab(\'portfolio\')" style="margin-left:auto;">'+t('goPortfolio')+'</button></div>';
 }
 
 function showTab(t){
@@ -910,6 +1741,9 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
   setTimeout(tick, 250);
 })();
 
+applyLang();
+fetchRates();
+// 로그인 상태 확인 후 자동 render
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}
 render();
 </script>
