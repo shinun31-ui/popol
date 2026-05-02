@@ -82,8 +82,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 .pgb.on{background:var(--charcoal);color:var(--warm);border-color:var(--charcoal);}
 .pgb:disabled{opacity:.3;cursor:default;}
 .pgi{font-size:11px;color:var(--text3);margin-left:4px;}
-.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;}
-.ov.on{display:flex;}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;pointer-events:none;}
+.ov.on{display:flex;pointer-events:auto;}
 .modal{background:var(--bg);border-radius:var(--rlg);border:0.5px solid var(--border2);padding:20px;width:100%;max-width:480px;margin:auto;}
 .modal h2{font-size:17px;font-weight:600;margin-bottom:16px;}
 .ff{margin-bottom:13px;}
