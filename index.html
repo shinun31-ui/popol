@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="POPOL"/>
 <link rel="manifest" href="/manifest.json"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
+
 <link rel="apple-touch-icon" href="/icon-192.png"/>
 <title>POPOL</title>
 <style>
@@ -816,6 +816,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 <div class="toast" id="toast"></div>
 </div><!-- /appScreen -->
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <script>
 
 var LANG = {
@@ -1373,18 +1374,6 @@ function updatePricePreview() {
 }
 
 
-window.addEventListener('load', function(){
-  if(typeof supabase === 'undefined'){
-    // SDK 재로드 시도
-    var s=document.createElement('script');
-    s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js';
-    s.onload=initSupabase;
-    document.head.appendChild(s);
-  } else {
-    initSupabase();
-  }
-});
-function initSupabase(){
 const SUPA_URL='https://jriljajqtseoedeqlxag.supabase.co';
 const SUPA_KEY='sb_publishable_NoBKTQlRsF7F_3V6OwWvWw_xobEF8e2';
 const supa=supabase.createClient(SUPA_URL,SUPA_KEY,{
@@ -2380,7 +2369,6 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 
 applyLang();
 fetchRates();
-} // end initSupabase
 // 로그인 상태 확인 후 자동 render
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}
 render();
