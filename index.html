@@ -1375,7 +1375,14 @@ function updatePricePreview() {
 
 const SUPA_URL='https://jriljajqtseoedeqlxag.supabase.co';
 const SUPA_KEY='sb_publishable_NoBKTQlRsF7F_3V6OwWvWw_xobEF8e2';
-const supa=supabase.createClient(SUPA_URL,SUPA_KEY);
+const supa=supabase.createClient(SUPA_URL,SUPA_KEY,{
+  auth:{
+    detectSessionInUrl:true,
+    persistSession:true,
+    autoRefreshToken:true,
+    flowType:'implicit'
+  }
+});
 let currentUser=null;
 
 // URL 해시에서 구글 OAuth 토큰 처리
@@ -1434,7 +1441,7 @@ supa.auth.onAuthStateChange(async function(event,session){
 });
 
 async function loginWithGoogle(){
-  await supa.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin}});
+  await supa.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://popol-six.vercel.app'}});
 }
 
 async function loginWithEmail(){
