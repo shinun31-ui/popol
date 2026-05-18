@@ -269,7 +269,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 .upload-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .upload-header-title{font-size:18px;font-weight:600;color:var(--text);}
 
-#loginScreen{position:fixed;inset:0;background:#2C2C2A;z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;opacity:0;}
+#loginScreen{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;background:#2C2C2A;z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;opacity:0;}
 .login-box{width:100%;max-width:360px;margin:0 auto;}
 .login-logo{text-align:center;margin-bottom:2rem;display:flex;flex-direction:column;align-items:center;}
 .login-logo-icon{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;transition:all .6s cubic-bezier(.34,1.56,.64,1);}
@@ -358,7 +358,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 .add-dcard{border:0.5px dashed var(--border2);border-radius:var(--rlg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:200px;cursor:pointer;font-size:12px;color:var(--text3);}
 .add-dcard:hover{background:var(--bg2);}
 
-#portfolioHome{display:none;position:fixed;inset:0;background:#2C2C2A;z-index:9990;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+#portfolioHome{display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;background:#2C2C2A;z-index:9990;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
 .ph-logo{display:flex;align-items:center;gap:10px;margin-bottom:48px;}
 .ph-logo-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;}
 .ph-logo-word{font-size:18px;font-weight:600;letter-spacing:.2em;color:#F1EFE8;}
@@ -816,572 +816,18 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 <div class="toast" id="toast"></div>
 </div><!-- /appScreen -->
 
+
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <script>
-
-var LANG = {
-  ko: {
-    appSub: 'portfolio, simplified.',
-    navUpload: '간편 업로드',
-    navList: '리스트 →',
-    navAdd: '+ 추가',
-    filterYear: '전체 연도',
-    filterGenre: '전체 장르',
-    filterHnum: '전체 호수',
-    filterAll: '전체 상태',
-    filterAvail: '판매 가능',
-    filterSold: '판매 완료',
-    sortLabel: '정렬',
-    sortYearDesc: '연도 최신순',
-    sortYearAsc: '연도 오래된순',
-    sortHnumAsc: '호수 작은순',
-    sortHnumDesc: '호수 큰순',
-    sortTitleAsc: '제목 가나다순',
-    psAll: '전체',
-    selClear: '해제',
-    selAllBtn: '전체',
-    selListBtn: '리스트 만들기 →',
-    soldBadge: '판매 완료',
-    prevBtn: '미리보기',
-    addCardBtn: '추가',
-    addTitle: '새 작품 추가',
-    editTitle: '작품 수정',
-    fTitle: '제목',
-    fTitlePh: '작품 제목',
-    fYear: '연도',
-    fGenre: '장르',
-    fSize: '크기 (cm)',
-    fSizePh: '예: 53×45.5',
-    fMedium: '매체',
-    fMediumPh: '예: 캔버스에 아크릴',
-    fDesc: '작품 설명',
-    fDescPh: '작가 노트, 작품 배경 등...',
-    fAward: '수상 / 출판 이력',
-    fAwardPh: '예: 2024 서울 청년작가상',
-    fImage: '이미지',
-    fImagePh: '클릭해서 이미지 업로드',
-    soldToggle: '판매 완료',
-    soldToggleSub: '켜면 카드에 판매 완료 표시가 나타나요',
-    cancel: '취소',
-    save: '저장',
-    close: '닫기',
-    edit: '수정하기',
-    addToSel: '선택에 추가',
-    removeSel: '선택 해제',
-    artistTitle: '작가 정보',
-    artistName: '작가 이름',
-    artistNamePh: '홍길동',
-    artistPhone: '연락처',
-    artistPhonePh: '010-0000-0000',
-    artistEmail: '이메일',
-    artistEmailPh: 'artist@email.com',
-    previewTitle: '작품 리스트 미리보기',
-    previewNoArtist: '작가 이름 미설정',
-    previewEditInfo: '정보 편집',
-    exportTitle: '내보내기',
-    expCsvName: '엑셀 (CSV)',
-    expCsvDesc: '번호·제목·연도·장르·호수·매체·크기·판매여부',
-    expPdfName: 'PDF (A4)',
-    expPdfDesc: '깔끔한 표, 작가 헤더 포함',
-    expImgName: '이미지만',
-    expImgDesc: '작품 사진 개별 다운로드',
-    expTxtName: '캡션 텍스트',
-    expTxtDesc: '클립보드에 복사',
-    shareTitle: '공유',
-    shareSms: '문자',
-    shareMail: '메일',
-    shareCopy: '링크 복사',
-    uploadTitle: '간편 업로드',
-    uploadSub: '이미지나 CSV를 올리면 작품 정보를 자동으로 읽어와요.',
-    uploadDrop: '파일을 끌어다 놓거나 클릭해서 선택',
-    uploadDropSub: '파일명에서 제목·연도·재료·크기 자동 추출 / CSV 작품 목록 일괄 등록 · 여러 파일 동시 가능',
-    how1title: '파일명 자동 파싱', how1n: '방법 1 — 이미지', how1d: '제목_연도_재료_크기 순서로 저장하면 자동 인식해요.',
-    how2title: '목록 일괄 등록', how2n: '방법 2 — CSV', how2d: '엑셀을 CSV로 저장해서 올리면 컬럼 자동 매핑해요.',
-    how3title: '이미지 + CSV 매칭', how3n: '방법 3 — 함께', how3d: '둘 다 올리면 제목 기준으로 이미지를 자동 연결해요.',
-    reviewTitle: '인식 결과 확인',
-    reviewImport: '선택 항목 등록 →',
-    reviewSelAll: '전체 선택 / 해제',
-    reviewEdit: '수정 ✎',
-    reviewCollapse: '접기 ↑',
-    reviewNoTitle: '제목 없음',
-    reviewNoMed: '재료 미인식',
-    reviewNoSize: '크기 미인식',
-    reviewSrcImg: '이미지',
-    reviewSrcCsv: '엑셀',
-    toastSaved: '저장됐어요',
-    toastNoTitle: '제목을 입력해주세요',
-    toastCsv: 'CSV 파일 다운로드됐어요',
-    toastPdf: 'PDF 인쇄 창이 열렸어요',
-    toastNoImg: '업로드된 이미지가 없어요',
-    toastImgDl: '개 다운로드 중...',
-    toastTxt: '캡션 텍스트가 복사됐어요',
-    toastCopied: '복사됐어요',
-    toastImported: '개 작품이 추가됐어요',
-    toastNone: '선택된 항목이 없어요',
-    toastNoWork: '인식된 작품이 없어요',
-    toastAnalyzing: '파일 분석 중...',
-    toastAnalyzingSub: '제목·연도·재료·크기를 자동 추출하고 있어요',
-    goPortfolio: '포트폴리오 보기 →',
-    selCount: '개 선택됨',
-    soldLabel: '판매 완료',
-    availLabel: '판매 가능',
-    genres: ['회화','조각','사진','설치미술','판화','드로잉','디지털아트','혼합매체'],
-    efTitle: '제목', efYear: '연도', efGenre: '장르', efMed: '재료/매체', efSize: '크기',
-    expPortfolio: '포트폴리오',
-    hnUnknown: '호수 인식 불가',
-    totalWorks: '점',
-    selWorks: '개 작품 선택됨',
-    soldIncluded: '점 포함)',
-    soldCount: '판매 완료 ',
-    pdfSoldLabel: '판매 완료',
-    pdfWorkList: '작품 목록',
-  },
-  en: {
-    appSub: 'portfolio, simplified.',
-    navUpload: 'Quick Upload',
-    navList: 'List →',
-    navAdd: '+ Add',
-    filterYear: 'All Years',
-    filterGenre: 'All Genres',
-    filterHnum: 'All Sizes',
-    filterAll: 'All Status',
-    filterAvail: 'Available',
-    filterSold: 'Sold',
-    sortLabel: 'Sort',
-    sortYearDesc: 'Newest First',
-    sortYearAsc: 'Oldest First',
-    sortHnumAsc: 'Size: Small–Large',
-    sortHnumDesc: 'Size: Large–Small',
-    sortTitleAsc: 'Title A–Z',
-    psAll: 'All',
-    selClear: 'Clear',
-    selAllBtn: 'All',
-    selListBtn: 'Make List →',
-    soldBadge: 'Sold',
-    prevBtn: 'Preview',
-    addCardBtn: 'Add',
-    addTitle: 'Add New Work',
-    editTitle: 'Edit Work',
-    fTitle: 'Title',
-    fTitlePh: 'Work title',
-    fYear: 'Year',
-    fGenre: 'Genre',
-    fSize: 'Size (cm)',
-    fSizePh: 'e.g. 53×45.5',
-    fMedium: 'Medium',
-    fMediumPh: 'e.g. Acrylic on canvas',
-    fDesc: 'Description',
-    fDescPh: "Artist's note, background...",
-    fAward: 'Awards / Publications',
-    fAwardPh: 'e.g. 2024 Young Artist Award',
-    fImage: 'Image',
-    fImagePh: 'Click to upload image',
-    soldToggle: 'Mark as Sold',
-    soldToggleSub: 'Displays a sold badge on the card',
-    cancel: 'Cancel',
-    save: 'Save',
-    close: 'Close',
-    edit: 'Edit',
-    addToSel: 'Add to Selection',
-    removeSel: 'Remove',
-    artistTitle: 'Artist Info',
-    artistName: 'Name',
-    artistNamePh: 'Your name',
-    artistPhone: 'Phone',
-    artistPhonePh: '+82 10-0000-0000',
-    artistEmail: 'Email',
-    artistEmailPh: 'artist@email.com',
-    previewTitle: 'Preview List',
-    previewNoArtist: 'Artist name not set',
-    previewEditInfo: 'Edit Info',
-    exportTitle: 'Export',
-    expCsvName: 'Excel (CSV)',
-    expCsvDesc: 'No.·title·year·genre·size·medium·sold',
-    expPdfName: 'PDF (A4)',
-    expPdfDesc: 'Clean table with artist header',
-    expImgName: 'Images Only',
-    expImgDesc: 'Download artwork photos',
-    expTxtName: 'Caption Text',
-    expTxtDesc: 'Copy to clipboard',
-    shareTitle: 'Share',
-    shareSms: 'Text',
-    shareMail: 'Email',
-    shareCopy: 'Copy Link',
-    uploadTitle: 'Quick Upload',
-    uploadSub: 'Drop images or CSV files — artwork info is parsed automatically.',
-    uploadDrop: 'Drop files here or click to select',
-    uploadDropSub: 'Auto-extract title, year, medium & size from filenames / Bulk import from CSV',
-    how1title: 'Auto-parse filename', how1n: 'Method 1 — Images', how1d: "Save as title_year_medium_size and it's recognized automatically.",
-    how2title: 'Bulk import list', how2n: 'Method 2 — CSV', how2d: 'Upload your spreadsheet as CSV and columns are mapped automatically.',
-    how3title: 'Image + CSV match', how3n: 'Method 3 — Together', how3d: 'Upload both and images are matched to works by title.',
-    reviewTitle: 'Review Results',
-    reviewImport: 'Import Selected →',
-    reviewSelAll: 'Select / Deselect All',
-    reviewEdit: 'Edit ✎',
-    reviewCollapse: 'Collapse ↑',
-    reviewNoTitle: 'No title',
-    reviewNoMed: 'Medium not detected',
-    reviewNoSize: 'Size not detected',
-    reviewSrcImg: 'Image',
-    reviewSrcCsv: 'CSV',
-    toastSaved: 'Saved!',
-    toastNoTitle: 'Please enter a title',
-    toastCsv: 'CSV file downloaded',
-    toastPdf: 'Print dialog opened',
-    toastNoImg: 'No uploaded images found',
-    toastImgDl: ' images downloading...',
-    toastTxt: 'Caption text copied',
-    toastCopied: 'Copied!',
-    toastImported: ' works added',
-    toastNone: 'No items selected',
-    toastNoWork: 'No works detected',
-    toastAnalyzing: 'Analyzing files...',
-    toastAnalyzingSub: 'Extracting title, year, medium & size',
-    goPortfolio: 'View Portfolio →',
-    selCount: ' selected',
-    soldLabel: 'Sold',
-    availLabel: 'Available',
-    genres: ['Painting','Sculpture','Photography','Installation','Printmaking','Drawing','Digital Art','Mixed Media'],
-    efTitle: 'Title', efYear: 'Year', efGenre: 'Genre', efMed: 'Medium', efSize: 'Size',
-    expPortfolio: 'Portfolio',
-    hnUnknown: 'Size not recognized',
-    totalWorks: ' works',
-    selWorks: ' works selected',
-    soldIncluded: ' sold)',
-    soldCount: 'Sold: ',
-    pdfSoldLabel: 'Sold',
-    pdfWorkList: 'Works',
-  },
-  ja: {
-    appSub: 'portfolio, simplified.',
-    navUpload: '簡単アップ',
-    navList: 'リスト →',
-    navAdd: '+ 追加',
-    filterYear: '全ての年',
-    filterGenre: '全てのジャンル',
-    filterHnum: '全てのサイズ',
-    filterAll: '全ての状態',
-    filterAvail: '販売中',
-    filterSold: '売却済み',
-    sortLabel: '並び替え',
-    sortYearDesc: '新しい順',
-    sortYearAsc: '古い順',
-    sortHnumAsc: '号数：小→大',
-    sortHnumDesc: '号数：大→小',
-    sortTitleAsc: 'タイトル順',
-    psAll: '全て',
-    selClear: '解除',
-    selAllBtn: '全選択',
-    selListBtn: 'リスト作成 →',
-    soldBadge: '売却済み',
-    prevBtn: 'プレビュー',
-    addCardBtn: '追加',
-    addTitle: '作品を追加',
-    editTitle: '作品を編集',
-    fTitle: 'タイトル',
-    fTitlePh: '作品タイトル',
-    fYear: '制作年',
-    fGenre: 'ジャンル',
-    fSize: 'サイズ (cm)',
-    fSizePh: '例：53×45.5',
-    fMedium: '素材・技法',
-    fMediumPh: '例：キャンバスにアクリル',
-    fDesc: '作品説明',
-    fDescPh: 'アーティストノート、制作背景など...',
-    fAward: '受賞・出版歴',
-    fAwardPh: '例：2024年 新人アーティスト賞',
-    fImage: '画像',
-    fImagePh: 'クリックして画像をアップロード',
-    soldToggle: '売却済みにする',
-    soldToggleSub: 'カードに売却済みバッジが表示されます',
-    cancel: 'キャンセル',
-    save: '保存',
-    close: '閉じる',
-    edit: '編集',
-    addToSel: '選択に追加',
-    removeSel: '選択解除',
-    artistTitle: 'アーティスト情報',
-    artistName: '氏名',
-    artistNamePh: '山田 太郎',
-    artistPhone: '電話番号',
-    artistPhonePh: '090-0000-0000',
-    artistEmail: 'メール',
-    artistEmailPh: 'artist@email.com',
-    previewTitle: '作品リストのプレビュー',
-    previewNoArtist: 'アーティスト名未設定',
-    previewEditInfo: '情報を編集',
-    exportTitle: 'エクスポート',
-    expCsvName: 'Excel (CSV)',
-    expCsvDesc: '番号・タイトル・年・ジャンル・素材・サイズ',
-    expPdfName: 'PDF (A4)',
-    expPdfDesc: 'アーティスト情報付きの一覧表',
-    expImgName: '画像のみ',
-    expImgDesc: '作品画像を個別にダウンロード',
-    expTxtName: 'キャプションテキスト',
-    expTxtDesc: 'クリップボードにコピー',
-    shareTitle: 'シェア',
-    shareSms: 'SMS',
-    shareMail: 'メール',
-    shareCopy: 'リンクをコピー',
-    uploadTitle: '簡単アップロード',
-    uploadSub: '画像やCSVをアップロードすると、作品情報を自動で読み取ります。',
-    uploadDrop: 'ここにファイルをドロップ、またはクリックして選択',
-    uploadDropSub: 'ファイル名からタイトル・年・素材・サイズを自動抽出 / CSVで一括登録',
-    how1title: 'ファイル名を自動解析', how1n: '方法 1 — 画像', how1d: 'タイトル_年_素材_サイズの形式で保存すると自動認識します。',
-    how2title: 'リストを一括登録', how2n: '方法 2 — CSV', how2d: 'ExcelをCSV形式で保存してアップロードすると、列が自動マッピングされます。',
-    how3title: '画像とCSVを照合', how3n: '方法 3 — 組み合わせ', how3d: '両方アップロードすると、タイトルを基準に画像が自動的に紐付けられます。',
-    reviewTitle: '認識結果の確認',
-    reviewImport: '選択した項目を登録 →',
-    reviewSelAll: '全て選択 / 解除',
-    reviewEdit: '編集 ✎',
-    reviewCollapse: '折りたたむ ↑',
-    reviewNoTitle: 'タイトルなし',
-    reviewNoMed: '素材が認識できません',
-    reviewNoSize: 'サイズが認識できません',
-    reviewSrcImg: '画像',
-    reviewSrcCsv: 'CSV',
-    toastSaved: '保存しました',
-    toastNoTitle: 'タイトルを入力してください',
-    toastCsv: 'CSVファイルをダウンロードしました',
-    toastPdf: '印刷ダイアログを開きました',
-    toastNoImg: 'アップロードされた画像がありません',
-    toastImgDl: '枚をダウンロード中...',
-    toastTxt: 'キャプションをコピーしました',
-    toastCopied: 'コピーしました',
-    toastImported: '点の作品を追加しました',
-    toastNone: '選択された項目がありません',
-    toastNoWork: '作品が認識されませんでした',
-    toastAnalyzing: 'ファイルを解析中...',
-    toastAnalyzingSub: 'タイトル・年・素材・サイズを抽出しています',
-    goPortfolio: 'ポートフォリオを見る →',
-    selCount: '件選択中',
-    soldLabel: '売却済み',
-    availLabel: '販売中',
-    genres: ['絵画','彫刻','写真','インスタレーション','版画','ドローイング','デジタルアート','ミクストメディア'],
-    efTitle: 'タイトル', efYear: '制作年', efGenre: 'ジャンル', efMed: '素材・技法', efSize: 'サイズ',
-    expPortfolio: 'ポートフォリオ',
-    hnUnknown: 'サイズ不明',
-    totalWorks: '点',
-    selWorks: '点選択中',
-    soldIncluded: '点含む)',
-    soldCount: '売却済み：',
-    pdfSoldLabel: '売却済み',
-    pdfWorkList: '作品一覧',
-  }
-};
-
-var curLang = localStorage.getItem('popol_lang') || 'ko';
-function t(key){ return (LANG[curLang] && LANG[curLang][key]) || LANG['ko'][key] || key; }
-
-function applyLang() {
-  var l = curLang;
-  function set(id,val){var el=document.getElementById(id);if(el)el.textContent=val;}
-  function setph(id,val){var el=document.getElementById(id);if(el)el.placeholder=val;}
-  // nav
-  set('navUpload',t('navUpload'));set('navList',t('navList'));set('navAdd',t('navAdd'));
-  // lang btn
-  set('langBtnLabel',l==='ko'?'한국어':l==='en'?'English':'日本語');
-  // search
-  setph('fQ',l==='ko'?'작품 검색...':l==='en'?'Search works...':'作品を検索...');
-  // fSold
-  var fs=document.getElementById('fSold');
-  if(fs&&fs.options.length>=3){fs.options[0].text=t('filterAll');fs.options[1].text=t('filterAvail');fs.options[2].text=t('filterSold');}
-  // sort
-  var sb=document.getElementById('sortBy');
-  if(sb&&sb.options.length>=5){sb.options[0].text=t('sortYearDesc');sb.options[1].text=t('sortYearAsc');sb.options[2].text=t('sortHnumAsc');sb.options[3].text=t('sortHnumDesc');sb.options[4].text=t('sortTitleAsc');}
-  // ps-btns
-  var psa=document.querySelector('.psb[data-n="9999"]');if(psa)psa.textContent=t('psAll');
-  // selbar buttons
-  set('selClearBtn',t('selClear'));set('selAllBtn2',t('selAllBtn'));
-  // add modal
-  set('lbTitle',t('fTitle'));setph('fTitle',t('fTitlePh'));
-  set('lbYear',t('fYear'));
-  set('lbGenre',t('fGenre'));
-  set('lbSize',t('fSize'));setph('fSize',t('fSizePh'));
-  set('lbMedium',t('fMedium'));setph('fMedium',t('fMediumPh'));
-  set('lbDesc',t('fDesc'));setph('fDesc',t('fDescPh'));
-  set('lbAward',t('fAward'));setph('fAward',t('fAwardPh'));
-  set('lbImage',t('fImage'));
-  set('dropZoneText',t('fImagePh'));
-  set('soldToggleLbl',t('soldToggle'));set('soldToggleSub',t('soldToggleSub'));
-  set('btnCancel1',t('cancel'));set('btnSave1',t('save'));
-  // genre select in add modal
-  var fg2=document.getElementById('fGenre2');
-  if(fg2){var genres=t('genres');for(var i=0;i<fg2.options.length&&i<genres.length;i++){fg2.options[i].text=genres[i];}}
-  // artist modal
-  set('artistModalTitle',t('artistTitle'));
-  set('lbArtistName',t('artistName'));setph('aName',t('artistNamePh'));
-  set('lbArtistPhone',t('artistPhone'));setph('aPhone',t('artistPhonePh'));
-  set('lbArtistEmail',t('artistEmail'));setph('aEmail',t('artistEmailPh'));
-  set('btnCancelArtist',t('cancel'));set('btnSaveArtist',t('save'));
-  // preview panel
-  set('prevPanelTitle',t('previewTitle'));
-  set('btnEditArtist',t('previewEditInfo'));
-  set('expSectionTitle',t('exportTitle'));set('shareSectionTitle',t('shareTitle'));
-  set('expCsvName',t('expCsvName'));set('expCsvDesc',t('expCsvDesc'));
-  set('expPdfName',t('expPdfName'));set('expPdfDesc',t('expPdfDesc'));
-  set('expImgName',t('expImgName'));set('expImgDesc',t('expImgDesc'));
-  set('expTxtName',t('expTxtName'));set('expTxtDesc',t('expTxtDesc'));
-  // share buttons (keep icon, replace text node)
-  set('btnSmsText',t('shareSms'));
-  set('btnMailText',t('shareMail'));
-  set('btnCopyText',t('shareCopy'));
-  set('btnClosePrev',t('close'));
-  // review modal
-  set('reviewModalTitle',t('reviewTitle'));
-  set('btnImportSel',t('reviewImport'));set('btnCancelReview',t('cancel'));
-  // upload section
-  set('uploadTitle',t('uploadTitle'));set('uploadSubTitle',t('uploadSub'));
-  set('uzTitle',t('uploadDrop'));
-  set('how1n',t('how1n'));set('how1t',t('how1title'));set('how1d',t('how1d'));
-  set('how2n',t('how2n'));set('how2t',t('how2title'));set('how2d',t('how2d'));
-  set('how3n',t('how3n'));set('how3t',t('how3title'));set('how3d',t('how3d'));
-  // pArtistName default
-  var pan=document.getElementById('pArtistName');
-  if(pan&&(pan.textContent===t('previewNoArtist')||pan.textContent==='작가 이름 미설정'||pan.textContent==='Artist name not set'||pan.textContent==='アーティスト名未設定'))pan.textContent=t('previewNoArtist');
-  // re-render
-  render();
-}
-
-function setLang(l) {
-  curLang = l;
-  localStorage.setItem('popol_lang', l);
-  document.getElementById('langMenu').classList.add('hide');
-  applyLang();
-}
-
-function toggleLangMenu() {
-  document.getElementById('langMenu').classList.toggle('hide');
-}
-
-// close menu on outside click
-document.addEventListener('click', function(e){
-  var menu = document.getElementById('langMenu');
-  var btn = document.getElementById('langBtn');
-  if(menu && btn && !menu.contains(e.target) && !btn.contains(e.target)){
-    menu.classList.add('hide');
-  }
-});
-
-
-var showPrice = true;
-var selCur = 'KRW';
-var rates = {KRW:1, USD:0, EUR:0, JPY:0, CNY:0};
-var ratesLoaded = false;
-
-function fmtKRW(won) {
-  if(!won) return '';
-  return won.toLocaleString()+'원';
-}
-
-function fmtPrice(won, cur) {
-  if(!won) return '';
-  if(cur === 'KRW') return won.toLocaleString()+'원';
-  var rate = rates[cur];
-  if(!rate) return won.toLocaleString()+'원';
-  var converted = won * rate;
-  var sym = {USD:'$', EUR:'€', JPY:'¥', CNY:'¥'}[cur]||'';
-  var name = {USD:'USD', EUR:'EUR', JPY:'JPY', CNY:'CNY'}[cur]||cur;
-  if(cur==='JPY') return sym+Math.round(converted).toLocaleString()+' '+name;
-  return sym+converted.toFixed(2)+' '+name;
-}
-
-async function fetchRates() {
-  try {
-    var res = await fetch('https://open.er-api.com/v6/latest/KRW');
-    var data = await res.json();
-    if(data && data.rates) {
-      rates.USD = data.rates.USD || 0;
-      rates.EUR = data.rates.EUR || 0;
-      rates.JPY = data.rates.JPY || 0;
-      rates.CNY = data.rates.CNY || 0;
-      ratesLoaded = true;
-      updateRateInfo();
-    }
-  } catch(e) {
-    // fallback rates (approximate)
-    rates.USD = 0.000735;
-    rates.EUR = 0.000675;
-    rates.JPY = 0.108;
-    rates.CNY = 0.00533;
-    ratesLoaded = true;
-    updateRateInfo();
-  }
-}
-
-function updateRateInfo() {
-  var el = document.getElementById('rateInfo');
-  if(!el) return;
-  if(!ratesLoaded) { el.textContent = '환율 불러오는 중...'; return; }
-  if(selCur === 'KRW') { el.textContent = ''; return; }
-  var sym = {USD:'$',EUR:'€',JPY:'¥',CNY:'¥'}[selCur]||'';
-  var r = rates[selCur];
-  if(!r) { el.textContent = '환율 정보 없음'; return; }
-  var per10k = (10000 * r);
-  var disp = selCur==='JPY' ? Math.round(per10k).toLocaleString() : per10k.toFixed(2);
-  el.textContent = '현재 환율: ₩10,000 = '+sym+disp+' (실시간)';
-}
-
-function setCur(cur) {
-  selCur = cur;
-  document.querySelectorAll('.cur-btn').forEach(function(b){
-    b.classList.toggle('on', b.dataset.cur === cur);
-  });
-  updateRateInfo();
-  refreshPreviewList();
-}
-
-function togglePriceShow() {
-  showPrice = !showPrice;
-  document.getElementById('priceToggle').classList.toggle('on', showPrice);
-  document.getElementById('currencyPicker').style.display = showPrice ? '' : 'none';
-  refreshPreviewList();
-}
-
-function refreshPreviewList() {
-  var ids = selSizeForPreview;
-  if(!ids) return;
-  renderPreviewList(ids);
-}
-
-var selSizeForPreview = null;
-
-function renderPreviewList(ids) {
-  selSizeForPreview = ids;
-  var tw = sortW(works.filter(function(w){return ids.indexOf(w.id)>=0;}));
-  var sc = tw.filter(function(w){return w.sold;}).length;
-  var scMsg = sc>0?' ('+t('soldCount')+sc+t('soldIncluded'):''; document.getElementById('prevSub').textContent = tw.length+t('selWorks')+scMsg;
-  document.getElementById('pList').innerHTML = tw.map(function(w, i){
-    var h = getHN(w);
-    var priceStr = (showPrice && w.price) ? fmtPrice(w.price, selCur) : '';
-    var ph = '<div style="width:46px;height:46px;border-radius:7px;background:'+w.c[0]+';display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 16 16" fill="'+w.c[1]+'" opacity=".5"><rect width="16" height="16" rx="2"/><circle cx="5" cy="5" r="2"/><path d="M0 12l3-4 2 3 3-3 5 4H0z"/></svg></div>';
-    return '<div class="pitem'+(w.sold?' psold':'')+'">'+(w.sold?'<div class="psoldb"></div>':'')+'<div class="pnum">'+(i+1)+'</div><div class="pthumb">'+(w.img?'<img src="'+w.img+'"/>':ph)+'</div><div class="pinfo"><div class="ptrow">'+w.title+(h?'<span class="phn">'+h+'</span>':'')+(priceStr?'<span style="font-size:9px;padding:1px 6px;border-radius:20px;background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97;font-weight:500;">'+priceStr+'</span>':'')+(w.sold?'<span class="pstag">'+t('soldBadge')+'</span>':'')+'</div><div class="pmeta">'+w.year+' · '+w.genre+(w.medium?' · '+w.medium:'')+(w.size?' · '+w.size:'')+'</div><div class="pdesc">'+w.desc+'</div></div></div>';
-  }).join('');
-}
-
-function updatePricePreview() {
-  var val = parseInt(document.getElementById('fPrice').value);
-  var el = document.getElementById('pricePreview');
-  if(!val || val <= 0) { el.textContent = ''; return; }
-  var parts = [fmtKRW(val)];
-  if(ratesLoaded) {
-    if(rates.USD) parts.push('$'+(val*rates.USD).toFixed(2)+' USD');
-    if(rates.EUR) parts.push('€'+(val*rates.EUR).toFixed(2)+' EUR');
-    if(rates.JPY) parts.push('¥'+Math.round(val*rates.JPY)+' JPY');
-  }
-  el.textContent = parts.join('  ·  ');
-  el.style.color = 'var(--text2)';
-}
-
-
-const SUPA_URL='https://jriljajqtseoedeqlxag.supabase.co';
-const SUPA_KEY='sb_publishable_NoBKTQlRsF7F_3V6OwWvWw_xobEF8e2';
-const supa=supabase.createClient(SUPA_URL,SUPA_KEY);
+// ============================================================
+// SUPABASE
+// ============================================================
+const _surl='https://jriljajqtseoedeqlxag.supabase.co';
+const _skey='sb_publishable_NoBKTQlRsF7F_3V6OwWvWw_xobEF8e2';
+const supa=supabase.createClient(_surl,_skey);
 let currentUser=null;
 
-// OAuth 토큰은 Supabase SDK가 자동 처리
-
-// 인증 상태 감지
 supa.auth.onAuthStateChange(async function(event,session){
   currentUser=session?session.user:null;
   var loginEl=document.getElementById('loginScreen');
@@ -1389,35 +835,27 @@ supa.auth.onAuthStateChange(async function(event,session){
   var navEl=document.getElementById('mainNav');
   var homeEl=document.getElementById('portfolioHome');
   var splashEl=document.getElementById('splash');
+  var splashActive=splashEl&&splashEl.style.display!=='none'&&splashEl.style.opacity!=='0';
 
   function showHome(){
+    if(splashEl)splashEl.style.display='none';
     if(loginEl)loginEl.style.display='none';
     if(appEl)appEl.style.display='none';
     if(navEl)navEl.style.display='none';
-    if(splashEl)splashEl.style.display='none';
     if(homeEl){homeEl.style.display='flex';homeEl.style.opacity='1';}
+    window.history.replaceState(null,'',window.location.pathname);
   }
-
   function showLogin(){
+    if(splashEl)splashEl.style.display='none';
     if(homeEl)homeEl.style.display='none';
     if(appEl)appEl.style.display='none';
     if(navEl)navEl.style.display='none';
-    if(splashEl)splashEl.style.display='none';
     if(loginEl){loginEl.style.display='flex';loginEl.style.opacity='1';}
   }
 
   if(currentUser){
-    var splashVisible = splashEl && splashEl.style.display !== 'none' && parseFloat(splashEl.style.opacity||'1') > 0;
-    var hasToken = window.location.hash && window.location.hash.includes('access_token');
-    // 토큰 있거나 스플래시 없으면 바로 홈 표시
-    if(!splashVisible || hasToken){
-      showHome();
-      // URL 해시 제거
-      if(hasToken) window.history.replaceState(null,'',window.location.pathname);
-    } else {
-      // 스플래시 중이면 스플래시 끝난 후 처리됨
-      if(homeEl)homeEl.style.display='flex';
-    }
+    if(!splashActive)showHome();
+    else homeEl&&(homeEl.style.display='flex');
     var em=document.getElementById('userEmail');
     if(em)em.textContent=currentUser.user_metadata&&currentUser.user_metadata.full_name?currentUser.user_metadata.full_name:(currentUser.email||'');
     await loadProfileFromDB();
@@ -1426,18 +864,16 @@ supa.auth.onAuthStateChange(async function(event,session){
       await saveProfileToDB();
     }
     var pg=document.getElementById('phGreeting');
-    if(pg&&artist.name)pg.textContent=artist.name+'님, 어떤 포트폴리오를 볼까요?';
+    if(pg)pg.textContent=(artist.name?artist.name+'님, ':'')+'어떤 포트폴리오를 볼까요?';
     await loadWorksFromDB();
   }else{
-    var splashVisible2 = splashEl && splashEl.style.display !== 'none' && parseFloat(splashEl.style.opacity||'1') > 0;
-    if(!splashVisible2) showLogin();
+    if(!splashActive)showLogin();
   }
 });
 
 async function loginWithGoogle(){
   await supa.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://popol-six.vercel.app'}});
 }
-
 async function loginWithEmail(){
   var email=document.getElementById('loginEmail').value.trim();
   var pw=document.getElementById('loginPassword').value;
@@ -1446,86 +882,20 @@ async function loginWithEmail(){
   if(!email||!pw){errEl.textContent='이메일과 비밀번호를 입력해주세요';return;}
   var btn=document.getElementById('loginEmailBtn');
   btn.textContent='로그인 중...';btn.disabled=true;
-  var res=await supa.auth.signInWithPassword({email:email,password:pw});
-  if(res.error){
-    errEl.textContent=res.error.message==='Invalid login credentials'?'이메일 또는 비밀번호가 틀렸어요':res.error.message;
-    btn.textContent='로그인';btn.disabled=false;
-  }
+  var res=await supa.auth.signInWithPassword({email,password:pw});
+  if(res.error){errEl.textContent=res.error.message==='Invalid login credentials'?'이메일 또는 비밀번호가 틀렸어요':res.error.message;btn.textContent='로그인';btn.disabled=false;}
 }
-
-var signupMode = false;
-
-var editMode = false;
-
-var portfolioType = 'artist';
-
-function enterPortfolio(type) {
-  portfolioType = type;
-  // 홈 화면 숨기기
-  var home = document.getElementById('portfolioHome');
-  if(home) home.style.display = 'none';
-  // 앱 화면 표시
-  var appEl = document.getElementById('appScreen');
-  var navEl = document.getElementById('mainNav');
-  if(appEl) appEl.style.display = '';
-  if(navEl) navEl.style.display = 'flex';
-  // 뒤로가기 버튼 표시
-  var backBtn = document.getElementById('navBack');
-  if(backBtn) backBtn.style.display = 'flex';
-  // 포트폴리오 타입에 따라 필터바 표시
-  var filterBar = document.querySelector('.filter-bar');
-  if(filterBar) filterBar.style.display = type === 'artist' ? '' : 'none';
-  var editBar = document.getElementById('editBar');
-  if(editBar) editBar.style.display = 'none';
-  render();
-}
-
-function goPortfolioHome() {
-  // 앱 화면 숨기고 홈으로
-  var appEl = document.getElementById('appScreen');
-  var navEl = document.getElementById('mainNav');
-  var home = document.getElementById('portfolioHome');
-  if(appEl) appEl.style.display = 'none';
-  if(navEl) navEl.style.display = 'none';
-  if(home) home.style.display = 'flex';
-  editMode = false;
-  sel.clear();
-}
-
-function switchPortfolio(type) {
-  portfolioType = type;
-  var filterBar = document.querySelector('.filter-bar');
-  if(filterBar) filterBar.style.display = type === 'artist' ? '' : 'none';
-  render();
-}
-
-var dragSrcId = null;
-
-
+var signupMode=false;
 function toggleSignupMode(){
-  signupMode = !signupMode;
-  var nameEl = document.getElementById('loginArtistName');
-  var label = document.getElementById('loginCardLabel');
-  var loginBtn = document.getElementById('loginEmailBtn');
-  var signupBtn = document.getElementById('signupBtn');
-  if(signupMode){
-    nameEl.style.display = '';
-    label.textContent = '새 계정 만들기';
-    loginBtn.textContent = '가입 완료';
-    loginBtn.onclick = signupWithEmail;
-    signupBtn.textContent = '로그인으로';
-    signupBtn.onclick = toggleSignupMode;
-  } else {
-    nameEl.style.display = 'none';
-    label.textContent = '이메일로 계속하기';
-    loginBtn.textContent = '로그인';
-    loginBtn.onclick = loginWithEmail;
-    signupBtn.textContent = '회원가입';
-    signupBtn.onclick = toggleSignupMode;
-  }
-  document.getElementById('loginError').textContent = '';
+  signupMode=!signupMode;
+  var nameEl=document.getElementById('loginArtistName');
+  var label=document.getElementById('loginCardLabel');
+  var loginBtn=document.getElementById('loginEmailBtn');
+  var signupBtn=document.getElementById('signupBtn');
+  if(signupMode){nameEl.style.display='';label.textContent='새 계정 만들기';loginBtn.textContent='가입 완료';loginBtn.onclick=signupWithEmail;signupBtn.textContent='로그인으로';signupBtn.onclick=toggleSignupMode;}
+  else{nameEl.style.display='none';label.textContent='이메일로 계속하기';loginBtn.textContent='로그인';loginBtn.onclick=loginWithEmail;signupBtn.textContent='회원가입';signupBtn.onclick=toggleSignupMode;}
+  document.getElementById('loginError').textContent='';
 }
-
 async function signupWithEmail(){
   var artistName=document.getElementById('loginArtistName').value.trim();
   var email=document.getElementById('loginEmail').value.trim();
@@ -1537,70 +907,35 @@ async function signupWithEmail(){
   if(pw.length<6){errEl.textContent='비밀번호는 6자 이상이어야 해요';return;}
   var btn=document.getElementById('loginEmailBtn');
   btn.textContent='가입 중...';btn.disabled=true;
-  var res=await supa.auth.signUp({email:email,password:pw,options:{data:{full_name:artistName}}});
-  if(res.error){
-    errEl.textContent=res.error.message;
-    btn.textContent='가입 완료';btn.disabled=false;
-  } else {
-    // 가입 성공 → 프로필에 작가 이름 저장
-    artist.name = artistName;
-    if(res.data && res.data.user){
-      await supa.from('profiles').upsert({
-        id: res.data.user.id,
-        artist_name: artistName,
-        email: email,
-        updated_at: new Date().toISOString()
-      });
-    }
-    errEl.style.color='#9FE1CB';
-    errEl.textContent='가입 완료! 로그인되었어요';
-  }
+  var res=await supa.auth.signUp({email,password:pw,options:{data:{full_name:artistName}}});
+  if(res.error){errEl.textContent=res.error.message;btn.textContent='가입 완료';btn.disabled=false;}
+  else{artist.name=artistName;if(res.data&&res.data.user)await supa.from('profiles').upsert({id:res.data.user.id,artist_name:artistName,email,updated_at:new Date().toISOString()});errEl.style.color='#9FE1CB';errEl.textContent='가입 완료!';}
 }
-
 function logout(){
-  // signOut 먼저 시도 (실패해도 화면 전환)
-  try { supa.auth.signOut(); } catch(e) {}
-  currentUser = null;
-  works=[];
-  artist={name:'',phone:'',email:''};
-  sel.clear();
+  try{supa.auth.signOut();}catch(e){}
+  currentUser=null;works=[];artist={name:'',phone:'',email:''};sel.clear();
   var appEl=document.getElementById('appScreen');
   var navEl=document.getElementById('mainNav');
+  var homeEl=document.getElementById('portfolioHome');
   var loginEl=document.getElementById('loginScreen');
-  if(appEl) appEl.style.display='none';
-  if(navEl) navEl.style.display='none';
-  if(loginEl){
-    loginEl.style.opacity='1';
-    loginEl.style.display='flex';
-    var box=loginEl.querySelector('.login-box');
-    if(box){
-      box.classList.remove('login-item-ready');
-      setTimeout(function(){box.classList.add('login-item-ready');},50);
-    }
-  }
+  if(appEl)appEl.style.display='none';
+  if(navEl)navEl.style.display='none';
+  if(homeEl)homeEl.style.display='none';
+  if(loginEl){loginEl.style.display='flex';loginEl.style.opacity='1';}
 }
 
 async function loadWorksFromDB(){
   var res=await supa.from('works').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false});
   if(res.error){console.error('로드 오류:',res.error);return;}
-  works=(res.data||[]).map(function(w){
-    return{id:w.id,title:w.title||'',year:w.year||new Date().getFullYear(),genre:w.genre||'회화',medium:w.medium||'',size:w.size||'',desc:w.description||'',award:w.award||'',price:w.price||0,sold:w.sold||false,img:w.img_url||null,c:[w.color_bg||PAL[0][0],w.color_fg||PAL[0][1]],dbId:w.id,portfolio_type:w.portfolio_type||'artist',project_client:w.project_client||'',project_link:w.project_link||'',project_duration:w.project_duration||''};
-  });
+  works=(res.data||[]).map(function(w){return{id:w.id,title:w.title||'',year:w.year||new Date().getFullYear(),genre:w.genre||'회화',medium:w.medium||'',size:w.size||'',desc:w.description||'',award:w.award||'',price:w.price||0,sold:w.sold||false,img:w.img_url||null,c:[w.color_bg||PAL[0][0],w.color_fg||PAL[0][1]],dbId:w.id,portfolio_type:w.portfolio_type||'artist',project_client:w.project_client||'',project_link:w.project_link||'',project_duration:w.project_duration||''};});
   render();
 }
-
 async function saveWorkToDB(data,isEdit,dbId){
-  var row={user_id:currentUser.id,title:data.title,year:data.year,genre:data.genre,medium:data.medium,size:data.size,description:data.desc,award:data.award,price:data.price||0,sold:data.sold,img_url:data.img||null,color_bg:data.c?data.c[0]:PAL[0][0],color_fg:data.c?data.c[1]:PAL[0][1],updated_at:new Date().toISOString()};
-  if(isEdit&&dbId){
-    var res=await supa.from('works').update(row).eq('id',dbId);
-    if(res.error){showToast('저장 실패: '+res.error.message);return false;}
-  }else{
-    var res2=await supa.from('works').insert(row).select().single();
-    if(res2.error){showToast('저장 실패: '+res2.error.message);return false;}
-  }
+  var row={user_id:currentUser.id,title:data.title,year:data.year,genre:data.genre,medium:data.medium,size:data.size,description:data.desc,award:data.award,price:data.price||0,sold:data.sold,img_url:data.img||null,color_bg:data.c?data.c[0]:PAL[0][0],color_fg:data.c?data.c[1]:PAL[0][1],sort_order:data.sort_order||0,portfolio_type:data.portfolio_type||'artist',project_client:data.project_client||null,project_link:data.project_link||null,project_duration:data.project_duration||null,updated_at:new Date().toISOString()};
+  if(isEdit&&dbId){var res=await supa.from('works').update(row).eq('id',dbId);if(res.error){showToast('저장 실패: '+res.error.message);return false;}}
+  else{var res2=await supa.from('works').insert(row).select().single();if(res2.error){showToast('저장 실패: '+res2.error.message);return false;}}
   return true;
 }
-
 async function uploadImageToDB(file){
   var ext=file.name.split('.').pop();
   var path=currentUser.id+'/'+Date.now()+'.'+ext;
@@ -1608,409 +943,184 @@ async function uploadImageToDB(file){
   if(res.error){console.error('이미지 업로드 오류:',res.error);return null;}
   return supa.storage.from('artwork-images').getPublicUrl(path).data.publicUrl;
 }
-
 async function loadProfileFromDB(){
   var res=await supa.from('profiles').select('*').eq('id',currentUser.id).single();
   if(res.data){artist.name=res.data.artist_name||'';artist.phone=res.data.phone||'';artist.email=res.data.email||'';}
-  var pg=document.getElementById('phGreeting');
-  if(pg&&artist.name)pg.textContent=artist.name+'님, 어떤 포트폴리오를 볼까요?';
 }
-
 async function saveProfileToDB(){
   await supa.from('profiles').upsert({id:currentUser.id,artist_name:artist.name,phone:artist.phone,email:artist.email,updated_at:new Date().toISOString()});
 }
 
+// ============================================================
+// PALETTE & DATA
+// ============================================================
 const PAL=[['#B5D4F4','#185FA5'],['#9FE1CB','#0F6E56'],['#CECBF6','#534AB7'],['#F5C4B3','#993C1D'],['#C0DD97','#3B6D11'],['#FAC775','#854F0B']];
 const GENRES=['회화','조각','사진','설치미술','판화','드로잉','디지털아트','혼합매체'];
-const MEDS=[
-  {k:'유화',e:['oil','oil paint','oil on canvas','유채'],c:'유화 (Oil)'},
-  {k:'아크릴',e:['acrylic','acryl','acrylic on canvas','아크릴릭'],c:'아크릴 (Acrylic)'},
-  {k:'수채',e:['watercolor','watercolour','water color'],c:'수채 (Watercolor)'},
-  {k:'과슈',e:['gouache','과슈','구아슈'],c:'과슈 (Gouache)'},
-  {k:'혼합매체',e:['mixed media','mix media','mixed','혼합','믹스미디어'],c:'혼합매체 (Mixed Media)'},
-  {k:'드로잉',e:['drawing','pencil','pen','ink','charcoal','pastel','드로잉','연필'],c:'드로잉'},
-  {k:'판화',e:['print','etching','lithograph','woodcut','목판','에칭'],c:'판화'},
-  {k:'사진',e:['photo','photograph','photography','사진'],c:'사진'},
-  {k:'설치',e:['installation','install','설치'],c:'설치미술'},
-  {k:'디지털',e:['digital','digital art','디지털'],c:'디지털아트'},
-  {k:'조각',e:['sculpture','ceramic','bronze','조각','도예'],c:'조각'},
-  {k:'콜라주',e:['collage','콜라주'],c:'콜라주 (Collage)'},
-  {k:'오일파스텔',e:['oil pastel','오일파스텔'],c:'오일파스텔'},
-];
-const HT=[{n:0,F:[18,14],S:[18,12],P:[18,10]},{n:1,F:[22,16],S:[22,14],P:[22,12]},{n:2,F:[24,19],S:[24,16],P:[24,14]},{n:3,F:[27.3,22],S:[27.3,19],P:[27.3,16]},{n:4,F:[33.4,24.2],S:[33.4,21.2],P:[33.4,18.2]},{n:5,F:[35,27],S:[35,24],P:[35,22]},{n:6,F:[40.9,31.8],S:[40.9,27.3],P:[40.9,24.2]},{n:8,F:[45.5,38],S:[45.5,33.4],P:[45.5,27.3]},{n:10,F:[53,45.5],S:[53,40.9],P:[53,33.4]},{n:12,F:[60.6,50],S:[60.6,45.5],P:[60.6,40.9]},{n:15,F:[65.2,53],S:[65.2,50],P:[65.2,45.5]},{n:20,F:[72.7,60.6],S:[72.7,53],P:[72.7,45.5]},{n:25,F:[80.3,65.2],S:[80.3,60.6],P:[80.3,53]},{n:30,F:[90.9,72.7],S:[90.9,65.2],P:[90.9,60.6]},{n:40,F:[100,80.3],S:[100,72.7],P:[100,65.2]},{n:50,F:[116.7,90.9],S:[116.7,80.3],P:[116.7,72.7]},{n:60,F:[130.3,97],S:[130.3,89.4],P:[130.3,80.3]},{n:80,F:[145.5,112.1],S:[145.5,97],P:[145.5,89.4]},{n:100,F:[162.2,130.3],S:[162.2,112.1],P:[162.2,97]},{n:120,F:[193.9,130.3],S:[193.9,112.1],P:[193.9,97]},{n:150,F:[227.3,181.8],S:[227.3,162.2],P:[227.3,145.5]},
-  {n:200,F:[259.1,193.9],S:[259.1,181.8],P:[259.1,162.2]},
-  {n:300,F:[290.9,218.2],S:[290.9,197.0],P:[290.9,181.8]},
-  {n:400,F:[333.4,248.5],S:[333.4,227.3],P:[333.4,209.1]},
-  {n:500,F:[363.6,259.1],S:[363.6,245.5],P:[363.6,227.3]}];
+const MEDS=[{k:'유화',e:['oil','oil paint','유채'],c:'유화 (Oil)'},{k:'아크릴',e:['acrylic','acryl','아크릴릭'],c:'아크릴 (Acrylic)'},{k:'수채',e:['watercolor','watercolour'],c:'수채 (Watercolor)'},{k:'혼합매체',e:['mixed media','혼합'],c:'혼합매체 (Mixed Media)'},{k:'드로잉',e:['drawing','pencil','pen','연필'],c:'드로잉'},{k:'판화',e:['print','etching','목판'],c:'판화'},{k:'사진',e:['photo','photograph','사진'],c:'사진'},{k:'설치',e:['installation','설치'],c:'설치미술'},{k:'디지털',e:['digital','디지털'],c:'디지털아트'},{k:'조각',e:['sculpture','ceramic','조각'],c:'조각'}];
+const HT=[{n:0,F:[18,14],S:[18,12],P:[18,10]},{n:1,F:[22,16],S:[22,14],P:[22,12]},{n:2,F:[24,19],S:[24,16],P:[24,14]},{n:3,F:[27.3,22],S:[27.3,19],P:[27.3,16]},{n:4,F:[33.4,24.2],S:[33.4,21.2],P:[33.4,18.2]},{n:5,F:[35,27],S:[35,24],P:[35,22]},{n:6,F:[40.9,31.8],S:[40.9,27.3],P:[40.9,24.2]},{n:8,F:[45.5,38],S:[45.5,33.4],P:[45.5,27.3]},{n:10,F:[53,45.5],S:[53,40.9],P:[53,33.4]},{n:12,F:[60.6,50],S:[60.6,45.5],P:[60.6,40.9]},{n:15,F:[65.2,53],S:[65.2,50],P:[65.2,45.5]},{n:20,F:[72.7,60.6],S:[72.7,53],P:[72.7,45.5]},{n:25,F:[80.3,65.2],S:[80.3,60.6],P:[80.3,53]},{n:30,F:[90.9,72.7],S:[90.9,65.2],P:[90.9,60.6]},{n:40,F:[100,80.3],S:[100,72.7],P:[100,65.2]},{n:50,F:[116.7,90.9],S:[116.7,80.3],P:[116.7,72.7]},{n:60,F:[130.3,97],S:[130.3,89.4],P:[130.3,80.3]},{n:80,F:[145.5,112.1],S:[145.5,97],P:[145.5,89.4]},{n:100,F:[162.2,130.3],S:[162.2,112.1],P:[162.2,97]},{n:120,F:[193.9,130.3],S:[193.9,112.1],P:[193.9,97]},{n:150,F:[227.3,181.8],S:[227.3,162.2],P:[227.3,145.5]},{n:200,F:[259.1,193.9],S:[259.1,181.8],P:[259.1,162.2]},{n:300,F:[290.9,218.2],S:[290.9,197.0],P:[290.9,181.8]},{n:400,F:[333.4,248.5],S:[333.4,227.3],P:[333.4,209.1]},{n:500,F:[363.6,259.1],S:[363.6,245.5],P:[363.6,227.3]}];
 
-let works=[];
-let sel=new Set(),nextId=7,editId=null,pendingImg=null,pendingImgFile=null,soldF=false;
+let works=[],sel=new Set(),nextId=1,editId=null,pendingImg=null,pendingImgFile=null,soldF=false;
 let artist={name:'',phone:'',email:''};
-let pageSize=30,curPage=1,reviewItems=[];
+let pageSize=30,curPage=1,reviewItems=[],editMode=false,dragSrcId=null;
+let portfolioType='artist';
 
-function detMed(t){
-  const s=(t||'').toLowerCase().replace(/[_.]/g,' ');
-  for(const m of MEDS){
-    if(m.k&&s.includes(m.k.toLowerCase()))return m.c;
-    for(const e of m.e){if(s.includes(e))return m.c;}
-  }
-  return null;
+// ============================================================
+// LANGUAGE
+// ============================================================
+var curLang=localStorage.getItem('popol_lang')||'ko';
+function t(k){
+  var ko={filterYear:'전체 연도',filterGenre:'전체 장르',filterHnum:'전체 호수',filterAll:'전체 상태',filterAvail:'판매 가능',filterSold:'판매 완료',sortYearDesc:'연도 최신순',sortYearAsc:'연도 오래된순',sortHnumAsc:'호수 작은순',sortHnumDesc:'호수 큰순',sortTitleAsc:'제목 가나다순',psAll:'전체',selCount:'개 선택됨',soldBadge:'판매 완료',prevBtn:'미리보기',addCardBtn:'추가',addTitle:'새 작품 추가',editTitle:'작품 수정',toastSaved:'저장됐어요',toastNoTitle:'제목을 입력해주세요',previewTitle:'작품 리스트 미리보기',previewNoArtist:'작가 이름 미설정',previewEditInfo:'정보 편집',exportTitle:'내보내기',expCsvName:'엑셀 (CSV)',expCsvDesc:'번호 제목 연도 장르 호수 매체',expPdfName:'PDF (A4)',expPdfDesc:'깔끔한 표',expImgName:'이미지만',expImgDesc:'작품 사진 다운로드',expTxtName:'캡션 텍스트',expTxtDesc:'클립보드에 복사',shareTitle:'공유',shareSms:'문자',shareMail:'메일',shareCopy:'링크 복사',selWorks:'개 작품 선택됨',soldCount:'판매 완료 ',soldIncluded:'점 포함)',toastCsv:'CSV 다운로드됐어요',toastPdf:'PDF 인쇄 창이 열렸어요',toastNoImg:'업로드된 이미지가 없어요',toastImgDl:'개 다운로드 중...',toastTxt:'캡션 텍스트가 복사됐어요',toastCopied:'복사됐어요',toastImported:'개 작품이 추가됐어요',toastNone:'선택된 항목이 없어요',toastNoWork:'인식된 작품이 없어요',hnUnknown:'호수 인식 불가',reviewTitle:'인식 결과 확인',reviewImport:'선택 항목 등록',reviewSelAll:'전체 선택 / 해제',reviewEdit:'수정',reviewCollapse:'접기',reviewNoTitle:'제목 없음',reviewNoMed:'재료 미인식',reviewNoSize:'크기 미인식',reviewSrcImg:'이미지',reviewSrcCsv:'엑셀',cancel:'취소',save:'저장',close:'닫기',goPortfolio:'포트폴리오 보기',selClear:'해제',selAllBtn:'전체',selListBtn:'리스트 만들기',fTitle:'제목',fTitlePh:'작품 제목',fYear:'연도',fGenre:'장르',fSize:'크기 (cm)',fSizePh:'예: 53x45.5',fMedium:'매체',fMediumPh:'예: 캔버스에 아크릴',fDesc:'작품 설명',fDescPh:'작가 노트, 작품 배경 등...',fAward:'수상 / 출판 이력',fAwardPh:'예: 2024 서울 청년작가상',fImage:'이미지',fImagePh:'클릭해서 이미지 업로드',soldToggle:'판매 완료',soldToggleSub:'켜면 카드에 판매 완료 표시가 나타나요',artistTitle:'작가 정보',artistName:'작가 이름',artistNamePh:'홍길동',artistPhone:'연락처',artistPhonePh:'010-0000-0000',artistEmail:'이메일',artistEmailPh:'artist@email.com',navUpload:'간편 업로드',navList:'리스트',navAdd:'+ 추가',uploadTitle:'간편 업로드',uploadSub:'이미지나 CSV를 올리면 작품 정보를 자동으로 읽어와요.',uploadDrop:'파일을 끌어다 놓거나 클릭해서 선택',how1n:'방법 1 이미지',how1title:'파일명 자동 파싱',how1d:'제목_연도_재료_크기 순서로 저장하면 자동 인식해요.',how2n:'방법 2 CSV',how2title:'목록 일괄 등록',how2d:'엑셀을 CSV로 저장해서 올리면 컬럼 자동 매핑해요.',how3n:'방법 3 함께',how3title:'이미지 + CSV 매칭',how3d:'둘 다 올리면 제목 기준으로 이미지를 자동 연결해요.',efTitle:'제목',efYear:'연도',efGenre:'장르',efMed:'재료/매체',efSize:'크기',edit:'수정하기',addToSel:'선택에 추가',removeSel:'선택 해제'};
+  var en={filterYear:'All Years',filterGenre:'All Genres',filterHnum:'All Sizes',filterAll:'All Status',filterAvail:'Available',filterSold:'Sold',sortYearDesc:'Newest',sortYearAsc:'Oldest',sortHnumAsc:'Size: Small-Large',sortHnumDesc:'Size: Large-Small',sortTitleAsc:'Title A-Z',psAll:'All',selCount:' selected',soldBadge:'Sold',prevBtn:'Preview',addCardBtn:'Add',addTitle:'Add New Work',editTitle:'Edit Work',toastSaved:'Saved!',toastNoTitle:'Enter a title',previewTitle:'Preview List',previewNoArtist:'Artist name not set',previewEditInfo:'Edit Info',exportTitle:'Export',expCsvName:'Excel (CSV)',expCsvDesc:'No title year genre size',expPdfName:'PDF (A4)',expPdfDesc:'Clean table',expImgName:'Images',expImgDesc:'Download photos',expTxtName:'Caption',expTxtDesc:'Copy to clipboard',shareTitle:'Share',shareSms:'Text',shareMail:'Email',shareCopy:'Copy Link',selWorks:' works selected',soldCount:'Sold: ',soldIncluded:' sold)',toastCsv:'CSV downloaded',toastPdf:'Print opened',toastNoImg:'No images found',toastImgDl:' downloading...',toastTxt:'Caption copied',toastCopied:'Copied!',toastImported:' works added',toastNone:'None selected',toastNoWork:'No works detected',hnUnknown:'Size not recognized',reviewTitle:'Review Results',reviewImport:'Import Selected',reviewSelAll:'Select / Deselect All',reviewEdit:'Edit',reviewCollapse:'Collapse',reviewNoTitle:'No title',reviewNoMed:'Medium not detected',reviewNoSize:'Size not detected',reviewSrcImg:'Image',reviewSrcCsv:'CSV',cancel:'Cancel',save:'Save',close:'Close',goPortfolio:'View Portfolio',selClear:'Clear',selAllBtn:'All',selListBtn:'Make List',fTitle:'Title',fTitlePh:'Work title',fYear:'Year',fGenre:'Genre',fSize:'Size (cm)',fSizePh:'e.g. 53x45.5',fMedium:'Medium',fMediumPh:'e.g. Acrylic on canvas',fDesc:'Description',fDescPh:"Artist's note...",fAward:'Awards',fAwardPh:'e.g. 2024 Award',fImage:'Image',fImagePh:'Click to upload',soldToggle:'Mark as Sold',soldToggleSub:'Shows sold badge on card',artistTitle:'Artist Info',artistName:'Name',artistNamePh:'Your name',artistPhone:'Phone',artistPhonePh:'+82 10-0000-0000',artistEmail:'Email',artistEmailPh:'artist@email.com',navUpload:'Quick Upload',navList:'List',navAdd:'+ Add',uploadTitle:'Quick Upload',uploadSub:'Drop images or CSV files.',uploadDrop:'Drop files or click to select',how1n:'Method 1 Images',how1title:'Auto-parse filename',how1d:'Save as title_year_medium_size.',how2n:'Method 2 CSV',how2title:'Bulk CSV Import',how2d:'Upload CSV for bulk import.',how3n:'Method 3 Together',how3title:'Image + CSV Match',how3d:'Upload both to auto-match.',efTitle:'Title',efYear:'Year',efGenre:'Genre',efMed:'Medium',efSize:'Size',edit:'Edit',addToSel:'Add to Selection',removeSel:'Remove'};
+  var ja={filterYear:'全ての年',filterGenre:'全てのジャンル',filterHnum:'全てのサイズ',filterAll:'全ての状態',filterAvail:'販売中',filterSold:'売却済み',sortYearDesc:'新しい順',sortYearAsc:'古い順',sortHnumAsc:'号数：小から大',sortHnumDesc:'号数：大から小',sortTitleAsc:'タイトル順',psAll:'全て',selCount:'件選択中',soldBadge:'売却済み',prevBtn:'プレビュー',addCardBtn:'追加',addTitle:'作品を追加',editTitle:'作品を編集',toastSaved:'保存しました',toastNoTitle:'タイトルを入力してください',previewTitle:'作品リストのプレビュー',previewNoArtist:'アーティスト名未設定',previewEditInfo:'情報を編集',exportTitle:'エクスポート',expCsvName:'Excel (CSV)',expCsvDesc:'番号 タイトル 年 ジャンル',expPdfName:'PDF (A4)',expPdfDesc:'一覧表',expImgName:'画像のみ',expImgDesc:'個別ダウンロード',expTxtName:'キャプション',expTxtDesc:'コピー',shareTitle:'シェア',shareSms:'SMS',shareMail:'メール',shareCopy:'リンクをコピー',selWorks:'点選択中',soldCount:'売却済み：',soldIncluded:'点含む)',toastCsv:'CSVダウンロード完了',toastPdf:'印刷ダイアログ',toastNoImg:'画像なし',toastImgDl:'枚をダウンロード中',toastTxt:'コピーしました',toastCopied:'コピーしました',toastImported:'点追加しました',toastNone:'未選択',toastNoWork:'作品未検出',hnUnknown:'サイズ不明',reviewTitle:'認識結果の確認',reviewImport:'登録',reviewSelAll:'全て選択',reviewEdit:'編集',reviewCollapse:'折りたたむ',reviewNoTitle:'タイトルなし',reviewNoMed:'素材不明',reviewNoSize:'サイズ不明',reviewSrcImg:'画像',reviewSrcCsv:'CSV',cancel:'キャンセル',save:'保存',close:'閉じる',goPortfolio:'ポートフォリオを見る',selClear:'解除',selAllBtn:'全選択',selListBtn:'リスト作成',fTitle:'タイトル',fTitlePh:'作品タイトル',fYear:'制作年',fGenre:'ジャンル',fSize:'サイズ (cm)',fSizePh:'例：53x45.5',fMedium:'素材・技法',fMediumPh:'例：キャンバスにアクリル',fDesc:'作品説明',fDescPh:'アーティストノート...',fAward:'受賞歴',fAwardPh:'例：2024年受賞',fImage:'画像',fImagePh:'クリックしてアップロード',soldToggle:'売却済みにする',soldToggleSub:'売却済みバッジを表示',artistTitle:'アーティスト情報',artistName:'氏名',artistNamePh:'山田 太郎',artistPhone:'電話番号',artistPhonePh:'090-0000-0000',artistEmail:'メール',artistEmailPh:'artist@email.com',navUpload:'簡単アップ',navList:'リスト',navAdd:'+ 追加',uploadTitle:'簡単アップロード',uploadSub:'画像やCSVをアップロード',uploadDrop:'ここにドロップ',how1n:'方法1 画像',how1title:'ファイル名解析',how1d:'タイトル_年_素材_サイズ形式で保存',how2n:'方法2 CSV',how2title:'CSV一括登録',how2d:'CSVで一括登録',how3n:'方法3 組み合わせ',how3title:'画像+CSV',how3d:'両方アップで自動照合',efTitle:'タイトル',efYear:'制作年',efGenre:'ジャンル',efMed:'素材・技法',efSize:'サイズ',edit:'編集',addToSel:'選択に追加',removeSel:'選択解除'};
+  var d=curLang==='en'?en:curLang==='ja'?ja:ko;
+  return d[k]||ko[k]||k;
 }
-function detSize(t){
-  const s=(t||'').replace(/,/g,'.');
-  const m=s.match(/(\d+(?:\.\d+)?)\s*[×xX✕*]\s*(\d+(?:\.\d+)?)\s*(cm|인치|inch|in|")?/i);
-  if(!m)return null;
-  const u=(m[3]||'').toLowerCase();
-  return m[1]+'×'+m[2]+(u.includes('인치')||u==='inch'||u==='in'||u==='"'?'"':'cm');
+function setLang(l){curLang=l;localStorage.setItem('popol_lang',l);document.getElementById('langMenu').classList.add('hide');applyLang();}
+function toggleLangMenu(){document.getElementById('langMenu').classList.toggle('hide');}
+document.addEventListener('click',function(e){var m=document.getElementById('langMenu'),b=document.getElementById('langBtn');if(m&&b&&!m.contains(e.target)&&!b.contains(e.target))m.classList.add('hide');});
+
+function applyLang(){
+  function set(id,val){var el=document.getElementById(id);if(el)el.textContent=val;}
+  function setph(id,val){var el=document.getElementById(id);if(el)el.placeholder=val;}
+  set('navUpload',t('navUpload'));set('navList',t('navList'));set('navAdd',t('navAdd'));
+  set('langBtnLabel',curLang==='ko'?'한국어':curLang==='en'?'English':'日本語');
+  setph('fQ',curLang==='ko'?'작품 검색...':curLang==='en'?'Search works...':'作品を検索...');
+  var fs=document.getElementById('fSold');if(fs&&fs.options.length>=3){fs.options[0].text=t('filterAll');fs.options[1].text=t('filterAvail');fs.options[2].text=t('filterSold');}
+  var sb=document.getElementById('sortBy');if(sb&&sb.options.length>=5){sb.options[0].text=t('sortYearDesc');sb.options[1].text=t('sortYearAsc');sb.options[2].text=t('sortHnumAsc');sb.options[3].text=t('sortHnumDesc');sb.options[4].text=t('sortTitleAsc');}
+  var psa=document.querySelector('.psb[data-n="9999"]');if(psa)psa.textContent=t('psAll');
+  set('selClearBtn',t('selClear'));set('selAllBtn2',t('selAllBtn'));
+  set('lbTitle',t('fTitle'));setph('fTitle',t('fTitlePh'));
+  set('lbYear',t('fYear'));set('lbGenre',t('fGenre'));
+  set('lbSize',t('fSize'));setph('fSize',t('fSizePh'));
+  set('lbMedium',t('fMedium'));setph('fMedium',t('fMediumPh'));
+  set('lbDesc',t('fDesc'));setph('fDesc',t('fDescPh'));
+  set('lbAward',t('fAward'));setph('fAward',t('fAwardPh'));
+  set('lbImage',t('fImage'));set('dropZoneText',t('fImagePh'));
+  set('soldToggleLbl',t('soldToggle'));set('soldToggleSub',t('soldToggleSub'));
+  set('btnCancel1',t('cancel'));set('btnSave1',t('save'));
+  var fg2=document.getElementById('fGenre2');if(fg2){var genres=GENRES;for(var i=0;i<fg2.options.length&&i<genres.length;i++){fg2.options[i].text=genres[i];}}
+  set('artistModalTitle',t('artistTitle'));set('lbArtistName',t('artistName'));setph('aName',t('artistNamePh'));
+  set('lbArtistPhone',t('artistPhone'));setph('aPhone',t('artistPhonePh'));
+  set('lbArtistEmail',t('artistEmail'));setph('aEmail',t('artistEmailPh'));
+  set('btnCancelArtist',t('cancel'));set('btnSaveArtist',t('save'));
+  set('prevPanelTitle',t('previewTitle'));set('btnEditArtist',t('previewEditInfo'));
+  set('expSectionTitle',t('exportTitle'));set('shareSectionTitle',t('shareTitle'));
+  set('expCsvName',t('expCsvName'));set('expCsvDesc',t('expCsvDesc'));
+  set('expPdfName',t('expPdfName'));set('expPdfDesc',t('expPdfDesc'));
+  set('expImgName',t('expImgName'));set('expImgDesc',t('expImgDesc'));
+  set('expTxtName',t('expTxtName'));set('expTxtDesc',t('expTxtDesc'));
+  set('btnSmsText',t('shareSms'));set('btnMailText',t('shareMail'));set('btnCopyText',t('shareCopy'));
+  set('btnClosePrev',t('close'));
+  set('reviewModalTitle',t('reviewTitle'));set('btnImportSel',t('reviewImport'));set('btnCancelReview',t('cancel'));
+  set('uploadTitle',t('uploadTitle'));set('uploadSubTitle',t('uploadSub'));set('uzTitle',t('uploadDrop'));
+  set('how1n',t('how1n'));set('how1t',t('how1title'));set('how1d',t('how1d'));
+  set('how2n',t('how2n'));set('how2t',t('how2title'));set('how2d',t('how2d'));
+  set('how3n',t('how3n'));set('how3t',t('how3title'));set('how3d',t('how3d'));
+  render();
 }
-function detYear(t){
-  const ms=[...t.matchAll(/(?<![가-힣a-zA-Z])(\d{4})(?![가-힣a-zA-Z])/g)];
-  const v=ms.map(m=>parseInt(m[1])).filter(y=>y>=1800&&y<=2100);
-  return v.length?v[v.length-1]:new Date().getFullYear();
-}
-function detTitle(t){
-  const clean=t.replace(/\.[^.]+$/,'');
-  const parts=clean.split(/[_\-|·,\/\\]/);
-  for(const p of parts){
-    const s=p.trim();
-    if(!s||/^\d{4}$/.test(s)||detSize(s)||detMed(s))continue;
-    if(/^\d/.test(s)&&/cm|inch|"/i.test(s))continue;
-    if(GENRES.some(g=>s===g))continue;
-    return s;
-  }
-  return clean.replace(/\.[^.]+$/,'');
-}
-function detHN(sz){
-  if(!sz)return null;
-  const m=sz.match(/(\d+(?:\.\d+)?)[×x](\d+(?:\.\d+)?)/i);
-  if(!m)return null;
-  const lo=Math.max(parseFloat(m[1]),parseFloat(m[2])),sh=Math.min(parseFloat(m[1]),parseFloat(m[2]));
-  let best=null,bd=99999;
-  for(const row of HT){
-    for(const t of['F','S','P']){
-      const rl=Math.max(...row[t]),rs=Math.min(...row[t]);
-      const d=Math.abs(lo-rl)+Math.abs(sh-rs);
-      if(d<bd){bd=d;best={n:row.n,t,exact:d<1.5};}
-    }
-  }
-  if(!best||bd>20)return null;
-  return best.n+'호 ('+best.t+'형)'+(best.exact?'':' 변형');
-}
+
+// ============================================================
+// CURRENCY
+// ============================================================
+var showPrice=true,selCur='KRW',rates={KRW:1,USD:0,EUR:0,JPY:0,CNY:0},ratesLoaded=false,selSizeForPreview=null;
+function fmtKRW(w){if(!w)return'';return w.toLocaleString()+'원';}
+function fmtPrice(w,cur){if(!w)return'';if(cur==='KRW')return w.toLocaleString()+'원';var r=rates[cur];if(!r)return w.toLocaleString()+'원';var c=w*r;var s={USD:'$',EUR:'€',JPY:'¥',CNY:'¥'}[cur]||'';var n={USD:'USD',EUR:'EUR',JPY:'JPY',CNY:'CNY'}[cur]||cur;if(cur==='JPY')return s+Math.round(c).toLocaleString()+' '+n;return s+c.toFixed(2)+' '+n;}
+async function fetchRates(){try{var res=await fetch('https://open.er-api.com/v6/latest/KRW');var data=await res.json();if(data&&data.rates){rates.USD=data.rates.USD||0;rates.EUR=data.rates.EUR||0;rates.JPY=data.rates.JPY||0;rates.CNY=data.rates.CNY||0;ratesLoaded=true;updateRateInfo();}}catch(e){rates.USD=0.000735;rates.EUR=0.000675;rates.JPY=0.108;rates.CNY=0.00533;ratesLoaded=true;updateRateInfo();}}
+function updateRateInfo(){var el=document.getElementById('rateInfo');if(!el)return;if(!ratesLoaded){el.textContent='환율 불러오는 중...';return;}if(selCur==='KRW'){el.textContent='';return;}var s={USD:'$',EUR:'€',JPY:'¥',CNY:'¥'}[selCur]||'';var r=rates[selCur];if(!r){el.textContent='환율 정보 없음';return;}var p=10000*r;var d=selCur==='JPY'?Math.round(p).toLocaleString():p.toFixed(2);el.textContent='현재 환율: ₩10,000 = '+s+d+' (실시간)';}
+function setCur(cur){selCur=cur;document.querySelectorAll('.cur-btn').forEach(function(b){b.classList.toggle('on',b.dataset.cur===cur);});updateRateInfo();refreshPreviewList();}
+function togglePriceShow(){showPrice=!showPrice;document.getElementById('priceToggle').classList.toggle('on',showPrice);document.getElementById('currencyPicker').style.display=showPrice?'':'none';refreshPreviewList();}
+function refreshPreviewList(){if(selSizeForPreview)renderPreviewList(selSizeForPreview);}
+function updatePricePreview(){var val=parseInt(document.getElementById('fPrice').value);var el=document.getElementById('pricePreview');if(!val||val<=0){el.textContent='';return;}var parts=[fmtKRW(val)];if(ratesLoaded){if(rates.USD)parts.push('$'+(val*rates.USD).toFixed(2)+' USD');if(rates.EUR)parts.push('€'+(val*rates.EUR).toFixed(2)+' EUR');if(rates.JPY)parts.push('¥'+Math.round(val*rates.JPY)+' JPY');}el.textContent=parts.join('  ·  ');el.style.color='var(--text2)';}
+
+// ============================================================
+// HNUM
+// ============================================================
+function detMed(t2){var s=(t2||'').toLowerCase().replace(/[_.]/g,' ');for(var m of MEDS){if(m.k&&s.includes(m.k.toLowerCase()))return m.c;for(var e of m.e){if(s.includes(e))return m.c;}}return null;}
+function detSize(t2){var s=(t2||'').replace(/,/g,'.');var m=s.match(/(\d+(?:\.\d+)?)\s*[×xX✕*]\s*(\d+(?:\.\d+)?)\s*(cm|인치|inch|in|")?/i);if(!m)return null;return m[1]+'×'+m[2];}
+function detYear(t2){var ms=[...t2.matchAll(/(?<![가-힣a-zA-Z])(\d{4})(?![가-힣a-zA-Z])/g)];var v=ms.map(m=>parseInt(m[1])).filter(y=>y>=1800&&y<=2100);return v.length?v[v.length-1]:new Date().getFullYear();}
+function detTitle(t2){var clean=t2.replace(/\.[^.]+$/,'');var parts=clean.split(/[_\-|·,\/\]/);for(var p of parts){var s=p.trim();if(!s||/^\d{4}$/.test(s)||detSize(s)||detMed(s))continue;if(/^\d/.test(s)&&/cm|inch|"/i.test(s))continue;if(GENRES.some(g=>s===g))continue;return s;}return clean.replace(/\.[^.]+$/,'');}
+function detHN(sz){if(!sz)return null;var m=sz.match(/(\d+(?:\.\d+)?)[×x](\d+(?:\.\d+)?)/i);if(!m)return null;var lo=Math.max(parseFloat(m[1]),parseFloat(m[2])),sh=Math.min(parseFloat(m[1]),parseFloat(m[2]));var best=null,bd=99999;for(var row of HT){for(var tp of['F','S','P']){var rl=Math.max(...row[tp]),rs=Math.min(...row[tp]);var d=Math.abs(lo-rl)+Math.abs(sh-rs);if(d<bd){bd=d;best={n:row.n,t:tp,exact:d<1.5};}}}if(!best||bd>20)return null;return best.n+'호 ('+best.t+'형)'+(best.exact?'':' 변형');}
 function getHN(w){return detHN(w.size);}
-function getHNV(w){const h=getHN(w);return h?parseInt(h):9999;}
+function getHNV(w){var h=getHN(w);return h?parseInt(h):9999;}
+function previewHN(){var s=document.getElementById('fSize').value;var h=detHN(s);var el=document.getElementById('hnprev');if(!h){el.textContent=s?t('hnUnknown'):'';el.style.color='var(--text3)';return;}el.innerHTML='<span style="display:inline-block;padding:2px 10px;border-radius:20px;background:'+(h.includes('변형')?'#EEEDFE':'#E6F1FB')+';color:'+(h.includes('변형')?'#534AB7':'#0C447C')+';font-size:12px;font-weight:500;border:0.5px solid '+(h.includes('변형')?'#CECBF6':'#B5D4F4')+';">'+h+'</span>';}
 
-function previewHN(){
-  const s=document.getElementById('fSize').value;
-  const h=detHN(s);
-  const el=document.getElementById('hnprev');
-  if(!h){el.textContent=s?t('hnUnknown'):'';el.style.color='var(--text3)';return;}
-  el.innerHTML='<span style="display:inline-block;padding:2px 10px;border-radius:20px;background:'+(h.includes('변형')?'#EEEDFE':'#E6F1FB')+';color:'+(h.includes('변형')?'#534AB7':'#0C447C')+';font-size:12px;font-weight:500;border:0.5px solid '+(h.includes('변형')?'#CECBF6':'#B5D4F4')+';">'+h+'</span>';
-}
-
-function allFiltered(){
-  const yr=document.getElementById('fYear').value;
-  const gn=document.getElementById('fGenre').value;
-  const hn=document.getElementById('fHnum').value;
-  const sd=document.getElementById('fSold').value;
-  const q=document.getElementById('fQ').value.toLowerCase();
-  return works.filter(w=>{
-    if(yr&&w.year!=yr)return false;
-    if(gn&&w.genre!==gn)return false;
-    if(sd!==''&&(sd==='1'?!w.sold:w.sold))return false;
-    if(q&&!w.title.toLowerCase().includes(q))return false;
-    if(hn){const h=getHN(w);if(!h||h.split('호')[0]!==hn)return false;}
-    return true;
-  });
-}
-function sortW(list){
-  const s=document.getElementById('sortBy').value;
-  return[...list].sort((a,b)=>{
-    if(s==='year_asc')return a.year-b.year;
-    if(s==='year_desc')return b.year-a.year;
-    if(s==='hnum_asc')return getHNV(a)-getHNV(b);
-    if(s==='hnum_desc')return getHNV(b)-getHNV(a);
-    if(s==='title_asc')return a.title.localeCompare(b.title,'ko');
-    return b.year-a.year;
-  });
-}
-function updFilters(){
-  const yr=document.getElementById('fYear'),gn=document.getElementById('fGenre'),hn=document.getElementById('fHnum');
-  const cy=yr.value,cg=gn.value,ch=hn.value;
-  yr.innerHTML='<option value="">'+t('filterYear')+'</option>'+[...new Set(works.map(w=>w.year))].sort((a,b)=>b-a).map(y=>'<option value="'+y+'"'+(y==cy?' selected':'')+'>'+y+'</option>').join('');
-  gn.innerHTML='<option value="">'+t('filterGenre')+'</option>'+[...new Set(works.map(w=>w.genre))].sort().map(g=>'<option value="'+g+'"'+(g===cg?' selected':'')+'>'+g+'</option>').join('');
-  const hns=[...new Set(works.map(w=>{const h=getHN(w);return h?parseInt(h):null}).filter(v=>v!==null))].sort((a,b)=>a-b);
-  var hnUnit=curLang==='ja'?'号':curLang==='en'?' (no.)':'호';
-  hn.innerHTML='<option value="">'+t('filterHnum')+'</option>'+hns.map(n=>'<option value="'+n+'"'+(String(n)===ch?' selected':'')+'>'+n+hnUnit+'</option>').join('');
-}
-function setPS(n){pageSize=n;document.querySelectorAll('.psb').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.n)===n||(n===9999&&b.dataset.n==='9999')));goPage(1);}
+// ============================================================
+// FILTER / SORT / RENDER
+// ============================================================
+function allFiltered(){var yr=document.getElementById('fYear').value,gn=document.getElementById('fGenre').value,hn=document.getElementById('fHnum').value,sd=document.getElementById('fSold').value,q=document.getElementById('fQ').value.toLowerCase();return works.filter(function(w){if(w.portfolio_type!=='artist')return false;if(yr&&w.year!=yr)return false;if(gn&&w.genre!==gn)return false;if(sd!==''&&(sd==='1'?!w.sold:w.sold))return false;if(q&&!w.title.toLowerCase().includes(q))return false;if(hn){var h=getHN(w);if(!h||h.split('호')[0]!==hn)return false;}return true;});}
+function sortW(list){var s=document.getElementById('sortBy').value;return[...list].sort(function(a,b){if(s==='year_asc')return a.year-b.year;if(s==='year_desc')return b.year-a.year;if(s==='hnum_asc')return getHNV(a)-getHNV(b);if(s==='hnum_desc')return getHNV(b)-getHNV(a);if(s==='title_asc')return a.title.localeCompare(b.title,'ko');return b.year-a.year;});}
+function updFilters(){var yr=document.getElementById('fYear'),gn=document.getElementById('fGenre'),hn=document.getElementById('fHnum');var cy=yr.value,cg=gn.value,ch=hn.value;var artistWorks=works.filter(function(w){return w.portfolio_type!=='design';});yr.innerHTML='<option value="">'+t('filterYear')+'</option>'+[...new Set(artistWorks.map(function(w){return w.year;}))].sort(function(a,b){return b-a;}).map(function(y){return'<option value="'+y+'"'+(y==cy?' selected':'')+'>'+y+'</option>';}).join('');gn.innerHTML='<option value="">'+t('filterGenre')+'</option>'+[...new Set(artistWorks.map(function(w){return w.genre;}))].sort().map(function(g){return'<option value="'+g+'"'+(g===cg?' selected':'')+'>'+g+'</option>';}).join('');var hns=[...new Set(artistWorks.map(function(w){var h=getHN(w);return h?parseInt(h):null;}).filter(function(v){return v!==null;}))].sort(function(a,b){return a-b;});var hnUnit=curLang==='ja'?'号':curLang==='en'?' (no.)':'호';hn.innerHTML='<option value="">'+t('filterHnum')+'</option>'+hns.map(function(n){return'<option value="'+n+'"'+(String(n)===ch?' selected':'')+'>'+n+hnUnit+'</option>';}).join('');}
+function setPS(n){pageSize=n;document.querySelectorAll('.psb').forEach(function(b){b.classList.toggle('on',parseInt(b.dataset.n)===n||(n===9999&&b.dataset.n==='9999'));});goPage(1);}
 function goPage(p){curPage=p;render();}
 
 function render(){
-  if(portfolioType === 'design') { renderDesign(); return; }
+  if(portfolioType==='design'){renderDesign();return;}
   updFilters();
-  const all=sortW(allFiltered());
-  const total=all.length;
-  const ps=pageSize===9999?total:pageSize;
-  const tp=Math.max(1,Math.ceil(total/ps));
-  if(curPage>tp)curPage=tp;
-  const page=all.slice((curPage-1)*ps,curPage*ps);
-  const sb=document.getElementById('selbar');sb.style.display=sel.size>0?'flex':'none';
+  var all=sortW(allFiltered());var total=all.length;var ps=pageSize===9999?total:pageSize;var tp=Math.max(1,Math.ceil(total/ps));if(curPage>tp)curPage=tp;var page=all.slice((curPage-1)*ps,curPage*ps);
+  var sb=document.getElementById('selbar');sb.style.display=sel.size>0?'flex':'none';
   document.getElementById('selcnt').textContent=sel.size+t('selCount');
   var esc2=document.getElementById('editSelCount');if(esc2)esc2.textContent=sel.size>0?sel.size+'개 선택됨':'';
-  const sv=document.getElementById('sortBy').value;
-  const byY=sv==='year_desc'||sv==='year_asc';
-  const gc=pageSize<=20?'g20':pageSize<=30?'g30':pageSize<=50?'g50':pageSize<=60?'g60':'g30';
-  const el=document.getElementById('list');
-  if(!page.length){el.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text3);font-size:14px;">'+(curLang==="en"?"No works yet. Tap + Add to get started.":curLang==="ja"?"作品がありません。+ 追加ボタンで始めましょう。":"등록된 작품이 없어요. + 추가 버튼으로 시작해보세요.")+'</div>';document.getElementById('pgn').innerHTML='';return;}
-  if(byY){
-    const bY={};page.forEach(w=>{if(!bY[w.year])bY[w.year]=[];bY[w.year].push(w);});
-    const yrs=Object.keys(bY).sort((a,b)=>sv==='year_asc'?a-b:b-a);
-    el.innerHTML=yrs.map((yr,yi)=>'<div class="ygroup"><div class="ylabel">'+yr+'</div><div class="grid '+gc+'">'+bY[yr].map(w=>cHtml(w)).join('')+(yi===0&&curPage===1?'<div class="addcard" onclick="openAdd()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'+t('addCardBtn')+'</div>':'')+'</div></div>').join('');
-  } else {
-    el.innerHTML='<div class="grid '+gc+'">'+page.map(w=>cHtml(w)).join('')+'</div>';
-  }
+  var sv=document.getElementById('sortBy').value;var byY=sv==='year_desc'||sv==='year_asc';
+  var gc=pageSize<=20?'g20':pageSize<=30?'g30':pageSize<=50?'g50':pageSize<=60?'g60':'g30';
+  var el=document.getElementById('list');
+  if(!page.length){el.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text3);font-size:14px;">'+(curLang==='en'?'No works yet. Tap + Add to get started.':curLang==='ja'?'作品がありません。':t('navAdd')+' 버튼으로 시작해보세요.')+'</div>';document.getElementById('pgn').innerHTML='';return;}
+  if(byY){var bY={};page.forEach(function(w){if(!bY[w.year])bY[w.year]=[];bY[w.year].push(w);});var yrs=Object.keys(bY).sort(function(a,b){return sv==='year_asc'?a-b:b-a;});el.innerHTML=yrs.map(function(yr,yi){return'<div class="ygroup"><div class="ylabel">'+yr+'</div><div class="grid '+gc+'">'+bY[yr].map(function(w){return cHtml(w);}).join('')+(yi===0&&curPage===1?'<div class="addcard" onclick="openAdd()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'+t('addCardBtn')+'</div>':'')+'</div></div>';}).join('');}
+  else{el.innerHTML='<div class="grid '+gc+'">'+page.map(function(w){return cHtml(w);}).join('')+'</div>';}
   renderPgn(tp,total);
 }
 
 function cHtml(w){
-  const s=sel.has(w.id),h=getHN(w);
-  const ph='<div style="width:100%;height:100%;background:'+w.c[0]+';display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="3" fill="'+w.c[1]+'" opacity=".18"/><circle cx="9" cy="9" r="3" fill="'+w.c[1]+'" opacity=".45"/><path d="M1 21l6-8 4 5 4-4 8 7H1z" fill="'+w.c[1]+'" opacity=".45"/></svg></div>';
-  var dragAttrs = editMode ? ' draggable="true" ondragstart="onDragStart(event,\'' + w.id + '\')" ondragover="onDragOver(event,\'' + w.id + '\')" ondrop="onDrop(event,\'' + w.id + '\')" ondragend="onDragEnd()"' : '';
-  return '<div class="card'+(s?' sel':'')+(w.sold?' sold-card':'')+'" data-id="'+w.id+'"'+dragAttrs+'>'+
-    (w.sold?'<div class="sold-ov"></div><div class="sold-badge">'+t('soldBadge')+'</div>':'')+
-    '<div class="chkbtn" onclick="event.stopPropagation();toggleSel('+w.id+')"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+'<div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg></div>'+
-    '<div class="thumb" onclick="toggleSel('+w.id+')">'+(w.img?'<img src="'+w.img+'"/>':ph)+'</div>'+
-    '<div class="cbody" onclick="toggleSel('+w.id+')">'+
-    '<div class="ctitle'+(w.sold?' sold-text':'')+'">'+w.title+'</div>'+
-    '<div class="cmeta">'+w.year+' · '+w.genre+'</div>'+
-    (h?'<div class="hntag'+(h.includes('변형')?' vari':'')+'">'+h+'</div>':'')+
-    '</div>'+
-    '<div class="prevrow"><button class="prevbtn" onclick="event.stopPropagation();openDetail('+w.id+')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>미리보기</button></div>'+
-    '</div>';
+  var s=sel.has(w.id),h=getHN(w);
+  var c0=w.c[0],c1=w.c[1];
+  var ph='<div style="width:100%;height:100%;background:'+c0+';display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="3" fill="'+c1+'" opacity=".18"/><circle cx="9" cy="9" r="3" fill="'+c1+'" opacity=".45"/><path d="M1 21l6-8 4 5 4-4 8 7H1z" fill="'+c1+'" opacity=".45"/></svg></div>';
+  var drag='';
+  if(editMode){drag=' draggable="true" ondragstart="onDragStart(event,this.dataset.wid)" ondragover="onDragOver(event,this.dataset.wid)" ondrop="onDrop(event,this.dataset.wid)" ondragend="onDragEnd()"';}
+  var html='<div class="card'+(s?' sel':'')+(w.sold?' sold-card':'')+'" data-id="'+w.id+'" data-wid="'+w.id+'"'+drag+'>';
+  html+=(w.sold?'<div class="sold-ov"></div><div class="sold-badge">'+t('soldBadge')+'</div>':'');
+  html+='<div class="chkbtn" onclick="event.stopPropagation();toggleSel(this.parentNode.dataset.id)"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+  html+='<div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg></div>';
+  html+='<div class="thumb" onclick="toggleSel(this.parentNode.dataset.id)">'+(w.img?'<img src="'+w.img+'"/>':ph)+'</div>';
+  html+='<div class="cbody" onclick="toggleSel(this.parentNode.dataset.id)">';
+  html+='<div class="ctitle'+(w.sold?' sold-text':'')+'">'+w.title+'</div>';
+  html+='<div class="cmeta">'+w.year+' . '+w.genre+'</div>';
+  html+=(w.price?'<div class="price-tag">'+fmtKRW(w.price)+'</div>':'');
+  html+='</div>';
+  html+='<div class="prevrow"><button class="prevbtn" onclick="event.stopPropagation();openDetail(this.parentNode.parentNode.dataset.id)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>'+t('prevBtn')+'</button></div>';
+  html+='</div>';
+  return html;
 }
+function renderPgn(tp,total){var el=document.getElementById('pgn');if(tp<=1){el.innerHTML='';return;}var h='<button class="pgb" onclick="goPage('+(curPage-1)+')" '+(curPage===1?'disabled':'')+'>‹</button>';for(var i=1;i<=tp;i++){if(i===1||i===tp||Math.abs(i-curPage)<=1)h+='<button class="pgb'+(i===curPage?' on':'')+'" onclick="goPage('+i+')">'+i+'</button>';else if(Math.abs(i-curPage)===2)h+='<span style="color:var(--text3);padding:0 3px;">…</span>';}h+='<button class="pgb" onclick="goPage('+(curPage+1)+')" '+(curPage===tp?'disabled':'')+'>›</button>';h+='<span class="pgi">총 '+total+'점</span>';el.innerHTML=h;}
 
-function renderPgn(tp,total){
-  const el=document.getElementById('pgn');
-  if(tp<=1){el.innerHTML='';return;}
-  let h='<button class="pgb" onclick="goPage('+(curPage-1)+')" '+(curPage===1?'disabled':'')+'>‹</button>';
-  for(let i=1;i<=tp;i++){
-    if(i===1||i===tp||Math.abs(i-curPage)<=1)h+='<button class="pgb'+(i===curPage?' on':'')+'" onclick="goPage('+i+')">'+i+'</button>';
-    else if(Math.abs(i-curPage)===2)h+='<span style="color:var(--text3);padding:0 3px;">…</span>';
-  }
-  h+='<button class="pgb" onclick="goPage('+(curPage+1)+')" '+(curPage===tp?'disabled':'')+'>›</button>';
-  h+='<span class="pgi">총 '+total+'점</span>';
-  el.innerHTML=h;
-}
-
-function toggleEditMode(){
-  editMode = !editMode;
-  var btn = document.getElementById('editModeBtn');
-  var bar = document.getElementById('editBar');
-  var listEl = document.getElementById('list');
-  if(editMode){
-    if(btn){btn.textContent='편집 완료';btn.className='btn btn-sm btn-blue';}
-    if(bar)bar.style.display='flex';
-    if(listEl)listEl.classList.add('edit-mode');
-  } else {
-    if(btn){btn.textContent='편집';btn.className='btn btn-sm';}
-    if(bar)bar.style.display='none';
-    if(listEl)listEl.classList.remove('edit-mode');
-    sel.clear();
-  }
-  render();
-}
-
-async function deleteSelected(){
-  if(sel.size===0){showToast('삭제할 작품을 선택해주세요');return;}
-  var ids=[...sel];
-  var selWorks=works.filter(function(w){return ids.indexOf(w.id)>=0;});
-  var names=selWorks.map(function(w){return w.title;}).slice(0,3);
-  var msg=names.join(', ')+(ids.length>3?' 외 '+(ids.length-3)+'개':'');
-  if(!confirm(msg+' 총 '+ids.length+'개 작품을 삭제할까요?'))return;
-  if(currentUser){
-    // dbId(UUID)로 삭제
-    for(var i=0;i<selWorks.length;i++){
-      var dbId=selWorks[i].dbId||selWorks[i].id;
-      var res=await supa.from('works').delete().eq('id',dbId);
-      if(res.error)console.error('삭제 오류:',res.error);
-    }
-    await loadWorksFromDB();
-  } else {
-    works=works.filter(function(w){return ids.indexOf(w.id)<0;});
-    render();
-  }
-  sel.clear();
-  showToast(ids.length+'개 작품을 삭제했어요');
-}
-
-async function saveOrder(){
-  if(!currentUser)return;
-  for(var i=0;i<works.length;i++){
-    await supa.from('works').update({sort_order:i}).eq('id',works[i].id);
-  }
-}
-
-function onDragStart(e,id){
-  dragSrcId=id;
-  e.dataTransfer.effectAllowed='move';
-  setTimeout(function(){
-    var el=document.querySelector('.card[data-id="'+id+'"]');
-    if(el)el.classList.add('dragging');
-  },0);
-}
-
-function onDragOver(e,id){
-  e.preventDefault();
-  e.dataTransfer.dropEffect='move';
-  document.querySelectorAll('.card').forEach(function(c){c.classList.remove('drag-over');});
-  var el=document.querySelector('.card[data-id="'+id+'"]');
-  if(el&&id!==dragSrcId)el.classList.add('drag-over');
-}
-
-function onDragEnd(){
-  document.querySelectorAll('.card').forEach(function(c){
-    c.classList.remove('dragging');c.classList.remove('drag-over');
-  });
-}
-
-function onDrop(e,targetId){
-  e.preventDefault();
-  if(!dragSrcId||dragSrcId===targetId)return;
-  var srcIdx=works.findIndex(function(w){return w.id===dragSrcId;});
-  var tgtIdx=works.findIndex(function(w){return w.id===targetId;});
-  if(srcIdx<0||tgtIdx<0)return;
-  var moved=works.splice(srcIdx,1)[0];
-  works.splice(tgtIdx,0,moved);
-  saveOrder();
-  render();
-  dragSrcId=null;
-}
-
-var designEditId = null;
-var designPendingImg = null;
-var designPendingImgFile = null;
-
-var DESIGN_CATS = {
-  '브랜딩': {bg:'#E6F1FB', color:'#0C447C'},
-  'UI/UX': {bg:'#EEEDFE', color:'#3C3489'},
-  '포스터': {bg:'#EAF3DE', color:'#27500A'},
-  '영상': {bg:'#FCEBEB', color:'#791F1F'},
-  '제품': {bg:'#FAEEDA', color:'#633806'},
-  '기획': {bg:'#F1EFE8', color:'#5F5E5A'},
-  '사진': {bg:'#E1F5EE', color:'#085041'},
-  '기타': {bg:'#F1EFE8', color:'#444441'}
-};
-
-function openDesignAdd(id) {
-  designEditId = id || null;
-  designPendingImg = null;
-  designPendingImgFile = null;
-  var w = id ? works.find(function(x){return x.id===id;}) : null;
-  document.getElementById('designModalTitle').textContent = w ? '프로젝트 수정' : '디자인 프로젝트 추가';
-  document.getElementById('dfTitle').value = w ? w.title : '';
-  document.getElementById('dfYear').value = w ? w.year : 2024;
-  document.getElementById('dfCat').value = w ? (w.genre||'브랜딩') : '브랜딩';
-  document.getElementById('dfClient').value = w ? (w.project_client||'') : '';
-  document.getElementById('dfDuration').value = w ? (w.project_duration||'') : '';
-  document.getElementById('dfDesc').value = w ? (w.desc||'') : '';
-  document.getElementById('dfLink').value = w ? (w.project_link||'') : '';
-  var dz = document.getElementById('dDropZone');
-  dz.innerHTML = w && w.img ? '<img class="imgpt" src="'+w.img+'"/>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> 클릭해서 이미지 업로드';
-  document.getElementById('designAddOv').classList.add('on');
-}
-
-function loadDesignImg(input) {
-  var f = input.files[0]; if(!f) return;
-  designPendingImgFile = f;
-  var r = new FileReader();
-  r.onload = function(e) {
-    designPendingImg = e.target.result;
-    document.getElementById('dDropZone').innerHTML = '<img class="imgpt" src="'+e.target.result+'"/>';
-  };
-  r.readAsDataURL(f);
-}
-
-async function saveDesignWork() {
-  var title = document.getElementById('dfTitle').value.trim();
-  if(!title) { showToast('프로젝트명을 입력해주세요'); return; }
-  var data = {
-    title: title,
-    year: parseInt(document.getElementById('dfYear').value),
-    genre: document.getElementById('dfCat').value,
-    desc: document.getElementById('dfDesc').value.trim(),
-    project_client: document.getElementById('dfClient').value.trim(),
-    project_duration: document.getElementById('dfDuration').value.trim(),
-    project_link: document.getElementById('dfLink').value.trim(),
-    portfolio_type: 'design',
-    medium: '', size: '', award: '', price: 0, sold: false
-  };
-  if(currentUser) {
-    var w = designEditId ? works.find(function(x){return x.id===designEditId;}) : null;
-    data.c = w ? w.c : PAL[Math.floor(Math.random()*PAL.length)];
-    if(designPendingImgFile) {
-      showToast('이미지 업로드 중...');
-      var url = await uploadImageToDB(designPendingImgFile);
-      if(url) data.img = url;
-    } else if(designPendingImg) {
-      data.img = designPendingImg;
-    } else if(w) {
-      data.img = w.img;
-    }
-    var ok = await saveWorkToDB(data, !!designEditId, w ? w.dbId : null);
-    if(!ok) return;
-    await loadWorksFromDB();
-  }
-  closeOv('designAddOv');
-  showToast('저장됐어요');
-}
-
-function renderDesign() {
-  var designWorks = sortW(works.filter(function(w){ return w.portfolio_type === 'design'; }));
-  var el = document.getElementById('list');
-  if(!designWorks.length) {
-    el.innerHTML = '<div class="design-grid"><div class="add-dcard" onclick="openDesignAdd()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>프로젝트 추가</div></div>';
-    return;
-  }
-  var html = '<div class="design-grid">';
-  designWorks.forEach(function(w) {
-    var cat = DESIGN_CATS[w.genre] || DESIGN_CATS['기타'];
-    var ph = '<div style="width:100%;height:100%;background:'+w.c[0]+';display:flex;align-items:center;justify-content:center;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="'+w.c[1]+'" stroke-width="1" opacity=".4"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></div>';
-    html += '<div class="dcard" data-id="'+w.id+'">';
-    html += '<div class="dcard-img">'+(w.img?'<img src="'+w.img+'"/>':ph)+'</div>';
-    html += '<div class="dcard-body">';
-    html += '<span class="dcard-cat" style="background:'+cat.bg+';color:'+cat.color+';">'+w.genre+'</span>';
-    html += '<div class="dcard-title">'+w.title+'</div>';
-    if(w.project_client) html += '<div class="dcard-client">'+w.project_client+(w.project_duration?' · '+w.project_duration:'')+'</div>';
-    if(w.desc) html += '<div class="dcard-desc">'+w.desc+'</div>';
-    html += '</div>';
-    if(w.project_link || true) {
-      html += '<div class="dcard-foot">';
-      html += '<button class="dlink-btn" onclick="dEditId=&quot;'+w.id+'&quot;;openDesignAdd(dEditId)">수정</button>';
-      if(w.project_link) html += '<a class="dlink-btn" href="'+w.project_link+'" target="_blank"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>링크</a>';
-      html += '</div>';
-    }
-    html += '</div>';
-  });
-  html += '<div class="add-dcard" onclick="openDesignAdd()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</div>';
-  html += '</div>';
-  el.innerHTML = html;
-  document.getElementById('pgn').innerHTML = '';
-}
-
+// ============================================================
+// SELECTION
+// ============================================================
 function toggleSel(id){if(sel.has(id))sel.delete(id);else sel.add(id);render();}
 function clearSel(){sel.clear();render();}
-function selAll(){allFiltered().forEach(w=>sel.add(w.id));render();}
+function selAll(){allFiltered().forEach(function(w){sel.add(w.id);});render();}
 
+// ============================================================
+// EDIT MODE / DRAG
+// ============================================================
+function toggleEditMode(){editMode=!editMode;var btn=document.getElementById('editModeBtn');var bar=document.getElementById('editBar');var listEl=document.getElementById('list');if(editMode){if(btn){btn.textContent='편집 완료';btn.className='btn btn-sm btn-blue';}if(bar)bar.style.display='flex';if(listEl)listEl.classList.add('edit-mode');}else{if(btn){btn.textContent='편집';btn.className='btn btn-sm';}if(bar)bar.style.display='none';if(listEl)listEl.classList.remove('edit-mode');sel.clear();}render();}
+async function deleteSelected(){if(sel.size===0){showToast('삭제할 작품을 선택해주세요');return;}var ids=[...sel];var selWorks=works.filter(function(w){return ids.indexOf(w.id)>=0;});var names=selWorks.map(function(w){return w.title;}).slice(0,3);var msg=names.join(', ')+(ids.length>3?' 외 '+(ids.length-3)+'개':'');if(!confirm(msg+' 총 '+ids.length+'개 작품을 삭제할까요?'))return;if(currentUser){for(var i=0;i<selWorks.length;i++){var dbId=selWorks[i].dbId||selWorks[i].id;await supa.from('works').delete().eq('id',dbId);}await loadWorksFromDB();}else{works=works.filter(function(w){return ids.indexOf(w.id)<0;});render();}sel.clear();showToast(ids.length+'개 작품을 삭제했어요');}
+async function saveOrder(){if(!currentUser)return;for(var i=0;i<works.length;i++){await supa.from('works').update({sort_order:i}).eq('id',works[i].id);}}
+function onDragStart(e,id){dragSrcId=id;e.dataTransfer.effectAllowed='move';setTimeout(function(){var el=document.querySelector('.card[data-id="'+id+'"]');if(el)el.classList.add('dragging');},0);}
+function onDragOver(e,id){e.preventDefault();e.dataTransfer.dropEffect='move';document.querySelectorAll('.card').forEach(function(c){c.classList.remove('drag-over');});var el=document.querySelector('.card[data-id="'+id+'"]');if(el&&id!==dragSrcId)el.classList.add('drag-over');}
+function onDragEnd(){document.querySelectorAll('.card').forEach(function(c){c.classList.remove('dragging');c.classList.remove('drag-over');});}
+function onDrop(e,targetId){e.preventDefault();if(!dragSrcId||dragSrcId===targetId)return;var srcIdx=works.findIndex(function(w){return w.id===dragSrcId;});var tgtIdx=works.findIndex(function(w){return w.id===targetId;});if(srcIdx<0||tgtIdx<0)return;var moved=works.splice(srcIdx,1)[0];works.splice(tgtIdx,0,moved);saveOrder();render();dragSrcId=null;}
+
+// ============================================================
+// ADD / EDIT WORK
+// ============================================================
 function toggleSoldF(){soldF=!soldF;document.getElementById('soldTrack').classList.toggle('on',soldF);}
-function openAdd(id=null){
-  editId=id;pendingImg=null;pendingImgFile=null;
-  const w=id?works.find(x=>x.id===id):null;
+function openAdd(id){
+  id=id||null;editId=id;pendingImg=null;pendingImgFile=null;
+  var w=id?works.find(function(x){return x.id===id;}):null;
   soldF=w?w.sold:false;
   document.getElementById('modalTitle').textContent=w?t('editTitle'):t('addTitle');
   document.getElementById('fTitle').value=w?w.title:'';
-  document.getElementById('fPrice').value=w&&w.price?w.price:'';
-  document.getElementById('pricePreview').textContent='';
   document.getElementById('fYear2').value=w?w.year:2024;
+  document.getElementById('fPrice').value=w&&w.price?w.price:'';
   document.getElementById('fSize').value=w?w.size:'';
   document.getElementById('fMedium').value=w?w.medium:'';
   document.getElementById('fDesc').value=w?w.desc:'';
@@ -2019,337 +1129,254 @@ function openAdd(id=null){
   document.getElementById('soldTrack').classList.toggle('on',soldF);
   document.getElementById('hnprev').innerHTML='';
   if(w&&w.size)setTimeout(previewHN,50);
-  const dz=document.getElementById('dropZone');
-  dz.innerHTML=w&&w.img?'<img class="imgpt" src="'+w.img+'"/>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> 클릭해서 이미지 업로드';
+  var dz=document.getElementById('dropZone');
+  dz.innerHTML=w&&w.img?'<img class="imgpt" src="'+w.img+'"/>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> <span id="dropZoneText">'+t('fImagePh')+'</span>';
   document.getElementById('addOv').classList.add('on');
 }
-function loadImg(input){
-  var f=input.files[0];if(!f)return;
-  pendingImgFile=f;
-  var r=new FileReader();r.onload=function(e){pendingImg=e.target.result;document.getElementById('dropZone').innerHTML='<img class="imgpt" src="'+e.target.result+'"/>';};r.readAsDataURL(f);
-}
-function saveWork(){
-  const title=document.getElementById('fTitle').value.trim();
+function loadImg(input){var f=input.files[0];if(!f)return;pendingImgFile=f;var r=new FileReader();r.onload=function(e){pendingImg=e.target.result;document.getElementById('dropZone').innerHTML='<img class="imgpt" src="'+e.target.result+'"/>';};r.readAsDataURL(f);}
+async function saveWork(){
+  var title=document.getElementById('fTitle').value.trim();
   if(!title){showToast(t('toastNoTitle'));return;}
-  const priceVal=parseInt(document.getElementById('fPrice').value)||0;const data={title,year:parseInt(document.getElementById('fYear2').value),genre:document.getElementById('fGenre2').value,medium:document.getElementById('fMedium').value.trim(),size:document.getElementById('fSize').value.trim(),desc:document.getElementById('fDesc').value.trim(),award:document.getElementById('fAward').value.trim(),sold:soldF,price:priceVal};
-  if(editId){const w=works.find(x=>x.id===editId);Object.assign(w,data);if(pendingImg)w.img=pendingImg;}
-  else works.push({id:nextId++,...data,img:pendingImg,c:PAL[nextId%PAL.length]});
-  closeOv('addOv');render();showToast(t('toastSaved'));
+  var priceVal=parseInt(document.getElementById('fPrice').value)||0;
+  var data={title:title,year:parseInt(document.getElementById('fYear2').value),genre:document.getElementById('fGenre2').value,medium:document.getElementById('fMedium').value.trim(),size:document.getElementById('fSize').value.trim(),desc:document.getElementById('fDesc').value.trim(),award:document.getElementById('fAward').value.trim(),sold:soldF,price:priceVal,portfolio_type:'artist'};
+  if(currentUser){var w=editId?works.find(function(x){return x.id===editId;}):null;data.c=w?w.c:PAL[nextId%PAL.length];if(pendingImgFile){showToast('이미지 업로드 중...');var url=await uploadImageToDB(pendingImgFile);if(url)data.img=url;}else if(pendingImg)data.img=pendingImg;else if(w)data.img=w.img;var ok=await saveWorkToDB(data,!!editId,w?w.dbId:null);if(!ok)return;await loadWorksFromDB();}
+  else{if(editId){var wx=works.find(function(x){return x.id===editId;});Object.assign(wx,data);if(pendingImg)wx.img=pendingImg;}else works.push(Object.assign({id:nextId++,img:pendingImg,c:PAL[nextId%PAL.length]},data));render();}
+  closeOv('addOv');showToast(t('toastSaved'));
 }
 
+// ============================================================
+// DETAIL
+// ============================================================
 function openDetail(id){
-  const w=works.find(x=>x.id===id);
-  const h=getHN(w);
-  const ph='<div style="width:100%;height:100%;background:'+w.c[0]+';display:flex;align-items:center;justify-content:center;"><svg width="60" height="60" viewBox="0 0 60 60" fill="none"><rect width="60" height="60" rx="6" fill="'+w.c[1]+'" opacity=".15"/><circle cx="20" cy="20" r="8" fill="'+w.c[1]+'" opacity=".4"/><path d="M4 46l12-16 9 11 7-9 17 14H4z" fill="'+w.c[1]+'" opacity=".4"/></svg></div>';
+  var w=works.find(function(x){return x.id===id;});var h=getHN(w);
+  var ph='<div style="width:100%;height:100%;background:'+w.c[0]+';display:flex;align-items:center;justify-content:center;"><svg width="60" height="60" viewBox="0 0 60 60" fill="none"><rect width="60" height="60" rx="6" fill="'+w.c[1]+'" opacity=".15"/><circle cx="20" cy="20" r="8" fill="'+w.c[1]+'" opacity=".4"/><path d="M4 46l12-16 9 11 7-9 17 14H4z" fill="'+w.c[1]+'" opacity=".4"/></svg></div>';
   document.getElementById('dImg').innerHTML=(w.img?'<img src="'+w.img+'"/>':ph)+(w.sold?'<div class="dsoldrib">'+t('soldBadge')+'</div>':'');
   document.getElementById('dTitle').textContent=w.title;
-  const chips=[w.year,w.genre,w.medium,w.size].filter(Boolean).map(v=>'<span class="chip">'+v+'</span>').join('');
-  const hnC=h?'<span class="chip hn'+(h.includes('변형')?' vari':'')+'">'+h+'</span>':'';
-  const solC=w.sold?'<span class="chip sold">판매 완료</span>':'';
-  const priceChip=w.price?'<span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD99;font-weight:500;">'+fmtKRW(w.price)+'</span>':'';
+  var chips=[w.year,w.genre,w.medium,w.size].filter(Boolean).map(function(v){return'<span class="chip">'+v+'</span>';}).join('');
+  var hnC=h?'<span class="chip hn'+(h.includes('변형')?' vari':'')+'">'+h+'</span>':'';
+  var priceChip=w.price?'<span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD99;font-weight:500;">'+fmtKRW(w.price)+'</span>':'';
+  var solC=w.sold?'<span class="chip sold">'+t('soldBadge')+'</span>':'';
   document.getElementById('dChips').innerHTML=hnC+priceChip+chips+solC;
   document.getElementById('dDesc').textContent=w.desc;
-  const aw=document.getElementById('dAward');
-  if(w.award){aw.style.display='flex';document.getElementById('dAwardTxt').textContent=w.award;}else aw.style.display='none';
+  var aw=document.getElementById('dAward');if(w.award){aw.style.display='flex';document.getElementById('dAwardTxt').textContent=w.award;}else aw.style.display='none';
   document.getElementById('dEditBtn').onclick=function(){closeOv('detailOv');openAdd(id);};
-  const sb=document.getElementById('dSelBtn');
-  if(sel.has(id)){sb.textContent='선택 해제';sb.className='btn';}else{sb.textContent='선택에 추가';sb.className='btn btn-blue';}
+  var sb=document.getElementById('dSelBtn');
+  if(sel.has(id)){sb.textContent=t('removeSel');sb.className='btn';}else{sb.textContent=t('addToSel');sb.className='btn btn-blue';}
   sb.onclick=function(){toggleSel(id);closeOv('detailOv');};
   document.getElementById('detailOv').classList.add('on');
 }
 
-function openArtist(){
-  document.getElementById('aName').value=artist.name;
-  document.getElementById('aPhone').value=artist.phone;
-  document.getElementById('aEmail').value=artist.email;
-  document.getElementById('artistOv').classList.add('on');
-}
-async function saveArtist(){
-  artist.name=document.getElementById('aName').value.trim();
-  artist.phone=document.getElementById('aPhone').value.trim();
-  artist.email=document.getElementById('aEmail').value.trim();
-  if(currentUser)await saveProfileToDB();
-  closeOv('artistOv');openPreview();
-}
+// ============================================================
+// ARTIST / PREVIEW
+// ============================================================
+function openArtist(){document.getElementById('aName').value=artist.name;document.getElementById('aPhone').value=artist.phone;document.getElementById('aEmail').value=artist.email;document.getElementById('artistOv').classList.add('on');}
+async function saveArtist(){artist.name=document.getElementById('aName').value.trim();artist.phone=document.getElementById('aPhone').value.trim();artist.email=document.getElementById('aEmail').value.trim();if(currentUser)await saveProfileToDB();closeOv('artistOv');openPreview();}
 function openPreview(){
-  var ids=sel.size>0?[...sel]:works.map(function(w){return w.id;});
+  var ids=sel.size>0?[...sel]:works.filter(function(w){return w.portfolio_type==='artist';}).map(function(w){return w.id;});
   selSizeForPreview=ids;
-  var aName = artist.name || t('previewNoArtist');
-  document.getElementById('pArtistName').textContent = aName;
-  // 작가 이름 있으면 "홍길동 작가의 작품 목록" 형식
-  var titleEl = document.getElementById('prevPanelTitle');
-  if(titleEl){
-    if(artist.name){
-      var suffix = curLang==='en' ? artist.name+"'s Portfolio" : curLang==='ja' ? artist.name+'さんの作品リスト' : artist.name+' 작가의 작품 목록';
-      titleEl.textContent = suffix;
-    } else {
-      titleEl.textContent = t('previewTitle');
-    }
-  }
+  var aName=artist.name||t('previewNoArtist');
+  document.getElementById('pArtistName').textContent=aName;
   document.getElementById('pArtistContact').textContent=[artist.phone,artist.email].filter(Boolean).join('  ·  ');
-  fetchRates().then(function(){renderPreviewList(ids);});
-  renderPreviewList(ids);
+  var titleEl=document.getElementById('prevPanelTitle');
+  if(titleEl){if(artist.name){var suffix=curLang==='en'?artist.name+"'s Portfolio":curLang==='ja'?artist.name+'さんの作品リスト':artist.name+' 작가의 작품 목록';titleEl.textContent=suffix;}else{titleEl.textContent=t('previewTitle');}}
+  fetchRates();renderPreviewList(ids);
   document.getElementById('prevOv').classList.add('on');
 }
+function renderPreviewList(ids){
+  selSizeForPreview=ids;
+  var tw=sortW(works.filter(function(w){return ids.indexOf(w.id)>=0;}));
+  var sc=tw.filter(function(w){return w.sold;}).length;
+  var scMsg=sc>0?' ('+t('soldCount')+sc+t('soldIncluded'):'';
+  document.getElementById('prevSub').textContent=tw.length+t('selWorks')+scMsg;
+  document.getElementById('pList').innerHTML=tw.map(function(w,i){var h=getHN(w);var priceStr=(showPrice&&w.price)?fmtPrice(w.price,selCur):'';var ph='<div style="width:46px;height:46px;border-radius:7px;background:'+w.c[0]+';display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 16 16" fill="'+w.c[1]+'" opacity=".5"><rect width="16" height="16" rx="2"/><circle cx="5" cy="5" r="2"/><path d="M0 12l3-4 2 3 3-3 5 4H0z"/></svg></div>';return'<div class="pitem'+(w.sold?' psold':'')+'">'+(w.sold?'<div class="psoldb"></div>':'')+'<div class="pnum">'+(i+1)+'</div><div class="pthumb">'+(w.img?'<img src="'+w.img+'"/>':ph)+'</div><div class="pinfo"><div class="ptrow">'+w.title+(h?'<span class="phn">'+h+'</span>':'')+(priceStr?'<span style="font-size:9px;padding:1px 6px;border-radius:20px;background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97;font-weight:500;">'+priceStr+'</span>':'')+(w.sold?'<span class="pstag">'+t('soldBadge')+'</span>':'')+'</div><div class="pmeta">'+w.year+' . '+w.genre+(w.medium?' . '+w.medium:'')+(w.size?' . '+w.size:'')+'</div><div class="pdesc">'+w.desc+'</div></div></div>';}).join('');}
+function setCur(cur){selCur=cur;document.querySelectorAll('.cur-btn').forEach(function(b){b.classList.toggle('on',b.dataset.cur===cur);});updateRateInfo();refreshPreviewList();}
+function togglePriceShow(){showPrice=!showPrice;document.getElementById('priceToggle').classList.toggle('on',showPrice);document.getElementById('currencyPicker').style.display=showPrice?'':'none';refreshPreviewList();}
 
+// ============================================================
+// EXPORT
+// ============================================================
 function doExport(type){
-  const ids=sel.size>0?[...sel]:works.map(w=>w.id);
-  const tw=sortW(works.filter(w=>ids.includes(w.id)));
-  if(type==='csv'){
-    const hdr='번호,제목,연도,장르,호수,매체,크기,작품 설명,가격(원),가격('+selCur+'),판매여부';
-    const rows=tw.map(function(w,i){const h=getHN(w);const priceKRW=w.price?w.price.toLocaleString()+'원':'-';const priceForeign=(showPrice&&w.price&&selCur!=='KRW')?fmtPrice(w.price,selCur):'-';return[i+1,'"'+w.title+'"',w.year,w.genre,h||'-','"'+w.medium+'"','"'+w.size+'"','"'+(w.desc||'').replace(/"/g,'""')+'"',priceKRW,priceForeign,w.sold?'판매 완료':'판매 가능'].join(',');});
-    const blob=new Blob(['\uFEFF'+[hdr,...rows].join('\n')],{type:'text/csv;charset=utf-8'});
-    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='POPOL_'+(artist.name||'포트폴리오')+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
-    showToast(t('toastCsv'));
-  } else if(type==='pdf'){
-    const pw=window.open('','_blank');
-    const aName=artist.name||'작가 이름',aC=[artist.phone,artist.email].filter(Boolean).join(' · ');
-    const today=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
-    const rows=tw.map(function(w,i){const h=getHN(w);return '<tr'+(w.sold?' style="background:#fff5f5;"':'')+'><td style="width:24px;text-align:center;color:#aaa;">'+( i+1)+'</td><td style="width:120px;"><b>'+w.title+'</b>'+(w.sold?'<br/><span style="font-size:7.5pt;color:#A32D2D;">판매 완료</span>':'')+'</td><td style="text-align:center;">'+w.year+'</td><td>'+w.genre+'</td><td>'+(h||'-')+'</td><td>'+(w.medium||'-')+'</td><td>'+(w.size||'-')+'</td><td style="font-size:8pt;color:#555;">'+w.desc+'</td></tr>';}).join('');
-    pw.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>작품 목록 — '+aName+'</title><style>@page{size:A4 landscape;margin:15mm 14mm;}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:#111;font-size:10pt;}.hd{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:10px;border-bottom:2px solid #111;margin-bottom:14px;}.name{font-size:17pt;font-weight:700;}.sub{font-size:8.5pt;color:#666;margin-top:4px;}.hr{text-align:right;font-size:8.5pt;color:#555;line-height:1.7;}table{width:100%;border-collapse:collapse;font-size:8.5pt;}thead tr{border-bottom:1.5px solid #222;}th{padding:6px 8px;text-align:left;font-weight:600;font-size:7.5pt;color:#444;}tr{border-bottom:0.5px solid #e0e0e0;}td{padding:7px 8px;vertical-align:middle;}.ft{margin-top:12px;padding-top:8px;border-top:0.5px solid #ddd;display:flex;justify-content:space-between;font-size:7.5pt;color:#bbb;}</style></head><body><div class="hd"><div><div class="name">'+aName+'</div><div class="sub">작품 목록 '+tw.length+'점'+(tw.filter(w=>w.sold).length>0?' · 판매 완료 '+tw.filter(w=>w.sold).length+'점':'')+'</div></div><div class="hr">'+(aC?aC+'<br/>':'')+'<span style="font-size:7.5pt;color:#999;">'+today+'</span></div></div><table><thead><tr><th>No.</th><th>제목</th><th>연도</th><th>장르</th><th>호수</th><th>매체</th><th>크기</th><th>작품 설명</th></tr></thead><tbody>'+rows+'</tbody></table><div class="ft"><span>POPOL · '+aName+'</span><span>'+today+'</span></div></body></html>');
-    pw.document.close();setTimeout(function(){pw.print();},500);showToast(t('toastPdf'));
-  } else if(type==='img'){
-    const imgs=tw.filter(w=>w.img);
-    if(!imgs.length){showToast(t('toastNoImg'));return;}
-    imgs.forEach(function(w,i){setTimeout(function(){const a=document.createElement('a');a.href=w.img;a.download=w.year+'_'+w.title+'.jpg';a.click();},i*400);});
-    showToast(imgs.length+t('toastImgDl'));
-  } else if(type==='txt'){
-    const txt=tw.map(function(w,i){const h=getHN(w);return(i+1)+'. '+w.title+(h?' ['+h+']':'')+(w.sold?' [판매 완료]':'')+'\n   '+[w.year,w.genre,w.medium,w.size].filter(Boolean).join(' · ')+'\n   '+w.desc;}).join('\n\n');
-    navigator.clipboard.writeText(txt).then(function(){showToast(t('toastTxt'));});
+  var ids=sel.size>0?[...sel]:works.filter(function(w){return w.portfolio_type==="artist";}).map(function(w){return w.id;});
+  var tw=sortW(works.filter(function(w){return ids.indexOf(w.id)>=0;}));
+  if(type==="csv"){
+    var hdr="번호,제목,연도,장르,호수,매체,크기,작품 설명,가격(원),판매여부";
+    var rows=tw.map(function(w,i){
+      var h=getHN(w);
+      return [i+1,'"'+w.title+'"',w.year,w.genre,h||"-",'"'+w.medium+'"','"'+w.size+'"','"'+(w.desc||"").replace(/"/g,'""')+'"',w.price?w.price.toLocaleString()+"원":"-",w.sold?"판매 완료":"판매 가능"].join(",");
+    });
+    var csvContent=[hdr].concat(rows).join("\n");
+    var blob=new Blob(["﻿"+csvContent],{type:"text/csv;charset=utf-8"});
+    var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="POPOL_"+(artist.name||"포트폴리오")+"_"+new Date().toISOString().slice(0,10)+".csv";a.click();
+    showToast(t("toastCsv"));
+  } else if(type==="pdf"){
+    var pw=window.open("","_blank");
+    var aName=artist.name||"작가 이름",aC=[artist.phone,artist.email].filter(Boolean).join(" · ");
+    var today=new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"long",day:"numeric"});
+    var rows2=tw.map(function(w,i){
+      var h=getHN(w);
+      return "<tr"+(w.sold?" style='background:#fff5f5;'":" ")+">" +
+        "<td style='text-align:center;color:#aaa;'>"+(i+1)+"</td>" +
+        "<td><b>"+w.title+"</b>"+(w.sold?"<br/><span style='font-size:7.5pt;color:#A32D2D;'>판매 완료</span>":"")+"</td>" +
+        "<td style='text-align:center;'>"+w.year+"</td>" +
+        "<td>"+w.genre+"</td>" +
+        "<td>"+(h||"-")+"</td>" +
+        "<td>"+(w.medium||"-")+"</td>" +
+        "<td>"+(w.size||"-")+"</td>" +
+        "<td style='font-size:8pt;color:#555;'>"+w.desc+"</td>" +
+        "</tr>";
+    }).join("");
+    pw.document.write("<!DOCTYPE html><html><head><meta charset='utf-8'><title>"+aName+"</title><style>@page{size:A4 landscape;margin:15mm 14mm;}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:#111;font-size:10pt;}.hd{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:10px;border-bottom:2px solid #111;margin-bottom:14px;}.name{font-size:17pt;font-weight:700;}table{width:100%;border-collapse:collapse;font-size:8.5pt;}thead tr{border-bottom:1.5px solid #222;}th{padding:6px 8px;text-align:left;font-weight:600;font-size:7.5pt;color:#444;}tr{border-bottom:0.5px solid #e0e0e0;}td{padding:7px 8px;vertical-align:middle;}</style></head><body><div class='hd'><div><div class='name'>"+aName+"</div><div style='font-size:8.5pt;color:#666;margin-top:4px;'>작품 목록 "+tw.length+"점</div></div><div style='text-align:right;font-size:8.5pt;color:#555;'>"+(aC?aC+"<br/>":"")+"<span style='color:#999;'>"+today+"</span></div></div><table><thead><tr><th>No.</th><th>제목</th><th>연도</th><th>장르</th><th>호수</th><th>매체</th><th>크기</th><th>작품 설명</th></tr></thead><tbody>"+rows2+"</tbody></table></body></html>");
+    pw.document.close();setTimeout(function(){pw.print();},500);showToast(t("toastPdf"));
+  } else if(type==="img"){
+    var imgs=tw.filter(function(w){return w.img;});
+    if(!imgs.length){showToast(t("toastNoImg"));return;}
+    imgs.forEach(function(w,i){setTimeout(function(){var a=document.createElement("a");a.href=w.img;a.download=w.year+"_"+w.title+".jpg";a.click();},i*400);});
+    showToast(imgs.length+t("toastImgDl"));
+  } else if(type==="txt"){
+    var lines=tw.map(function(w,i){
+      var h=getHN(w);
+      return (i+1)+". "+w.title+(h?" ["+h+"]":"")+(w.sold?" ["+t("soldBadge")+"]":"")+"\n   "+[w.year,w.genre,w.medium,w.size].filter(Boolean).join(" . ")+"\n   "+w.desc;
+    });
+    navigator.clipboard.writeText(lines.join("\n\n")).then(function(){showToast(t("toastTxt"));});
   }
 }
 function shareVia(type){
-  const ids=sel.size>0?[...sel]:works.map(w=>w.id);
-  const tw=works.filter(w=>ids.includes(w.id));
-  const txt=(artist.name?artist.name+' ':'')+'포트폴리오 ('+tw.length+'개 작품)\n'+tw.map(function(w,i){const h=getHN(w);return(i+1)+'. '+w.title+' ('+w.year+', '+w.genre+(h?', '+h:'')+(w.sold?', 판매 완료':'')+')';}).join('\n');
-  if(type==='sms')window.open('sms:?body='+encodeURIComponent(txt));
-  else if(type==='email')window.open('mailto:?subject='+encodeURIComponent((artist.name||'작가')+' 작품 목록')+'&body='+encodeURIComponent(txt));
-  else if(type==='copy')navigator.clipboard.writeText(txt).then(function(){showToast(t('toastCopied'));});
+  var ids=sel.size>0?[...sel]:works.filter(function(w){return w.portfolio_type==="artist";}).map(function(w){return w.id;});
+  var tw=works.filter(function(w){return ids.indexOf(w.id)>=0;});
+  var lines=[(artist.name?artist.name+" ":"")+"포트폴리오 ("+tw.length+"개 작품)"];
+  tw.forEach(function(w,i){
+    var h=getHN(w);
+    lines.push((i+1)+". "+w.title+" ("+w.year+", "+w.genre+(h?", "+h:"")+(w.sold?", "+t("soldBadge"):"")+")");
+  });
+  var txt=lines.join("\n");
+  if(type==="sms")window.open("sms:?body="+encodeURIComponent(txt));
+  else if(type==="email")window.open("mailto:?subject="+encodeURIComponent((artist.name||"작가")+" 작품 목록")+"&body="+encodeURIComponent(txt));
+  else if(type==="copy")navigator.clipboard.writeText(txt).then(function(){showToast(t("toastCopied"));});
 }
-
+// ============================================================
+// UPLOAD / PARSE
+// ============================================================
 function norm(s){return(s||'').toLowerCase().replace(/[\s_.]/g,'');}
-function readURL(f){return new Promise(function(res){const r=new FileReader();r.onload=function(e){res(e.target.result);};r.readAsDataURL(f);});}
-function parseFN(name){
-  const base=name.replace(/\.[^.]+$/,'');
-  return{title:detTitle(base),year:detYear(base),size:detSize(base)||'',medium:detMed(base)||'',genre:'회화',confidence:{title:'ok',year:detYear(base)!==new Date().getFullYear()?'ok':'warn',size:detSize(base)?'ok':'warn',medium:detMed(base)?'ok':'warn'}};
-}
-function parseCSVL(line){
-  const res=[];let cur='',inQ=false;
-  for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(c===','&&!inQ){res.push(cur.trim());cur='';}else cur+=c;}
-  res.push(cur.trim());return res;
-}
+function readURL(f){return new Promise(function(res){var r=new FileReader();r.onload=function(e){res(e.target.result);};r.readAsDataURL(f);});}
+function parseFN(name){var base=name.replace(/\.[^.]+$/,'');return{title:detTitle(base),year:detYear(base),size:detSize(base)||'',medium:detMed(base)||'',genre:'회화',confidence:{title:'ok',year:'ok',size:detSize(base)?'ok':'warn',medium:detMed(base)?'ok':'warn'}};}
+function parseCSVL(line){var res=[],cur='',inQ=false;for(var i=0;i<line.length;i++){var c=line[i];if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(c===','&&!inQ){res.push(cur.trim());cur='';}else cur+=c;}res.push(cur.trim());return res;}
 const CMAP={제목:['제목','title','작품명','name'],연도:['연도','year','제작년도'],장르:['장르','genre','분류'],매체:['매체','medium','재료','material'],크기:['크기','size','사이즈'],설명:['설명','description','desc'],수상:['수상','award','이력']};
-function findC(hdrs,key){for(const c of(CMAP[key]||[])){const i=hdrs.findIndex(h=>(h||'').toLowerCase().includes(c));if(i>=0)return i;}return -1;}
+function findC(hdrs,key){for(var c of(CMAP[key]||[])){var i=hdrs.findIndex(function(h){return(h||'').toLowerCase().includes(c);});if(i>=0)return i;}return -1;}
 function parseCSV(text){
-  const lines=text.split(/\r?\n/).filter(l=>l.trim());if(lines.length<2)return[];
-  const hdrs=parseCSVL(lines[0]);const cols={};for(const k of Object.keys(CMAP))cols[k]=findC(hdrs,k);
-  const res=[];
-  for(let i=1;i<lines.length;i++){
-    const row=parseCSVL(lines[i]);if(row.every(c=>!c))continue;
-    const title=cols['제목']>=0?row[cols['제목']]:'';if(!title)continue;
-    const rm=cols['매체']>=0?row[cols['매체']]:'';
-    const rs=cols['크기']>=0?row[cols['크기']]:'';
-    const rg=cols['장르']>=0?row[cols['장르']]:'';
-    res.push({title,year:parseInt(cols['연도']>=0?row[cols['연도']]:'')||new Date().getFullYear(),genre:GENRES.find(g=>rg.includes(g))||'회화',medium:detMed(rm)||rm,size:detSize(rs)||rs,desc:cols['설명']>=0?row[cols['설명']]:'',award:cols['수상']>=0?row[cols['수상']]:'',source:'csv',confidence:{title:'ok',year:'ok',size:(detSize(rs)||rs)?'ok':'warn',medium:(detMed(rm)||rm)?'ok':'warn'}});
+  var lines=text.split(/\r?\n/).filter(function(l){return l.trim();});
+  if(lines.length<2)return[];
+  var hdrs=parseCSVL(lines[0]);
+  var cols={};
+  for(var k of Object.keys(CMAP))cols[k]=findC(hdrs,k);
+  var res=[];
+  for(var i=1;i<lines.length;i++){
+    var row=parseCSVL(lines[i]);
+    if(row.every(function(c){return!c;}))continue;
+    var title=cols["제목"]>=0?row[cols["제목"]]:"";
+    if(!title)continue;
+    var rm=cols["매체"]>=0?row[cols["매체"]]:"";
+    var rs=cols["크기"]>=0?row[cols["크기"]]:"";
+    var rg=cols["장르"]>=0?row[cols["장르"]]:"";
+    res.push({title:title,year:parseInt(cols["연도"]>=0?row[cols["연도"]]:"")||new Date().getFullYear(),genre:GENRES.find(function(g){return rg.includes(g);})||"회화",medium:detMed(rm)||rm,size:detSize(rs)||rs,desc:cols["설명"]>=0?row[cols["설명"]]:"",award:cols["수상"]>=0?row[cols["수상"]]:"",source:"csv",confidence:{title:"ok",year:"ok",size:(detSize(rs)||rs)?"ok":"warn",medium:(detMed(rm)||rm)?"ok":"warn"}});
   }
   return res;
 }
 async function handleDrop(e){e.preventDefault();document.getElementById('uzzone').classList.remove('drag');await handleFiles(e.dataTransfer.files);}
-async function handleFiles(files){
-  if(!files||!files.length)return;
-  const imgs=[],csvs=[];
-  for(const f of files){if(/\.csv$/i.test(f.name))csvs.push(f);else if(/\.(jpe?g|png|webp|gif|bmp)$/i.test(f.name))imgs.push(f);}
-  showLoading();
-  let items=[];
-  for(const cf of csvs){const text=await cf.text();parseCSV(text).forEach(p=>items.push({...p,img:null,checked:true,editing:false}));}
-  for(const img of imgs){
-    const url=await readURL(img);
-    const p=parseFN(img.name);
-    const ex=items.find(it=>{const a=norm(it.title),b=norm(img.name.replace(/\.[^.]+$/,''));return b.includes(a)||a.includes(b);});
-    if(ex)ex.img=url;
-    else items.push({...p,img:url,source:'img',checked:true,editing:false,desc:'',award:''});
-  }
-  if(!items.length){closeOv('reviewOv');showToast(t('toastNoWork'));return;}
-  reviewItems=items;showReview();
-}
-function showLoading(){
-  document.getElementById('reviewBody').innerHTML='<div class="loadwrap"><div class="spinner"></div><div style="font-size:13px;color:var(--text2);">'+t('toastAnalyzing')+'</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">'+t('toastAnalyzingSub')+'</div></div>';
-  document.getElementById('reviewSub').textContent='잠시만 기다려주세요';
-  document.getElementById('reviewOv').classList.add('on');
-}
-function showReview(){
-  const n=reviewItems.length,im=reviewItems.filter(r=>r.img).length,cv=reviewItems.filter(r=>r.source==='csv').length;
-  document.getElementById('reviewSub').textContent='총 '+n+'개 인식 · 이미지 '+im+'개 · 목록 '+cv+'개';
-  renderReview();
-}
-function renderReview(){
-  const allOn=reviewItems.every(r=>r.checked);
-  let h='<div class="selallrow"><div class="chkbox'+(allOn?' on':'')+'" onclick="toggleAllR()"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>전체 선택 / 해제</div>';
-  reviewItems.forEach(function(it,i){
-    const hn=detHN(it.size);
-    const ph='<div style="width:52px;height:52px;border-radius:8px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
-    if(it.editing){
-      h+='<div class="ritem"><div class="chkbox'+(it.checked?' on':'')+'" onclick="toggleRC('+i+')"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rthumb">'+(it.img?'<img src="'+it.img+'"/>':ph)+'</div><div class="rbody"><div class="editform"><div class="efgrid"><div class="effield" style="grid-column:1/-1;"><label class="eflabel">제목</label><input class="efinput" value="'+esc(it.title)+'" oninput="reviewItems['+i+'].title=this.value"/></div><div class="effield"><label class="eflabel">연도</label><input class="efinput" type="number" value="'+it.year+'" oninput="reviewItems['+i+'].year=parseInt(this.value)"/></div><div class="effield"><label class="eflabel">장르</label><select class="efinput" onchange="reviewItems['+i+'].genre=this.value">'+GENRES.map(g=>'<option'+(g===it.genre?' selected':'')+'>'+g+'</option>').join('')+'</select></div><div class="effield" style="grid-column:1/-1;"><label class="eflabel">재료/매체</label><input class="efinput" value="'+esc(it.medium)+'" oninput="reviewItems['+i+'].medium=this.value"/></div><div class="effield" style="grid-column:1/-1;"><label class="eflabel">크기</label><input class="efinput" value="'+esc(it.size)+'" oninput="reviewItems['+i+'].size=this.value"/></div></div></div><span class="redit" onclick="reviewItems['+i+'].editing=false;renderReview()">'+ t('reviewCollapse') +'</span></div></div>';
-    } else {
-      h+='<div class="ritem"><div class="chkbox'+(it.checked?' on':'')+'" onclick="toggleRC('+i+')"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rthumb">'+(it.img?'<img src="'+it.img+'"/>':ph)+'</div><div class="rbody"><div class="rtop"><div class="rtitle">'+(it.title||'<span style="color:var(--text3)">'+t('reviewNoTitle')+'</span>')+'</div><span class="redit" onclick="reviewItems['+i+'].editing=true;renderReview()">'+ t('reviewEdit') +'</span></div><div class="rtags"><span class="rtag rt-year">'+it.year+'</span><span class="rtag rt-genre">'+it.genre+'</span>'+(it.medium?'<span class="rtag rt-med">'+esc(it.medium)+'</span>':'<span class="rtag rt-warn">'+t('reviewNoMed')+'</span>')+(it.size?'<span class="rtag rt-size">'+esc(it.size)+'</span>':'<span class="rtag rt-warn">'+t('reviewNoSize')+'</span>')+(hn?'<span class="rtag rt-hnum">'+hn+'</span>':'')+'<span class="rtag rt-src">'+(it.source==='csv'?'엑셀':'이미지')+'</span></div></div></div>';
-    }
-  });
-  document.getElementById('reviewBody').innerHTML=h;
-  document.getElementById('footInfo').textContent=reviewItems.filter(r=>r.checked).length+'개 선택됨';
-}
+async function handleFiles(files){if(!files||!files.length)return;var imgs=[],csvs=[];for(var f of files){if(/\.csv$/i.test(f.name))csvs.push(f);else if(/\.(jpe?g|png|webp|gif|bmp)$/i.test(f.name))imgs.push(f);}showLoading();var items=[];for(var cf of csvs){var text=await cf.text();parseCSV(text).forEach(function(p){items.push(Object.assign({img:null,checked:true,editing:false},p));});}for(var img of imgs){var url=await readURL(img);var p=parseFN(img.name);var ex=items.find(function(it){var a=norm(it.title),b=norm(img.name.replace(/\.[^.]+$/,''));return b.includes(a)||a.includes(b);});if(ex)ex.img=url;else items.push(Object.assign({img:url,source:'img',checked:true,editing:false,desc:'',award:''},p));}if(!items.length){closeOv('reviewOv');showToast(t('toastNoWork'));return;}reviewItems=items;showReview();}
+function showLoading(){document.getElementById('reviewBody').innerHTML='<div class="loadwrap"><div class="spinner"></div><div style="font-size:13px;color:var(--text2);">파일 분석 중...</div></div>';document.getElementById('reviewSub').textContent='잠시만 기다려주세요';document.getElementById('reviewOv').classList.add('on');}
+function showReview(){var n=reviewItems.length,im=reviewItems.filter(function(r){return r.img;}).length,cv=reviewItems.filter(function(r){return r.source==='csv';}).length;document.getElementById('reviewSub').textContent='총 '+n+'개 인식 · 이미지 '+im+'개 · 목록 '+cv+'개';renderReview();}
+function renderReview(){var allOn=reviewItems.every(function(r){return r.checked;});var h='<div class="selallrow"><div class="chkbox'+(allOn?' on':'')+'" onclick="toggleAllR()"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+t('reviewSelAll')+'</div>';reviewItems.forEach(function(it,i){var hn=detHN(it.size);var ph='<div style="width:52px;height:52px;border-radius:8px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';if(it.editing){h+='<div class="ritem"><div class="chkbox'+(it.checked?' on':'')+'" onclick="toggleRC('+i+')"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rthumb">'+(it.img?'<img src="'+it.img+'"/>':ph)+'</div><div class="rbody"><div class="editform"><div class="efgrid"><div class="effield" style="grid-column:1/-1;"><label class="eflabel">'+t('efTitle')+'</label><input class="efinput" value="'+esc(it.title)+'" oninput="reviewItems['+i+'].title=this.value"/></div><div class="effield"><label class="eflabel">'+t('efYear')+'</label><input class="efinput" type="number" value="'+it.year+'" oninput="reviewItems['+i+'].year=parseInt(this.value)"/></div><div class="effield"><label class="eflabel">'+t('efGenre')+'</label><select class="efinput" onchange="reviewItems['+i+'].genre=this.value">'+GENRES.map(function(g){return'<option'+(g===it.genre?' selected':'')+'>'+g+'</option>';}).join('')+'</select></div><div class="effield" style="grid-column:1/-1;"><label class="eflabel">'+t('efMed')+'</label><input class="efinput" value="'+esc(it.medium)+'" oninput="reviewItems['+i+'].medium=this.value"/></div><div class="effield" style="grid-column:1/-1;"><label class="eflabel">'+t('efSize')+'</label><input class="efinput" value="'+esc(it.size)+'" oninput="reviewItems['+i+'].size=this.value"/></div></div></div><span class="redit" onclick="reviewItems['+i+'].editing=false;renderReview()">'+t('reviewCollapse')+'</span></div></div>';}else{h+='<div class="ritem"><div class="chkbox'+(it.checked?' on':'')+'" onclick="toggleRC('+i+')"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rthumb">'+(it.img?'<img src="'+it.img+'"/>':ph)+'</div><div class="rbody"><div class="rtop"><div class="rtitle">'+(it.title||'<span style="color:var(--text3)">'+t('reviewNoTitle')+'</span>')+'</div><span class="redit" onclick="reviewItems['+i+'].editing=true;renderReview()">'+t('reviewEdit')+'</span></div><div class="rtags"><span class="rtag rt-year">'+it.year+'</span><span class="rtag rt-genre">'+it.genre+'</span>'+(it.medium?'<span class="rtag rt-med">'+esc(it.medium)+'</span>':'<span class="rtag rt-warn">'+t('reviewNoMed')+'</span>')+(it.size?'<span class="rtag rt-size">'+esc(it.size)+'</span>':'<span class="rtag rt-warn">'+t('reviewNoSize')+'</span>')+(hn?'<span class="rtag rt-hnum">'+hn+'</span>':'')+'<span class="rtag rt-src">'+(it.source==='csv'?t('reviewSrcCsv'):t('reviewSrcImg'))+'</span></div></div></div>';}});document.getElementById('reviewBody').innerHTML=h;document.getElementById('footInfo').textContent=reviewItems.filter(function(r){return r.checked;}).length+'개 선택됨';}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toggleRC(i){reviewItems[i].checked=!reviewItems[i].checked;renderReview();}
-function toggleAllR(){const a=reviewItems.every(r=>r.checked);reviewItems.forEach(r=>r.checked=!a);renderReview();}
-function importSel(){
-  const toAdd=reviewItems.filter(r=>r.checked);
-  if(!toAdd.length){showToast(t('toastNone'));return;}
-  let base=Date.now();
-  toAdd.forEach(function(it,i){works.push({id:base+i,title:it.title,year:it.year,genre:it.genre,medium:it.medium||'',size:it.size||'',desc:it.desc||'',award:it.award||'',img:it.img||null,sold:false,c:PAL[(base+i)%PAL.length]});});
-  nextId=Date.now()+1000;
-  closeOv('reviewOv');reviewItems=[];render();
-  showToast(toAdd.length+t('toastImported'));
-  document.getElementById('impSec').innerHTML='<div class="resbanner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>'+toAdd.length+t('toastImported')+'! <button class="btn btn-sm btn-dark" onclick="showTab(\'portfolio\')" style="margin-left:auto;">'+t('goPortfolio')+'</button></div>';
+function toggleAllR(){var a=reviewItems.every(function(r){return r.checked;});reviewItems.forEach(function(r){r.checked=!a;});renderReview();}
+async function importSel(){
+  var toAdd=reviewItems.filter(function(r){return r.checked;});
+  if(!toAdd.length){showToast(t("toastNone"));return;}
+  if(currentUser){
+    for(var i=0;i<toAdd.length;i++){
+      var it=toAdd[i];
+      var data={title:it.title,year:it.year,genre:it.genre,medium:it.medium||"",size:it.size||"",desc:it.desc||"",award:it.award||"",img:it.img||null,sold:false,price:0,portfolio_type:"artist",c:PAL[Math.floor(Math.random()*PAL.length)]};
+      await saveWorkToDB(data,false,null);
+    }
+    await loadWorksFromDB();
+  } else {
+    toAdd.forEach(function(it){
+      works.push({id:nextId++,title:it.title,year:it.year,genre:it.genre,medium:it.medium||"",size:it.size||"",desc:it.desc||"",award:it.award||"",img:it.img||null,sold:false,price:0,portfolio_type:"artist",c:PAL[nextId%PAL.length]});
+    });
+    render();
+  }
+  closeOv("reviewOv");
+  reviewItems=[];
+  showToast(toAdd.length+t("toastImported"));
+  document.getElementById("impSec").innerHTML="<div class='resbanner'>"+toAdd.length+t("toastImported")+"! <button class='btn btn-sm btn-dark' onclick=\"showTab('portfolio')\" style='margin-left:auto;'>"+t("goPortfolio")+"</button></div>";
 }
-
-function showTab(t){
-  document.getElementById('tabP').style.display=t==='portfolio'?'block':'none';
-  document.getElementById('tabU').style.display=t==='upload'?'block':'none';
-}
-function closeOv(id){document.getElementById(id).classList.remove('on');}
-function ovClick(e,id){if(e.target.id===id)closeOv(id);}
-let toastT;
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('on');},2500);}
-
-
-(function(){
-  // 구글 OAuth 콜백이면 스플래시 스킵
-  if(window.location.hash && window.location.hash.includes('access_token')){
-    var sp = document.getElementById('splash');
-    if(sp) sp.style.display = 'none';
+var DESIGN_CATS={'브랜딩':{bg:'#E6F1FB',color:'#0C447C'},'UI/UX':{bg:'#EEEDFE',color:'#3C3489'},'포스터':{bg:'#EAF3DE',color:'#27500A'},'영상':{bg:'#FCEBEB',color:'#791F1F'},'제품':{bg:'#FAEEDA',color:'#633806'},'기획':{bg:'#F1EFE8',color:'#5F5E5A'},'사진':{bg:'#E1F5EE',color:'#085041'},'기타':{bg:'#F1EFE8',color:'#444441'}};
+var designEditId=null,designPendingImg=null,designPendingImgFile=null;
+function openDesignAdd(id){designEditId=id||null;designPendingImg=null;designPendingImgFile=null;var w=id?works.find(function(x){return x.id===id;}):null;document.getElementById('designModalTitle').textContent=w?'프로젝트 수정':'디자인 프로젝트 추가';document.getElementById('dfTitle').value=w?w.title:'';document.getElementById('dfYear').value=w?w.year:2024;document.getElementById('dfCat').value=w?(w.genre||'브랜딩'):'브랜딩';document.getElementById('dfClient').value=w?(w.project_client||''):'';document.getElementById('dfDuration').value=w?(w.project_duration||''):'';document.getElementById('dfDesc').value=w?(w.desc||''):'';document.getElementById('dfLink').value=w?(w.project_link||''):'';var dz=document.getElementById('dDropZone');dz.innerHTML=w&&w.img?'<img class="imgpt" src="'+w.img+'"/>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> 클릭해서 이미지 업로드';document.getElementById('designAddOv').classList.add('on');}
+function loadDesignImg(input){var f=input.files[0];if(!f)return;designPendingImgFile=f;var r=new FileReader();r.onload=function(e){designPendingImg=e.target.result;document.getElementById('dDropZone').innerHTML='<img class="imgpt" src="'+e.target.result+'"/>';};r.readAsDataURL(f);}
+async function saveDesignWork(){var title=document.getElementById('dfTitle').value.trim();if(!title){showToast('프로젝트명을 입력해주세요');return;}var data={title:title,year:parseInt(document.getElementById('dfYear').value),genre:document.getElementById('dfCat').value,desc:document.getElementById('dfDesc').value.trim(),project_client:document.getElementById('dfClient').value.trim(),project_duration:document.getElementById('dfDuration').value.trim(),project_link:document.getElementById('dfLink').value.trim(),portfolio_type:'design',medium:'',size:'',award:'',price:0,sold:false};if(currentUser){var w=designEditId?works.find(function(x){return x.id===designEditId;}):null;data.c=w?w.c:PAL[Math.floor(Math.random()*PAL.length)];if(designPendingImgFile){showToast('이미지 업로드 중...');var url=await uploadImageToDB(designPendingImgFile);if(url)data.img=url;}else if(designPendingImg){data.img=designPendingImg;}else if(w){data.img=w.img;}var ok=await saveWorkToDB(data,!!designEditId,w?w.dbId:null);if(!ok)return;await loadWorksFromDB();}closeOv('designAddOv');showToast('저장됐어요');}
+function renderDesign(){
+  var dw=sortW(works.filter(function(w){return w.portfolio_type==="design";}));
+  var el=document.getElementById("list");
+  if(!dw.length){
+    el.innerHTML="<div class='design-grid'><div class='add-dcard' onclick='openDesignAdd()'><svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round'><line x1='12' y1='5' x2='12' y2='19'/><line x1='5' y1='12' x2='19' y2='12'/></svg>프로젝트 추가</div></div>";
     return;
   }
-  var splash = document.getElementById('splash');
-  var splashLogoEl = document.querySelector('.splash-logo');
-  var sqs = [
-    document.getElementById('sq0'),
-    document.getElementById('sq1'),
-    document.getElementById('sq2'),
-    document.getElementById('sq3')
-  ];
-  var word = document.getElementById('splashWord');
-  var sub = document.getElementById('splashSub');
+  var html="<div class='design-grid'>";
+  dw.forEach(function(w){
+    var cat=DESIGN_CATS[w.genre]||DESIGN_CATS["기타"];
+    var c0=w.c[0],c1=w.c[1];
+    var ph="<div style='width:100%;height:100%;background:"+c0+";display:flex;align-items:center;justify-content:center;'><svg width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='"+c1+"' stroke-width='1' opacity='.4'><path d='M12 19l7-7 3 3-7 7-3-3z'/><path d='M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z'/></svg></div>";
+    html+="<div class='dcard' data-id='"+w.id+"'>";
+    html+="<div class='dcard-img'>"+(w.img?"<img src='"+w.img+"'/>":ph)+"</div>";
+    html+="<div class='dcard-body'>";
+    html+="<span class='dcard-cat' style='background:"+cat.bg+";color:"+cat.color+";'>"+w.genre+"</span>";
+    html+="<div class='dcard-title'>"+w.title+"</div>";
+    if(w.project_client)html+="<div class='dcard-client'>"+w.project_client+(w.project_duration?" . "+w.project_duration:"")+"</div>";
+    if(w.desc)html+="<div class='dcard-desc'>"+w.desc+"</div>";
+    html+="</div>";
+    html+="<div class='dcard-foot'>";
+    html+="<button class='dlink-btn' data-wid='"+w.id+"' onclick='openDesignAdd(this.dataset.wid)'>수정</button>";
+    if(w.project_link)html+="<a class='dlink-btn' href='"+w.project_link+"' target='_blank'>링크</a>";
+    html+="</div></div>";
+  });
+  html+="<div class='add-dcard' onclick='openDesignAdd()'><svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round'><line x1='12' y1='5' x2='12' y2='19'/><line x1='5' y1='12' x2='19' y2='12'/></svg>추가</div></div>";
+  el.innerHTML=html;
+  document.getElementById("pgn").innerHTML="";
+}
+function enterPortfolio(type){portfolioType=type;var home=document.getElementById('portfolioHome');var appEl=document.getElementById('appScreen');var navEl=document.getElementById('mainNav');if(home)home.style.display='none';if(appEl)appEl.style.display='';if(navEl)navEl.style.display='flex';var backBtn=document.getElementById('navBack');if(backBtn)backBtn.style.display='flex';var filterBar=document.querySelector('.filter-bar');if(filterBar)filterBar.style.display=type==='artist'?'':'none';var editBar=document.getElementById('editBar');if(editBar)editBar.style.display='none';render();}
+function goPortfolioHome(){var appEl=document.getElementById('appScreen');var navEl=document.getElementById('mainNav');var home=document.getElementById('portfolioHome');if(appEl)appEl.style.display='none';if(navEl)navEl.style.display='none';if(home)home.style.display='flex';editMode=false;sel.clear();}
 
-  // 로딩 중 밝기 단계
-  var loadLevels = [1.0, 0.55, 0.25, 0.1];
-  // 완성형 로고 명암 (원래 로고: 좌상단 100%, 우상단 55%, 좌하단 55%, 우하단 25%)
-  // HTML 순서: sq0(좌상), sq1(우상), sq3(좌하), sq2(우하)
-  var finalOpacity = {sq0:1.0, sq1:0.55, sq3:0.55, sq2:0.25};
+// ============================================================
+// TABS / OVERLAY / TOAST
+// ============================================================
+function showTab(t2){document.getElementById('tabP').style.display=t2==='portfolio'?'block':'none';document.getElementById('tabU').style.display=t2==='upload'?'block':'none';}
+function closeOv(id){document.getElementById(id).classList.remove('on');}
+function ovClick(e,id){if(e.target.id===id)closeOv(id);}
+var toastT;
+function showToast(msg){var t2=document.getElementById('toast');t2.textContent=msg;t2.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){t2.classList.remove('on');},2500);}
 
-  var step = 0, totalSteps = 8, interval = 280;
-
-  function setLoadOpacity(brightestIdx){
-    for(var i=0;i<4;i++){
-      var li=((i-brightestIdx)%4+4)%4;
-      sqs[i].style.opacity=loadLevels[li];
-    }
-  }
-  sqs.forEach(function(s){s.style.opacity=loadLevels[3];});
-
-  function tick(){
-    if(step<totalSteps){
-      setLoadOpacity(step%4);
-      step++;
-      setTimeout(tick,interval);
-    } else {
-      // 로딩 완료 → 원래 로고 명암으로 부드럽게 전환
-      sqs.forEach(function(s){
-        s.style.transition='opacity .4s ease';
-      });
-      document.getElementById('sq0').style.opacity = finalOpacity.sq0;
-      document.getElementById('sq1').style.opacity = finalOpacity.sq1;
-      document.getElementById('sq3').style.opacity = finalOpacity.sq3;
-      document.getElementById('sq2').style.opacity = finalOpacity.sq2;
-
-      // POPOL 글자 등장
-      setTimeout(function(){
-        word.classList.add('show');
-        sub.classList.add('show');
-      }, 350);
-
-      // 2초 후 로그인 화면으로 전환 시작
-      setTimeout(function(){
-        startTransitionToLogin();
-      }, 2000);
-    }
-  }
-
-  function startTransitionToLogin(){
-    // 1. 로그인 화면 display:flex로 바꾸되 opacity:0 유지
-    var loginEl = document.getElementById('loginScreen');
-    var appEl = document.getElementById('appScreen');
-    var isLoggedIn = appEl && appEl.style.display === '';
-
-    if(!isLoggedIn && loginEl){
-      loginEl.style.display = 'flex';
-      loginEl.style.opacity = '0';
-    }
-    var homeEl3=document.getElementById('portfolioHome');
-    if(isLoggedIn && homeEl3) homeEl3.style.display='flex';
-
-    // 2. POPOL 글자 서서히 사라짐
-    word.style.transition = 'opacity .4s ease';
-    word.style.opacity = '0';
-    sub.style.transition = 'opacity .3s ease';
-    sub.style.opacity = '0';
-
-    // 3. 로고가 로그인 화면 로고 자리로 날아가기
-    setTimeout(function(){
-      var fromRect = splashLogoEl.getBoundingClientRect();
-      var loginIcon = loginEl ? loginEl.querySelector('.login-logo-icon') : null;
-      var toRect = loginIcon ? loginIcon.getBoundingClientRect() : null;
-
-      var scale = toRect ? Math.min(toRect.width/fromRect.width, toRect.height/fromRect.height) : 0.88;
-      var dx = toRect ? (toRect.left + toRect.width/2) - (fromRect.left + fromRect.width/2) : 0;
-      var dy = toRect ? (toRect.top + toRect.height/2) - (fromRect.top + fromRect.height/2) : -window.innerHeight*0.22;
-
-      splashLogoEl.style.transition = 'transform .7s cubic-bezier(.4,0,.2,1)';
-      splashLogoEl.style.transform = 'translate('+dx+'px,'+dy+'px) scale('+scale+')';
-
-      // 4. 배경 페이드아웃 + 로그인 화면 페이드인 동시에
-      setTimeout(function(){
-        splash.style.transition = 'opacity .5s ease';
-        splash.style.opacity = '0';
-
-        if(!isLoggedIn && loginEl){
-          loginEl.style.transition = 'opacity .5s ease';
-          loginEl.style.opacity = '1';
-        } else if(isLoggedIn && appEl){
-          appEl.style.transition = 'opacity .5s ease';
-          appEl.style.opacity = '1';
-        }
-
-        // 5. 로그인 아이템들 순차 등장
-        setTimeout(function(){
-          if(!isLoggedIn && loginEl){
-            var box = loginEl.querySelector('.login-box');
-            if(box) box.classList.add('login-item-ready');
-          }
-          splash.style.display = 'none';
-          splashLogoEl.style.transition = '';
-          splashLogoEl.style.transform = '';
-        }, 500);
-      }, 350);
-    }, 100);
-  }
-
-  setTimeout(tick, 250);
+// ============================================================
+// SPLASH
+// ============================================================
+(function(){
+  var splash=document.getElementById('splash');
+  var splashLogoEl=document.querySelector('.splash-logo');
+  var sqs=[document.getElementById('sq0'),document.getElementById('sq1'),document.getElementById('sq2'),document.getElementById('sq3')];
+  var word=document.getElementById('splashWord');
+  var sub=document.getElementById('splashSub');
+  var levels=[1.0,0.55,0.25,0.1];
+  var finalOpacity={sq0:1.0,sq1:0.55,sq2:0.25,sq3:0.55};
+  var step=0,totalSteps=8,interval=280;
+  function setLoadOpacity(bi){for(var i=0;i<4;i++){var li=((i-bi)%4+4)%4;sqs[i].style.opacity=levels[li];}}
+  sqs.forEach(function(s){s.style.opacity=levels[3];});
+  function tick(){if(step<totalSteps){setLoadOpacity(step%4);step++;setTimeout(tick,interval);}else{sqs.forEach(function(s){s.style.transition='opacity .4s ease';});['sq0','sq1','sq2','sq3'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.opacity=finalOpacity[id];});setTimeout(function(){word.classList.add('show');sub.classList.add('show');},350);setTimeout(function(){startTransitionToLogin();},2000);}}
+  function startTransitionToLogin(){var loginEl=document.getElementById('loginScreen');var appEl=document.getElementById('appScreen');var homeEl=document.getElementById('portfolioHome');var isLoggedIn=currentUser!==null;if(!isLoggedIn&&loginEl){loginEl.style.display='flex';loginEl.style.opacity='0';}word.style.transition='opacity .4s ease';word.style.opacity='0';sub.style.transition='opacity .3s ease';sub.style.opacity='0';setTimeout(function(){var fromRect=splashLogoEl?splashLogoEl.getBoundingClientRect():null;var loginIcon=loginEl?loginEl.querySelector('.login-logo-icon'):null;var toRect=loginIcon?loginIcon.getBoundingClientRect():null;if(splashLogoEl&&toRect&&fromRect){var scale=Math.min(toRect.width/fromRect.width,toRect.height/fromRect.height);var dx=(toRect.left+toRect.width/2)-(fromRect.left+fromRect.width/2);var dy=(toRect.top+toRect.height/2)-(fromRect.top+fromRect.height/2);splashLogoEl.style.transition='transform .7s cubic-bezier(.4,0,.2,1)';splashLogoEl.style.transform='translate('+dx+'px,'+dy+'px) scale('+scale+')';}setTimeout(function(){splash.style.transition='opacity .5s ease';splash.style.opacity='0';if(!isLoggedIn&&loginEl){loginEl.style.transition='opacity .5s ease';loginEl.style.opacity='1';}else if(isLoggedIn&&homeEl){homeEl.style.display='flex';homeEl.style.opacity='1';}if(!isLoggedIn&&loginEl){var box=loginEl.querySelector('.login-box');if(box){box.classList.remove('login-item-ready');setTimeout(function(){box.classList.add('login-item-ready');},50);}}setTimeout(function(){splash.style.display='none';if(splashLogoEl){splashLogoEl.style.transition='';splashLogoEl.style.transform='';}},500);},350);},100);}
+  setTimeout(tick,250);
 })();
 
 applyLang();
 fetchRates();
-// 로그인 상태 확인 후 자동 render
-if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}
-render();
 </script>
 </body>
 </html>
