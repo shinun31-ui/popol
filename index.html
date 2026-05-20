@@ -486,7 +486,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
 
 
 <!-- LOADER -->
-<div id="loaderOv" style="display:none;position:fixed;inset:0;background:rgba(44,44,42,.85);z-index:9998;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+<div id="loaderOv" style="display:none;position:fixed;inset:0;background:rgba(44,44,42,.85);z-index:99999;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
   <div class="splash-logo" id="loaderLogo" style="width:48px;height:48px;">
     <div class="sq" id="lsq0"></div>
     <div class="sq" id="lsq1"></div>
@@ -953,7 +953,22 @@ async function importSel(){
   if(currentUser){
     for(var i=0;i<toAdd.length;i++){
       var it=toAdd[i];
-      var row={user_id:currentUser.id,title:it.title,year:it.year||new Date().getFullYear(),genre:it.genre||'회화',medium:it.medium||'',size:it.size||'',description:it.desc||'',award:it.award||'',price:0,sold:false,img_url:it.img||null,color_bg:PAL[i%PAL.length][0],color_fg:PAL[i%PAL.length][1],sort_order:i,updated_at:new Date().toISOString()};
+      // base64 이미지는 Storage에 업로드 후 URL 사용
+      var imgUrl=null;
+      if(it.img&&it.img.startsWith('data:')){
+        try{
+          var blob=dataURLtoBlob(it.img);
+          var ext=blob.type.split('/')[1]||'jpg';
+          var path=currentUser.id+'/'+Date.now()+'_'+i+'.'+ext;
+          var upRes=await supa.storage.from('artwork-images').upload(path,blob);
+          if(!upRes.error){
+            imgUrl=supa.storage.from('artwork-images').getPublicUrl(path).data.publicUrl;
+          }
+        }catch(e){console.error('이미지 업로드 오류:',e);}
+      } else if(it.img){
+        imgUrl=it.img;
+      }
+      var row={user_id:currentUser.id,title:it.title,year:it.year||new Date().getFullYear(),genre:it.genre||'회화',medium:it.medium||'',size:it.size||'',description:it.desc||'',award:it.award||'',price:0,sold:false,img_url:imgUrl,color_bg:PAL[i%PAL.length][0],color_fg:PAL[i%PAL.length][1],sort_order:i,updated_at:new Date().toISOString()};
       var res=await supa.from('works').insert(row);
       if(res.error){hideLoader();showToast('저장 실패: '+res.error.message);success=false;break;}
     }
@@ -967,6 +982,13 @@ async function importSel(){
     showTab('portfolio');
     showToast(toAdd.length+t('toastImported'));
   }
+}
+
+function dataURLtoBlob(dataURL){
+  var arr=dataURL.split(','),mime=arr[0].match(/:(.*?);/)[1];
+  var bstr=atob(arr[1]),n=bstr.length,u8arr=new Uint8Array(n);
+  while(n--){u8arr[n]=bstr.charCodeAt(n);}
+  return new Blob([u8arr],{type:mime});
 }
 
 
