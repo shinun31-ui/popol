@@ -1017,9 +1017,9 @@ function allFiltered(){
     if(gn&&w.genre!==gn)return false;
     if(sd!==''&&(sd==='1'?!w.sold:w.sold))return false;
     if(q){
-      var searchIn=[w.title,w.genre,w.medium,w.desc,w.award,String(w.year)].filter(Boolean).join(' ');
-      var matched=searchIn.toLowerCase().includes(q.toLowerCase());
-      if(!matched)return false;
+      var nq=q.normalize('NFC').toLowerCase();
+      var searchIn=[w.title,w.genre,w.medium,w.desc,w.award,String(w.year)].filter(Boolean).join(' ').normalize('NFC').toLowerCase();
+      if(!searchIn.includes(nq))return false;
     }
     if(hn){var h=getHN(w);if(!h||h.split('호')[0]!==hn)return false;}
     if(mf&&classifyMedium(w.medium)!==mf)return false;
