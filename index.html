@@ -373,7 +373,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
         <select id="fHnum" onchange="goPage(1)"><option value="">전체 호수</option></select>
         <select id="fMediumF" onchange="goPage(1)"><option value="">전체 재료</option></select>
         <select id="fSold" onchange="goPage(1)"><option value="">전체 상태</option><option value="0">판매 가능</option><option value="1">판매 완료</option></select>
-        <input id="fQ" placeholder="작품 검색..." oninput="goPage(1)"/>
+        <input id="fQ" placeholder="작품 검색..."/>
       </div>
       <div class="ctrl-row">
         <div class="legend">
@@ -1246,7 +1246,17 @@ function openPreview(){
   if(tEl)tEl.textContent=artist.name?artist.name+' 작가의 작품 목록':'작품 리스트 미리보기';
   initAutoLoginUI();
 applyLang();
-fetchRates();renderPreviewList(ids);
+fetchRates();
+// 검색 이벤트 - 한글 IME 지원
+(function(){
+  var fq=document.getElementById('fQ');
+  if(!fq)return;
+  var timer=null;
+  function doSearch(){clearTimeout(timer);timer=setTimeout(function(){goPage(1);},120);}
+  fq.addEventListener('input',doSearch);
+  fq.addEventListener('compositionend',function(){clearTimeout(timer);goPage(1);});
+  fq.addEventListener('keyup',function(e){if(e.key==='Enter')goPage(1);});
+})();renderPreviewList(ids);
   document.getElementById('prevOv').classList.add('on');
 }
 function renderPreviewList(ids){
