@@ -901,24 +901,47 @@ async function handleFiles(files){
   for(var fi=0;fi<files.length;fi++){
     var ff=files[fi];
     if(/\.csv$/i.test(ff.name))csvs.push(ff);
-    else if(/\.(jpe?g|png|webp|gif)$/i.test(ff.name))imgs.push(ff);
+    else if(/\.(jpe?g|png|webp|gif|bmp|tiff?)$/i.test(ff.name))imgs.push(ff);
   }
-  document.getElementById('reviewBody').innerHTML='<div class="loadwrap"><div class="spinner"></div><div style="font-size:13px;color:var(--text2);">파일 분석 중...</div></div>';
+  document.getElementById('reviewBody').innerHTML='<div class="loadwrap"><div class="spinner"></div><div style="font-size:13px;color:var(--text2);">'+imgs.length+'개 파일 분석 중...</div></div>';
   document.getElementById('reviewSub').textContent='잠시만 기다려주세요';
   document.getElementById('reviewOv').classList.add('on');
   var items=[];
+  // CSV 먼저 처리
   for(var ci=0;ci<csvs.length;ci++){
     var csvText=await csvs[ci].text();
     parseCSV(csvText).forEach(function(p){items.push(Object.assign({img:null,checked:true,editing:false},p));});
   }
+  // 이미지 처리 - 모든 파일 개별적으로 추가
   for(var ii=0;ii<imgs.length;ii++){
     var imgFile=imgs[ii];
     var url=await readURL(imgFile);
-    var p={title:detTitle(imgFile.name),year:detYear(imgFile.name),size:detSize(imgFile.name)||'',medium:detMed(imgFile.name)||'',genre:'회화',source:'img'};
-    var nm=imgFile.name.replace(/\.[^.]+$/,'').toLowerCase().replace(/[\s_.]/g,'');
-    var ex=items.find(function(it){var a=it.title.toLowerCase().replace(/[\s_.]/g,'');return nm.includes(a)||a.includes(nm);});
-    if(ex)ex.img=url;
-    else items.push(Object.assign({img:url,checked:true,editing:false,desc:'',award:''},p));
+    var baseName=imgFile.name.replace(/\.[^.]+$/,'');
+    var p={
+      title:detTitle(imgFile.name),
+      year:detYear(imgFile.name),
+      size:detSize(imgFile.name)||'',
+      medium:detMed(imgFile.name)||'',
+      genre:'회화',
+      source:'img',
+      desc:'',
+      award:''
+    };
+    // CSV와 매칭 시도
+    var nm=baseName.toLowerCase().replace(/[\s_.\-]/g,'');
+    var matched=false;
+    for(var ki=0;ki<items.length;ki++){
+      if(items[ki].img)continue; // 이미 이미지 있는 항목 스킵
+      var a=items[ki].title.toLowerCase().replace(/[\s_.\-]/g,'');
+      if(nm===a||nm.includes(a)||a.includes(nm)){
+        items[ki].img=url;
+        matched=true;
+        break;
+      }
+    }
+    if(!matched){
+      items.push(Object.assign({img:url,checked:true,editing:false},p));
+    }
   }
   if(!items.length){closeOv('reviewOv');showToast(t('toastNoWork'));return;}
   reviewItems=items;
@@ -948,12 +971,12 @@ async function importSel(){
   if(!toAdd.length){showToast(t('toastNone'));return;}
   var btn=document.getElementById('btnImportSel');
   if(btn){btn.textContent='저장 중...';btn.disabled=true;}
-  showLoader('저장 중...');
+  showLoader('저장 중... (0/'+toAdd.length+')');
   var success=true;
   if(currentUser){
     for(var i=0;i<toAdd.length;i++){
       var it=toAdd[i];
-      // base64 이미지는 Storage에 업로드 후 URL 사용
+      document.getElementById('loaderMsg').textContent='저장 중... ('+(i+1)+'/'+toAdd.length+')';
       var imgUrl=null;
       if(it.img&&it.img.startsWith('data:')){
         try{
@@ -968,9 +991,30 @@ async function importSel(){
       } else if(it.img){
         imgUrl=it.img;
       }
-      var row={user_id:currentUser.id,title:it.title,year:it.year||new Date().getFullYear(),genre:it.genre||'회화',medium:it.medium||'',size:it.size||'',description:it.desc||'',award:it.award||'',price:0,sold:false,img_url:imgUrl,color_bg:PAL[i%PAL.length][0],color_fg:PAL[i%PAL.length][1],sort_order:i,updated_at:new Date().toISOString()};
+      var row={
+        user_id:currentUser.id,
+        title:it.title||'제목없음',
+        year:it.year||new Date().getFullYear(),
+        genre:it.genre||'회화',
+        medium:it.medium||'',
+        size:it.size||'',
+        description:it.desc||'',
+        award:it.award||'',
+        price:0,
+        sold:false,
+        img_url:imgUrl,
+        color_bg:PAL[i%PAL.length][0],
+        color_fg:PAL[i%PAL.length][1],
+        sort_order:i,
+        updated_at:new Date().toISOString()
+      };
       var res=await supa.from('works').insert(row);
-      if(res.error){hideLoader();showToast('저장 실패: '+res.error.message);success=false;break;}
+      if(res.error){
+        hideLoader();
+        showToast('저장 실패: '+res.error.message);
+        success=false;
+        break;
+      }
     }
     if(success)await loadWorksFromDB();
   }
@@ -983,7 +1027,6 @@ async function importSel(){
     showToast(toAdd.length+t('toastImported'));
   }
 }
-
 function dataURLtoBlob(dataURL){
   var arr=dataURL.split(','),mime=arr[0].match(/:(.*?);/)[1];
   var bstr=atob(arr[1]),n=bstr.length,u8arr=new Uint8Array(n);
