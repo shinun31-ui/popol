@@ -723,6 +723,23 @@ function showApp(){
   app.style.display='block';
   app.style.width='100%';
   app.style.minHeight='calc(100vh - 52px)';
+  initSearchEvents();
+}
+var _searchInited=false;
+function initSearchEvents(){
+  if(_searchInited)return;
+  var fq=document.getElementById('fQ');
+  if(!fq)return;
+  _searchInited=true;
+  var composing=false,timer=null;
+  fq.addEventListener('compositionstart',function(){composing=true;});
+  fq.addEventListener('compositionend',function(){composing=false;clearTimeout(timer);goPage(1);});
+  fq.addEventListener('input',function(){
+    if(composing)return;
+    clearTimeout(timer);
+    timer=setTimeout(function(){goPage(1);},80);
+  });
+  fq.addEventListener('keyup',function(e){if(e.key==='Enter'){clearTimeout(timer);goPage(1);}});
 }
 
 supa.auth.onAuthStateChange(async function(event,session){
@@ -1245,23 +1262,7 @@ function openPreview(){
   initAutoLoginUI();
 applyLang();
 fetchRates();
-// 검색 이벤트 - 한글 완성형/자모 모두 지원
-(function(){
-  var fq=document.getElementById('fQ');
-  if(!fq)return;
-  var composing=false;
-  var timer=null;
-  fq.addEventListener('compositionstart',function(){composing=true;});
-  fq.addEventListener('compositionend',function(){composing=false;clearTimeout(timer);goPage(1);});
-  fq.addEventListener('input',function(){
-    if(composing)return;
-    clearTimeout(timer);
-    timer=setTimeout(function(){goPage(1);},80);
-  });
-  fq.addEventListener('keyup',function(e){
-    if(e.key==='Enter'){clearTimeout(timer);goPage(1);}
-  });
-})();renderPreviewList(ids);
+renderPreviewList(ids);
   document.getElementById('prevOv').classList.add('on');
 }
 function renderPreviewList(ids){
