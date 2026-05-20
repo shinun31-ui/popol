@@ -1227,17 +1227,15 @@ function openDetail(id){
   document.getElementById('dChips').innerHTML=(h?'<span class="chip hn">'+h+'</span>':'')+(w.price?'<span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD99;font-weight:500;">'+fmtKRW(w.price)+'</span>':'')+[w.year,w.genre,w.medium,w.size].filter(Boolean).map(function(v){return'<span class="chip">'+v+'</span>';}).join('')+(w.sold?'<span class="chip sold">'+t('soldBadge')+'</span>':'');
   document.getElementById('dDesc').textContent=w.desc||'';
   var aw=document.getElementById('dAward');if(w.award){aw.style.display='flex';document.getElementById('dAwardTxt').textContent=w.award;}else aw.style.display='none';
-  // 캡션 생성
+  // 캡션 생성 - "제목, 재료, 크기, 연도" 형식
   var h2=getHN(w);
-  var captionLines=[];
-  captionLines.push(w.title);
-  var meta=[];
-  if(w.year)meta.push(w.year);
-  if(w.medium)meta.push(w.medium);
-  if(w.size)meta.push(w.size+(h2?' ('+h2+')':''));
-  if(meta.length)captionLines.push(meta.join(', '));
-  if(w.award)captionLines.push(w.award);
-  var captionText=captionLines.join('\n');
+  var captionParts=[];
+  if(w.title)captionParts.push(w.title);
+  if(w.medium)captionParts.push(w.medium);
+  if(w.size){var sizeStr=w.size+(h2?' ('+h2+')':'');captionParts.push(sizeStr);}
+  if(w.year)captionParts.push(String(w.year));
+  if(w.award)captionParts.push(w.award);
+  var captionText=captionParts.join(', ');
   // 캡션 박스 업데이트
   var cb=document.getElementById('dCaptionBox');
   if(cb)cb.value=captionText;
@@ -1353,42 +1351,46 @@ function detYear(s){
   return found.length?found[found.length-1]:new Date().getFullYear();
 }
 function parseFilename(filename){
-  // 확장자 제거
+  // 확장자 제거 + NFC 정규화
   var base=filename.replace(/\.[^.]+$/,'').normalize('NFC');
-  // 구분자로 분리
-  var tokens=base.split(/[_\-|,\/\\]+/).map(function(t){return t.trim();}).filter(Boolean);
-  
-  var year=null,size=null,medium=null,titleParts=[];
-  
+  // / _ - 등으로 분리
+  var tokens=base.split(/[\/\\|]+/).map(function(t){return t.trim();}).filter(Boolean);
+  // 각 토큰을 추가로 _ 로 분리 (단, 재료 안의 _ 는 공백으로 처리)
+  var expanded=[];
   tokens.forEach(function(tok){
-    // 연도 체크 (4자리 숫자)
-    if(/^\d{4}$/.test(tok)){
-      var n=parseInt(tok);
-      if(n>=1900&&n<=2100){year=n;return;}
-    }
-    // 크기 체크 (숫자x숫자)
-    var sz=detSize(tok);
-    if(sz){size=sz;return;}
-    // 재료 체크
-    var med=detMed(tok);
-    if(med&&!medium){medium=med;return;}
-    // 나머지는 제목
-    titleParts.push(tok);
+    // 숫자x숫자 패턴 있으면 그대로
+    if(detSize(tok)){expanded.push(tok);return;}
+    // 연도 단독이면 그대로
+    if(/^\d{4}$/.test(tok)){expanded.push(tok);return;}
+    // _ 가 있으면 공백으로 바꿔서 하나의 토큰으로
+    expanded.push(tok.replace(/_/g,' '));
   });
-  
-  // 연도가 토큰 안에 없으면 전체 문자열에서 추출
+
+  var year=null,size=null,medium=null,titleParts=[];
+
+  expanded.forEach(function(tok){
+    var t=tok.trim();
+    if(!t)return;
+    // 연도
+    if(/^\d{4}$/.test(t)){var n=parseInt(t);if(n>=1900&&n<=2100){year=n;return;}}
+    // 크기 (91.0x72.7cm 형태 포함)
+    var sz=detSize(t);if(sz){size=sz;return;}
+    // 재료 키워드 포함 여부
+    var med=detMed(t);if(med&&!medium){medium=t;return;}  // 원본 텍스트 보존
+    // 나머지 제목
+    titleParts.push(t);
+  });
+
+  // fallback
   if(!year)year=detYear(base);
-  // 크기가 토큰 안에 없으면 전체 문자열에서 추출
-  if(!size)size=detSize(base);
-  // 재료가 토큰 안에 없으면 전체 문자열에서 추출
-  if(!medium)medium=detMed(base);
-  
-  // 제목: titleParts 합치기, 없으면 전체
-  var title=titleParts.join(' ').trim();
-  if(!title)title=base;
-  
+  if(!size){var s2=detSize(base);if(s2)size=s2;}
+  if(!medium){var m2=detMed(base);if(m2)medium=m2;}
+
+  var title=titleParts.join(' ').trim()||base;
+
   return{title:title,year:year||new Date().getFullYear(),size:size||'',medium:medium||''};
 }
+
 function detTitle(s){return parseFilename(s).title;}
 function readURL(f){return new Promise(function(res){var r=new FileReader();r.onload=function(e){res(e.target.result);};r.readAsDataURL(f);});}
 function parseCSVLine(line){var res=[],cur='',inQ=false;for(var i=0;i<line.length;i++){var c=line[i];if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(c===','&&!inQ){res.push(cur.trim());cur='';}else cur+=c;}res.push(cur.trim());return res;}
