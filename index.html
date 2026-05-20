@@ -879,22 +879,31 @@ async function handleDrop(e){e.preventDefault();document.getElementById('uzzone'
 async function handleFiles(files){
   if(!files||!files.length)return;
   var imgs=[],csvs=[];
-  for(var i=0;i<files.length;i++){var f=files[i];if(/\.csv$/i.test(f.name))csvs.push(f);else if(/\.(jpe?g|png|webp|gif)$/i.test(f.name))imgs.push(f);}
+  for(var fi=0;fi<files.length;fi++){
+    var ff=files[fi];
+    if(/\.csv$/i.test(ff.name))csvs.push(ff);
+    else if(/\.(jpe?g|png|webp|gif)$/i.test(ff.name))imgs.push(ff);
+  }
   document.getElementById('reviewBody').innerHTML='<div class="loadwrap"><div class="spinner"></div><div style="font-size:13px;color:var(--text2);">파일 분석 중...</div></div>';
   document.getElementById('reviewSub').textContent='잠시만 기다려주세요';
   document.getElementById('reviewOv').classList.add('on');
   var items=[];
-  for(var i=0;i<csvs.length;i++){var text=await csvs[i].text();parseCSV(text).forEach(function(p){items.push(Object.assign({img:null,checked:true,editing:false},p));});}
-  for(var i=0;i<imgs.length;i++){
-    var url=await readURL(imgs[i]);
-    var p={title:detTitle(imgs[i].name),year:detYear(imgs[i].name),size:detSize(imgs[i].name)||'',medium:detMed(imgs[i].name)||'',genre:'회화',source:'img'};
-    var nm=imgs[i].name.replace(/\.[^.]+$/,'').toLowerCase().replace(/[\s_.]/g,'');
+  for(var ci=0;ci<csvs.length;ci++){
+    var csvText=await csvs[ci].text();
+    parseCSV(csvText).forEach(function(p){items.push(Object.assign({img:null,checked:true,editing:false},p));});
+  }
+  for(var ii=0;ii<imgs.length;ii++){
+    var imgFile=imgs[ii];
+    var url=await readURL(imgFile);
+    var p={title:detTitle(imgFile.name),year:detYear(imgFile.name),size:detSize(imgFile.name)||'',medium:detMed(imgFile.name)||'',genre:'회화',source:'img'};
+    var nm=imgFile.name.replace(/\.[^.]+$/,'').toLowerCase().replace(/[\s_.]/g,'');
     var ex=items.find(function(it){var a=it.title.toLowerCase().replace(/[\s_.]/g,'');return nm.includes(a)||a.includes(nm);});
-    if(ex)ex.img=url;else items.push(Object.assign({img:url,checked:true,editing:false,desc:'',award:''},p));
+    if(ex)ex.img=url;
+    else items.push(Object.assign({img:url,checked:true,editing:false,desc:'',award:''},p));
   }
   if(!items.length){closeOv('reviewOv');showToast(t('toastNoWork'));return;}
   reviewItems=items;
-  document.getElementById('reviewSub').textContent='총 '+items.length+'개 인식';
+  document.getElementById('reviewSub').textContent='총 '+items.length+'개 인식 완료';
   renderReview();
 }
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -916,9 +925,23 @@ function renderReview(){
 function toggleRC(i){reviewItems[i].checked=!reviewItems[i].checked;renderReview();}
 function toggleAllR(){var a=reviewItems.every(function(r){return r.checked;});reviewItems.forEach(function(r){r.checked=!a;});renderReview();}
 async function importSel(){
-  var toAdd=reviewItems.filter(function(r){return r.checked;});if(!toAdd.length){showToast(t('toastNone'));return;}
-  if(currentUser){for(var i=0;i<toAdd.length;i++){var it=toAdd[i];await saveWorkToDB({title:it.title,year:it.year,genre:it.genre,medium:it.medium||'',size:it.size||'',desc:it.desc||'',award:it.award||'',img:it.img||null,sold:false,price:0,c:PAL[i%PAL.length]},false,null);}await loadWorksFromDB();}
-  closeOv('reviewOv');reviewItems=[];showToast(toAdd.length+t('toastImported'));
+  var toAdd=reviewItems.filter(function(r){return r.checked;});
+  if(!toAdd.length){showToast(t('toastNone'));return;}
+  var btn=document.getElementById('btnImportSel');
+  if(btn){btn.textContent='저장 중...';btn.disabled=true;}
+  if(currentUser){
+    for(var i=0;i<toAdd.length;i++){
+      var it=toAdd[i];
+      var ok=await saveWorkToDB({title:it.title,year:it.year,genre:it.genre,medium:it.medium||'',size:it.size||'',desc:it.desc||'',award:it.award||'',img:it.img||null,sold:false,price:0,c:PAL[i%PAL.length]},false,null);
+      if(!ok){if(btn){btn.textContent='선택 항목 등록';btn.disabled=false;}return;}
+    }
+    await loadWorksFromDB();
+  }
+  closeOv('reviewOv');
+  reviewItems=[];
+  showTab('portfolio');
+  showToast(toAdd.length+t('toastImported'));
+  if(btn){btn.textContent='선택 항목 등록';btn.disabled=false;}
 }
 
 // ===================== UI UTILS =====================
