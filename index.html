@@ -261,6 +261,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--charcoal);color:var(--warm);font-size:13px;padding:9px 20px;border-radius:8px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;}
 .toast.on{opacity:1;}
 @media(max-width:520px){.howgrid,.expgrid,.frow{grid-template-columns:1fr;}.dmodal,.ppanel,.modal,.rmodal{border-radius:var(--rlg) var(--rlg) 0 0;margin:auto 0 0;}.ov{padding:0;align-items:flex-end;}}
+
+body.loading{cursor:wait;}
+body.loading *{pointer-events:none;}
+body.loading .modal-close,body.loading button{cursor:wait;}
 </style>
 </head>
 <body>
@@ -539,8 +543,10 @@ async function loginWithEmail(){
   var pw=document.getElementById('loginPassword').value;
   var err=document.getElementById('loginError'); err.textContent='';
   if(!email||!pw){err.textContent='이메일과 비밀번호를 입력해주세요';return;}
+  document.body.classList.add('loading');
   var btn=document.getElementById('loginEmailBtn'); btn.textContent='로그인 중...'; btn.disabled=true;
   var res=await supa.auth.signInWithPassword({email:email,password:pw});
+  document.body.classList.remove('loading');
   if(res.error){err.textContent=res.error.message==='Invalid login credentials'?'이메일 또는 비밀번호가 틀렸어요':res.error.message;btn.textContent='로그인';btn.disabled=false;}
 }
 var signupMode=false;
@@ -764,6 +770,7 @@ function openAdd(id){
 }
 function loadImg(input){var f=input.files[0];if(!f)return;pendingImgFile=f;var r=new FileReader();r.onload=function(e){pendingImg=e.target.result;document.getElementById('dropZone').innerHTML='<img class="imgpt" src="'+e.target.result+'"/>';};r.readAsDataURL(f);}
 async function saveWork(){
+  document.body.classList.add('loading');
   var title=document.getElementById('fTitle').value.trim();if(!title){showToast(t('toastNoTitle'));return;}
   var data={title:title,year:parseInt(document.getElementById('fYear2').value),genre:document.getElementById('fGenre2').value,medium:document.getElementById('fMedium').value.trim(),size:document.getElementById('fSize').value.trim(),desc:document.getElementById('fDesc').value.trim(),award:document.getElementById('fAward').value.trim(),sold:soldF,price:parseInt(document.getElementById('fPrice').value)||0};
   if(currentUser){
@@ -775,6 +782,7 @@ async function saveWork(){
     await loadWorksFromDB();
   }
   closeOv('addOv');showToast(t('toastSaved'));
+  document.body.classList.remove('loading');
 }
 
 // ===================== DETAIL =====================
@@ -927,21 +935,27 @@ function toggleAllR(){var a=reviewItems.every(function(r){return r.checked;});re
 async function importSel(){
   var toAdd=reviewItems.filter(function(r){return r.checked;});
   if(!toAdd.length){showToast(t('toastNone'));return;}
+  document.body.classList.add('loading');
   var btn=document.getElementById('btnImportSel');
   if(btn){btn.textContent='저장 중...';btn.disabled=true;}
-  if(currentUser){
-    for(var i=0;i<toAdd.length;i++){
-      var it=toAdd[i];
-      var ok=await saveWorkToDB({title:it.title,year:it.year,genre:it.genre,medium:it.medium||'',size:it.size||'',desc:it.desc||'',award:it.award||'',img:it.img||null,sold:false,price:0,c:PAL[i%PAL.length]},false,null);
-      if(!ok){if(btn){btn.textContent='선택 항목 등록';btn.disabled=false;}return;}
+  try{
+    if(currentUser){
+      for(var i=0;i<toAdd.length;i++){
+        var it=toAdd[i];
+        var row={user_id:currentUser.id,title:it.title,year:it.year,genre:it.genre||'회화',medium:it.medium||'',size:it.size||'',description:it.desc||'',award:it.award||'',price:0,sold:false,img_url:it.img||null,color_bg:PAL[i%PAL.length][0],color_fg:PAL[i%PAL.length][1],sort_order:0,updated_at:new Date().toISOString()};
+        var res=await supa.from('works').insert(row);
+        if(res.error){showToast('저장 실패: '+res.error.message);return;}
+      }
+      await loadWorksFromDB();
     }
-    await loadWorksFromDB();
+    closeOv('reviewOv');
+    reviewItems=[];
+    showTab('portfolio');
+    showToast(toAdd.length+t('toastImported'));
+  } finally {
+    document.body.classList.remove('loading');
+    if(btn){btn.textContent='선택 항목 등록';btn.disabled=false;}
   }
-  closeOv('reviewOv');
-  reviewItems=[];
-  showTab('portfolio');
-  showToast(toAdd.length+t('toastImported'));
-  if(btn){btn.textContent='선택 항목 등록';btn.disabled=false;}
 }
 
 // ===================== UI UTILS =====================
