@@ -1314,10 +1314,82 @@ function shareVia(type){
 }
 
 // ===================== UPLOAD =====================
-function detMed(s){var t2=(s||'').toLowerCase();var meds=[['유화','oil','유채'],['아크릴','acrylic'],['수채','watercolor'],['혼합매체','mixed'],['드로잉','drawing','pencil'],['판화','print'],['사진','photo'],['설치','installation'],['디지털','digital'],['조각','sculpture']];for(var i=0;i<meds.length;i++){for(var j=1;j<meds[i].length;j++){if(t2.includes(meds[i][j]))return meds[i][0];}}return null;}
-function detSize(s){var m=(s||'').replace(/,/g,'.').match(/(\d+(?:\.\d+)?)\s*[x×X]\s*(\d+(?:\.\d+)?)/i);return m?m[1]+'x'+m[2]:null;}
-function detYear(s){var y=new Date().getFullYear(),found=[];var re=/(\d{4})/g,m;while((m=re.exec(s))!==null){var n=parseInt(m[1]);if(n>=1800&&n<=2100)found.push(n);}return found.length?found[found.length-1]:y;}
-function detTitle(s){var clean=s.replace(/\.[^.]+$/,'');var parts=clean.split(/[_\-|,\/\\]/);for(var i=0;i<parts.length;i++){var p=parts[i].trim();if(!p||/^\d{4}$/.test(p)||detSize(p)||detMed(p))continue;return p;}return clean.replace(/\.[^.]+$/,'');}
+function detMed(s){
+  var t2=(s||'').toLowerCase();
+  var meds=[
+    ['유화','oil','유채','오일'],
+    ['아크릴','acrylic','아크릴릭'],
+    ['수채화','watercolor','수채','watercolour'],
+    ['혼합매체','mixed media','mixed','혼합','믹스드'],
+    ['드로잉','drawing','pencil','연필','색연필'],
+    ['판화','print','etching','lithograph'],
+    ['사진','photo','photograph','photography'],
+    ['설치','installation'],
+    ['디지털','digital'],
+    ['조각','sculpture','ceramic','도자'],
+    ['과슈','gouache'],
+    ['파스텔','pastel'],
+    ['잉크','ink'],
+    ['캔버스','canvas']
+  ];
+  for(var i=0;i<meds.length;i++){
+    for(var j=1;j<meds[i].length;j++){
+      if(t2.includes(meds[i][j]))return meds[i][0];
+    }
+  }
+  return null;
+}
+function detSize(s){
+  var m=(s||'').replace(/,/g,'.').match(/(\d+(?:\.\d+)?)\s*[x×X]\s*(\d+(?:\.\d+)?)/i);
+  return m?m[1]+'x'+m[2]:null;
+}
+function detYear(s){
+  var found=[];
+  var re=/(\d{4})/g,m;
+  while((m=re.exec(s))!==null){
+    var n=parseInt(m[1]);
+    if(n>=1900&&n<=2100)found.push(n);
+  }
+  return found.length?found[found.length-1]:new Date().getFullYear();
+}
+function parseFilename(filename){
+  // 확장자 제거
+  var base=filename.replace(/\.[^.]+$/,'').normalize('NFC');
+  // 구분자로 분리
+  var tokens=base.split(/[_\-|,\/\\]+/).map(function(t){return t.trim();}).filter(Boolean);
+  
+  var year=null,size=null,medium=null,titleParts=[];
+  
+  tokens.forEach(function(tok){
+    // 연도 체크 (4자리 숫자)
+    if(/^\d{4}$/.test(tok)){
+      var n=parseInt(tok);
+      if(n>=1900&&n<=2100){year=n;return;}
+    }
+    // 크기 체크 (숫자x숫자)
+    var sz=detSize(tok);
+    if(sz){size=sz;return;}
+    // 재료 체크
+    var med=detMed(tok);
+    if(med&&!medium){medium=med;return;}
+    // 나머지는 제목
+    titleParts.push(tok);
+  });
+  
+  // 연도가 토큰 안에 없으면 전체 문자열에서 추출
+  if(!year)year=detYear(base);
+  // 크기가 토큰 안에 없으면 전체 문자열에서 추출
+  if(!size)size=detSize(base);
+  // 재료가 토큰 안에 없으면 전체 문자열에서 추출
+  if(!medium)medium=detMed(base);
+  
+  // 제목: titleParts 합치기, 없으면 전체
+  var title=titleParts.join(' ').trim();
+  if(!title)title=base;
+  
+  return{title:title,year:year||new Date().getFullYear(),size:size||'',medium:medium||''};
+}
+function detTitle(s){return parseFilename(s).title;}
 function readURL(f){return new Promise(function(res){var r=new FileReader();r.onload=function(e){res(e.target.result);};r.readAsDataURL(f);});}
 function parseCSVLine(line){var res=[],cur='',inQ=false;for(var i=0;i<line.length;i++){var c=line[i];if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(c===','&&!inQ){res.push(cur.trim());cur='';}else cur+=c;}res.push(cur.trim());return res;}
 function parseCSV(text){
@@ -1357,11 +1429,12 @@ async function handleFiles(files){
     var imgFile=imgs[ii];
     var url=await readURL(imgFile);
     var baseName=imgFile.name.replace(/\.[^.]+$/,'');
+    var _parsed=parseFilename(imgFile.name);
     var p={
-      title:detTitle(imgFile.name),
-      year:detYear(imgFile.name),
-      size:detSize(imgFile.name)||'',
-      medium:detMed(imgFile.name)||'',
+      title:_parsed.title,
+      year:_parsed.year,
+      size:_parsed.size,
+      medium:_parsed.medium,
       genre:'회화',
       source:'img',
       desc:'',
