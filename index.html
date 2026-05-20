@@ -430,7 +430,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
 <div class="ov" id="detailOv" onclick="ovClick(event,'detailOv')">
   <div class="dmodal">
     <div style="position:relative;"><div class="dimg" id="dImg"></div><button class="modal-close" onclick="closeOv('detailOv')" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,.45);border-color:rgba(255,255,255,.3);color:#fff;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="dbody"><div class="dtitle" id="dTitle"></div><div class="dchips" id="dChips"></div><div class="ddiv"></div><div class="ddesc" id="dDesc"></div><div class="daward" id="dAward" style="display:none;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#185FA5" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="6" r="4"/><path d="M5 10l-2 5 5-2 5 2-2-5"/></svg><span id="dAwardTxt"></span></div><div class="dacts"><button class="btn btn-dark" id="dEditBtn">수정하기</button><button class="btn btn-blue" id="dSelBtn">선택에 추가</button></div></div>
+    <div class="dbody"><div class="dtitle" id="dTitle"></div><div class="dchips" id="dChips"></div><div class="ddiv"></div><div class="ddesc" id="dDesc"></div><div class="daward" id="dAward" style="display:none;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#185FA5" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="6" r="4"/><path d="M5 10l-2 5 5-2 5 2-2-5"/></svg><span id="dAwardTxt"></span></div><div class="dacts"><button class="btn btn-dark" id="dEditBtn">수정하기</button><button class="btn" id="dCopyBtn" onclick="copyCaption()">캡션 복사</button><button class="btn btn-blue" id="dSelBtn">선택에 추가</button></div></div>
   </div>
 </div>
 
@@ -1183,6 +1183,16 @@ async function saveWork(){
 }
 
 // ===================== DETAIL =====================
+
+function copyCaption(){
+  var txt=window._currentCaption||'';
+  if(!txt)return;
+  navigator.clipboard.writeText(txt).then(function(){
+    showToast('캡션이 복사됐어요');
+    var btn=document.getElementById('dCopyBtn');
+    if(btn){btn.textContent='복사됨 ✓';setTimeout(function(){btn.textContent='캡션 복사';},1500);}
+  });
+}
 function openDetail(id){
   var w=works.find(function(x){return x.id===id;}),h=getHN(w),c0=w.c[0],c1=w.c[1];
   var ph='<div style="width:100%;height:100%;background:'+c0+';display:flex;align-items:center;justify-content:center;"><svg width="60" height="60" viewBox="0 0 60 60" fill="none"><rect width="60" height="60" rx="6" fill="'+c1+'" opacity=".15"/><circle cx="20" cy="20" r="8" fill="'+c1+'" opacity=".4"/><path d="M4 46l12-16 9 11 7-9 17 14H4z" fill="'+c1+'" opacity=".4"/></svg></div>';
@@ -1191,6 +1201,21 @@ function openDetail(id){
   document.getElementById('dChips').innerHTML=(h?'<span class="chip hn">'+h+'</span>':'')+(w.price?'<span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD99;font-weight:500;">'+fmtKRW(w.price)+'</span>':'')+[w.year,w.genre,w.medium,w.size].filter(Boolean).map(function(v){return'<span class="chip">'+v+'</span>';}).join('')+(w.sold?'<span class="chip sold">'+t('soldBadge')+'</span>':'');
   document.getElementById('dDesc').textContent=w.desc||'';
   var aw=document.getElementById('dAward');if(w.award){aw.style.display='flex';document.getElementById('dAwardTxt').textContent=w.award;}else aw.style.display='none';
+  // 캡션 생성
+  var h2=getHN(w);
+  var captionLines=[];
+  captionLines.push(w.title);
+  var meta=[];
+  if(w.year)meta.push(w.year);
+  if(w.medium)meta.push(w.medium);
+  if(w.size)meta.push(w.size+(h2?' ('+h2+')':''));
+  if(meta.length)captionLines.push(meta.join(', '));
+  if(w.award)captionLines.push(w.award);
+  var captionText=captionLines.join('\n');
+  // 캡션 박스 업데이트
+  var cb=document.getElementById('dCaptionBox');
+  if(cb)cb.value=captionText;
+  window._currentCaption=captionText;
   document.getElementById('dEditBtn').onclick=function(){closeOv('detailOv');openAdd(id);};
   var sb=document.getElementById('dSelBtn');
   if(sel.has(id)){sb.textContent='선택 해제';sb.className='btn';}else{sb.textContent='선택에 추가';sb.className='btn btn-blue';}
