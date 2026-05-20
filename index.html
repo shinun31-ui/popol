@@ -15,7 +15,7 @@
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:15px;line-height:1.5;}
 /* SPLASH */
 #splash{position:fixed;inset:0;background:#2C2C2A;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;}
-.splash-logo{display:grid;grid-template-columns:1fr 1fr;gap:7px;width:56px;height:56px;}
+.splash-logo{display:grid;grid-template-columns:1fr 1fr;gap:7px;width:52px;height:52px;}
 .splash-logo .sq{border-radius:5px;background:#F1EFE8;transition:opacity .35s ease;}
 .splash-word{font-size:26px;font-weight:600;letter-spacing:.3em;color:#F1EFE8;opacity:0;transition:opacity .7s ease;}
 .splash-word.show{opacity:1;}
@@ -271,27 +271,32 @@ body.loading .modal-close,body.loading button{cursor:wait;}
 
 <!-- SPLASH -->
 <div id="splash">
-  <div class="splash-logo">
-    <div class="sq" id="sq0"></div><div class="sq" id="sq1"></div>
-    <div class="sq" id="sq3"></div><div class="sq" id="sq2"></div>
+  <div style="display:flex;align-items:center;gap:14px;">
+    <div class="splash-logo" id="splashLogoGrid">
+      <div class="sq" id="sq0"></div><div class="sq" id="sq1"></div>
+      <div class="sq" id="sq3"></div><div class="sq" id="sq2"></div>
+    </div>
+    <div id="splashWordmark" style="overflow:hidden;max-width:0;opacity:0;transition:max-width .7s cubic-bezier(.4,0,.2,1),opacity .5s ease;white-space:nowrap;">
+      <span style="font-size:28px;font-weight:800;font-style:italic;letter-spacing:.05em;color:#F1EFE8;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;">POPOL</span>
+    </div>
   </div>
-  <div class="splash-word" id="splashWord">POPOL</div>
-  <div class="splash-sub" id="splashSub">portfolio, simplified.</div>
+  <div class="splash-sub" id="splashSub" style="margin-top:16px;">portfolio, simplified.</div>
 </div>
 
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-box" id="loginBox">
     <div class="login-logo">
-      <div class="login-logo-icon">
-        <svg width="64" height="64" viewBox="0 0 36 36" fill="none">
-          <rect x="4" y="4" width="12" height="12" rx="2.5" fill="#F1EFE8"/>
-          <rect x="20" y="4" width="12" height="12" rx="2.5" fill="#F1EFE8" opacity=".55"/>
-          <rect x="4" y="20" width="12" height="12" rx="2.5" fill="#F1EFE8" opacity=".55"/>
-          <rect x="20" y="20" width="12" height="12" rx="2.5" fill="#F1EFE8" opacity=".25"/>
+      <div class="login-logo-icon" style="width:64px;height:64px;margin:0 auto 12px;">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="64" height="64" rx="14" fill="#1a1a18"/>
+          <rect x="12" y="12" width="17" height="17" rx="3.5" fill="#F1EFE8"/>
+          <rect x="35" y="12" width="17" height="17" rx="3.5" fill="#F1EFE8" opacity=".55"/>
+          <rect x="12" y="35" width="17" height="17" rx="3.5" fill="#F1EFE8" opacity=".55"/>
+          <rect x="35" y="35" width="17" height="17" rx="3.5" fill="#F1EFE8" opacity=".25"/>
         </svg>
       </div>
-      <div class="login-wordmark">POPOL</div>
+      <div class="login-wordmark" style="font-style:italic;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;letter-spacing:.05em;">POPOL</div>
       <div class="login-sub-text">portfolio, simplified.</div>
     </div>
     <div class="login-card">
@@ -494,11 +499,11 @@ body.loading .modal-close,body.loading button{cursor:wait;}
 
 <!-- LOADER -->
 <div id="loaderOv" style="display:none;position:fixed;inset:0;background:rgba(44,44,42,.85);z-index:99999;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
-  <div class="splash-logo" id="loaderLogo" style="width:48px;height:48px;">
-    <div class="sq" id="lsq0"></div>
-    <div class="sq" id="lsq1"></div>
-    <div class="sq" id="lsq3"></div>
-    <div class="sq" id="lsq2"></div>
+  <div id="loaderLogo" style="width:56px;height:56px;">
+    <svg width="56" height="56" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" id="loaderLogoSvg" style="animation:spin 1s linear infinite;">
+      <rect width="36" height="36" rx="8" fill="rgba(241,239,232,.12)"/>
+      <text x="18" y="18" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="800" font-style="italic" fill="#F1EFE8" text-anchor="middle" dominant-baseline="central">P</text>
+    </svg>
   </div>
   <div id="loaderMsg" style="font-size:13px;color:rgba(241,239,232,.6);letter-spacing:.05em;"></div>
 </div>
@@ -1453,17 +1458,8 @@ var loaderStep=0,loaderTimer=null;
 var loaderLevels=[1.0,0.55,0.25,0.1];
 function showLoader(msg){
   var ov=document.getElementById('loaderOv');
-  var lsqs=[document.getElementById('lsq0'),document.getElementById('lsq1'),document.getElementById('lsq2'),document.getElementById('lsq3')];
   document.getElementById('loaderMsg').textContent=msg||'';
   ov.style.display='flex';
-  loaderStep=0;
-  lsqs.forEach(function(s){if(s)s.style.transition='none';});
-  function loaderTick(){
-    lsqs.forEach(function(s,i){if(s)s.style.opacity=loaderLevels[((i-loaderStep)%4+4)%4];});
-    loaderStep++;
-    loaderTimer=setTimeout(loaderTick,280);
-  }
-  loaderTick();
 }
 function hideLoader(){
   clearTimeout(loaderTimer);
@@ -1480,42 +1476,72 @@ function showToast(msg){var el=document.getElementById('toast');el.textContent=m
 // ===================== SPLASH =====================
 (function(){
   var sp=document.getElementById('splash');
-  var logo=document.querySelector('.splash-logo');
+  var sub=document.getElementById('splashSub');
+  var logo=document.getElementById('splashLogoGrid');
+  var wordmark=document.getElementById('splashWordmark');
   var sqs=[document.getElementById('sq0'),document.getElementById('sq1'),document.getElementById('sq2'),document.getElementById('sq3')];
-  var word=document.getElementById('splashWord'),sub=document.getElementById('splashSub');
-  var lv=[1.0,0.55,0.25,0.1],fo={sq0:1.0,sq1:0.55,sq2:0.25,sq3:0.55},step=0;
-  sqs.forEach(function(s){s.style.opacity=lv[3];});
+  var lv=[1.0,0.55,0.25,0.1];
+  var step=0;
+  sqs.forEach(function(s){if(s)s.style.opacity=lv[3];});
+
+  // 네모 시계방향 애니메이션
   function tick(){
-    if(step<8){for(var i=0;i<4;i++)sqs[i].style.opacity=lv[((i-step)%4+4)%4];step++;setTimeout(tick,280);}
-    else{
-      sqs.forEach(function(s){s.style.transition='opacity .4s ease';});
-      ['sq0','sq1','sq2','sq3'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.opacity=fo[id];});
-      setTimeout(function(){word.classList.add('show');sub.classList.add('show');},350);
-      setTimeout(doOut,2000);
+    if(step<8){
+      sqs.forEach(function(s,i){if(s)s.style.opacity=lv[((i-step)%4+4)%4];});
+      step++;
+      setTimeout(tick,280);
+    } else {
+      // 원래 명암으로
+      sqs.forEach(function(s){if(s)s.style.transition='opacity .4s ease';});
+      if(sqs[0])sqs[0].style.opacity='1.0';
+      if(sqs[1])sqs[1].style.opacity='0.55';
+      if(sqs[2])sqs[2].style.opacity='0.25';
+      if(sqs[3])sqs[3].style.opacity='0.55';
+      // 글씨 샤라락
+      setTimeout(function(){
+        if(wordmark){wordmark.style.maxWidth='200px';wordmark.style.opacity='1';}
+        if(sub){sub.classList.add('show');}
+      },300);
+      // 나가기
+      setTimeout(doOut, 2000);
     }
   }
+
   function doOut(){
-    word.style.transition='opacity .4s ease';word.style.opacity='0';
-    sub.style.transition='opacity .3s ease';sub.style.opacity='0';
+    if(wordmark){wordmark.style.transition='opacity .4s ease';wordmark.style.opacity='0';}
+    if(sub){sub.style.transition='opacity .3s ease';sub.style.opacity='0';}
     setTimeout(function(){
       var loginEl=document.getElementById('loginScreen');
       if(!currentUser){loginEl.style.display='flex';loginEl.style.opacity='0';}
       if(logo&&loginEl&&!currentUser){
-        var fr=logo.getBoundingClientRect(),li=loginEl.querySelector('.login-logo-icon'),tr=li?li.getBoundingClientRect():null;
-        if(tr){var sc=Math.min(tr.width/fr.width,tr.height/fr.height),dx=(tr.left+tr.width/2)-(fr.left+fr.width/2),dy=(tr.top+tr.height/2)-(fr.top+fr.height/2);logo.style.transition='transform .7s cubic-bezier(.4,0,.2,1)';logo.style.transform='translate('+dx+'px,'+dy+'px) scale('+sc+')';}
+        var fr=logo.getBoundingClientRect();
+        var li=loginEl.querySelector('.login-logo-icon');
+        var tr=li?li.getBoundingClientRect():null;
+        if(tr){
+          var sc=Math.min(tr.width/fr.width,tr.height/fr.height);
+          var dx=(tr.left+tr.width/2)-(fr.left+fr.width/2);
+          var dy=(tr.top+tr.height/2)-(fr.top+fr.height/2);
+          logo.style.transition='transform .65s cubic-bezier(.4,0,.2,1)';
+          logo.style.transform='translate('+dx+'px,'+dy+'px) scale('+sc+')';
+        }
       }
       setTimeout(function(){
         sp.style.transition='opacity .5s ease';sp.style.opacity='0';
-        if(!currentUser){loginEl.style.transition='opacity .5s ease';loginEl.style.opacity='1';var box=document.getElementById('loginBox');if(box){box.classList.remove('lin-anim');setTimeout(function(){box.classList.add('lin-anim');},50);}}
-        else{showApp();}
-        setTimeout(function(){sp.style.display='none';if(logo){logo.style.transition='';logo.style.transform='';}},520);
+        if(!currentUser){
+          loginEl.style.transition='opacity .5s ease';loginEl.style.opacity='1';
+          var box=document.getElementById('loginBox');
+          if(box){box.classList.remove('lin-anim');setTimeout(function(){box.classList.add('lin-anim');},50);}
+        } else {showApp();}
+        setTimeout(function(){
+          sp.style.display='none';
+          if(logo){logo.style.transition='';logo.style.transform='';}
+        },520);
       },350);
     },100);
   }
-  setTimeout(tick,250);
-})();
 
-initAutoLoginUI();
+  setTimeout(tick, 300);
+})();
 fetchRates();
 </script>
 </body>
