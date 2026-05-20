@@ -104,6 +104,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 .card:hover{border-color:var(--border2);}
 .card.sel{border:1.5px solid var(--blue);}
 .card.sold-card{border-color:rgba(163,45,45,.3);}
+.card.reserve-card{border-color:rgba(250,199,117,.4);}
 .sold-ov{position:absolute;inset:0;background:rgba(163,45,45,.08);pointer-events:none;z-index:1;}
 .sold-badge{position:absolute;bottom:7px;left:7px;z-index:3;background:rgba(163,45,45,.85);color:#fff;font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;pointer-events:none;}
 .chkbtn{position:absolute;top:7px;left:7px;width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(255,255,255,.88);background:rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;z-index:4;cursor:pointer;}
@@ -426,7 +427,11 @@ body.loading .modal-close,body.loading button{cursor:wait;}
       <div class="imgdrop" id="dropZone" onclick="document.getElementById('imgFile').click()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> <span id="dropZoneText">클릭해서 이미지 업로드</span></div>
       <input type="file" id="imgFile" accept="image/*" style="display:none;" onchange="loadImg(this)"/>
     </div>
-    <div class="togglerow" onclick="toggleSoldF()"><div class="track" id="soldTrack"><div class="tdot"></div></div><div><div class="tlbl">판매 완료</div><div class="tsub">켜면 카드에 판매 완료 표시가 나타나요</div></div></div>
+    <div style="display:flex;gap:6px;margin-bottom:13px;">
+      <button id="statusAvail" onclick="setSoldStatus(false)" style="flex:1;padding:8px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:12px;">판매 가능</button>
+      <button id="statusReserve" onclick="setSoldStatus('reserve')" style="flex:1;padding:8px;border-radius:8px;border:0.5px solid rgba(250,199,117,.4);background:rgba(250,199,117,.08);color:#9a7010;cursor:pointer;font-size:12px;">예약중</button>
+      <button id="statusSold" onclick="setSoldStatus(true)" style="flex:1;padding:8px;border-radius:8px;border:0.5px solid rgba(163,45,45,.3);background:rgba(163,45,45,.06);color:var(--red);cursor:pointer;font-size:12px;">판매 완료</button>
+    </div>
     <div class="mact"><button class="btn" onclick="closeOv('addOv')">취소</button><button class="btn btn-dark" onclick="saveWork()">저장</button></div>
   </div>
 </div>
@@ -814,7 +819,7 @@ async function loadWorksFromDB(){
   works=(res.data||[]).map(function(w){return{
     id:w.id,title:w.title||'',year:w.year||2024,genre:w.genre||'회화',
     medium:w.medium||'',size:w.size||'',desc:w.description||'',award:w.award||'',
-    price:w.price||0,sold:w.sold||false,img:w.img_url||null,
+    price:w.price||0,sold:w.sold==='reserve'?'reserve':(w.sold?true:false),img:w.img_url||null,
     c:[w.color_bg||PAL[0][0],w.color_fg||PAL[0][1]],dbId:w.id
   };});
   render();
@@ -822,7 +827,7 @@ async function loadWorksFromDB(){
 async function saveWorkToDB(data,isEdit,dbId){
   var row={user_id:currentUser.id,title:data.title,year:data.year,genre:data.genre,
     medium:data.medium||'',size:data.size||'',description:data.desc||'',award:data.award||'',
-    price:data.price||0,sold:data.sold||false,img_url:data.img||null,
+    price:data.price||0,sold:data.sold==='reserve'?'reserve':(data.sold?true:false),img_url:data.img||null,
     color_bg:data.c?data.c[0]:PAL[0][0],color_fg:data.c?data.c[1]:PAL[0][1],
     sort_order:data.sort_order||0,updated_at:new Date().toISOString()};
   var res=isEdit&&dbId?await supa.from('works').update(row).eq('id',dbId):await supa.from('works').insert(row).select().single();
@@ -1113,8 +1118,10 @@ function cHtml(w){
   var ph='<div style="width:100%;height:100%;background:'+c0+';display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="3" fill="'+c1+'" opacity=".18"/><circle cx="9" cy="9" r="3" fill="'+c1+'" opacity=".45"/><path d="M1 21l6-8 4 5 4-4 8 7H1z" fill="'+c1+'" opacity=".45"/></svg></div>';
   var wid=String(w.id);
   var dragAttrs=editMode?' draggable="true" data-wid="'+wid+'" ondragstart="onDragStart(event,this.dataset.wid)" ondragover="onDragOver(event,this.dataset.wid)" ondrop="onDrop(event,this.dataset.wid)" ondragend="onDragEnd()"':'';
-  var html='<div class="card'+(s?' sel':'')+(w.sold?' sold-card':'')+'" data-id="'+wid+'"'+dragAttrs+'>';
-  html+=w.sold?'<div class="sold-ov"></div><div class="sold-badge">'+t('soldBadge')+'</div>':'';
+  var soldClass=w.sold===true?' sold-card':w.sold==='reserve'?' reserve-card':'';
+  var html='<div class="card'+(s?' sel':'')+soldClass+'" data-id="'+wid+'"'+dragAttrs+'>';
+  var soldOv=w.sold===true?'<div class="sold-ov"></div><div class="sold-badge">판매 완료</div>':w.sold==='reserve'?'<div class="sold-ov" style="background:rgba(250,199,117,.08);"></div><div class="sold-badge" style="background:rgba(180,130,20,.85);">예약중</div>':'';
+  html+=soldOv;
   html+='<div class="chkbtn" data-cid="'+wid+'" onclick="event.stopPropagation();toggleSel(this.dataset.cid)"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
   html+='<div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg></div>';
   html+='<div class="thumb" data-tid="'+wid+'" onclick="toggleSel(this.dataset.tid)">'+(w.img?'<img src="'+w.img+'"/>':ph)+'</div>';
@@ -1155,6 +1162,26 @@ function toggleEditMode(){
   else{if(btn){btn.textContent='편집';btn.className='btn btn-sm';}if(bar)bar.style.display='none';if(listEl)listEl.classList.remove('edit-mode');sel.clear();}
   render();
 }
+
+async function setSelSoldStatus(status){
+  if(sel.size===0){showToast('작품을 선택해주세요');return;}
+  var ids=[...sel];
+  var label=status===true?'판매 완료':status==='reserve'?'예약중':'판매 가능';
+  if(!confirm(ids.length+'개 작품을 '+label+'으로 변경할까요?'))return;
+  showLoader(label+'으로 변경 중...');
+  var soldVal=status===true?true:status==='reserve'?'reserve':false;
+  if(currentUser){
+    for(var i=0;i<ids.length;i++){
+      var w=works.find(function(x){return x.id===ids[i];});
+      if(w){await supa.from('works').update({sold:soldVal,updated_at:new Date().toISOString()}).eq('id',w.dbId||w.id);}
+    }
+    await loadWorksFromDB();
+  }
+  hideLoader();
+  sel.clear();
+  showToast(ids.length+'개 작품을 '+label+'으로 변경했어요');
+}
+
 async function deleteSelected(){
   if(sel.size===0){showToast('삭제할 작품을 선택해주세요');return;}
   var ids=[...sel],sw=works.filter(function(w){return ids.indexOf(w.id)>=0;});
@@ -1171,12 +1198,26 @@ function onDragEnd(){document.querySelectorAll('.card').forEach(function(c){c.cl
 function onDrop(e,tid){e.preventDefault();if(!dragSrcId||dragSrcId===tid)return;var si=works.findIndex(function(w){return w.id===dragSrcId;}),ti=works.findIndex(function(w){return w.id===tid;});if(si<0||ti<0)return;var mv=works.splice(si,1)[0];works.splice(ti,0,mv);saveOrder();render();dragSrcId=null;}
 
 // ===================== ADD/EDIT WORK =====================
-function toggleSoldF(){soldF=!soldF;document.getElementById('soldTrack').classList.toggle('on',soldF);}
+
+function setSoldStatus(status){
+  soldF=status;
+  var btns=['statusAvail','statusReserve','statusSold'];
+  var vals=[false,'reserve',true];
+  btns.forEach(function(id,i){
+    var el=document.getElementById(id);
+    if(!el)return;
+    var active=vals[i]===status||(status===false&&i===0);
+    el.style.fontWeight=active?'600':'400';
+    el.style.opacity=active?'1':'0.6';
+  });
+}
+
 function openAddWithYear(yr){openAdd(null,parseInt(yr));}
 function openAdd(id,defaultYear){
   id=id||null;editId=id;pendingImg=null;pendingImgFile=null;
   var w=id?works.find(function(x){return x.id===id;}):null;
   soldF=w?w.sold:false;
+  setTimeout(function(){setSoldStatus(soldF);},10);
   document.getElementById('modalTitle').textContent=w?t('editTitle'):t('addTitle');
   document.getElementById('fTitle').value=w?w.title:'';
   document.getElementById('fYear2').value=w?w.year:(defaultYear||new Date().getFullYear());
@@ -1238,7 +1279,8 @@ function copyCaption(){
 function openDetail(id){
   var w=works.find(function(x){return x.id===id;}),h=getHN(w),c0=w.c[0],c1=w.c[1];
   var ph='<div style="width:100%;height:100%;background:'+c0+';display:flex;align-items:center;justify-content:center;"><svg width="60" height="60" viewBox="0 0 60 60" fill="none"><rect width="60" height="60" rx="6" fill="'+c1+'" opacity=".15"/><circle cx="20" cy="20" r="8" fill="'+c1+'" opacity=".4"/><path d="M4 46l12-16 9 11 7-9 17 14H4z" fill="'+c1+'" opacity=".4"/></svg></div>';
-  document.getElementById('dImg').innerHTML=(w.img?'<img src="'+w.img+'"/>':ph)+(w.sold?'<div class="dsoldrib">'+t('soldBadge')+'</div>':'');
+  var soldRib=w.sold===true?'<div class="dsoldrib">판매 완료</div>':w.sold==='reserve'?'<div class="dsoldrib" style="background:rgba(180,130,20,.88);">예약중</div>':'';
+  document.getElementById('dImg').innerHTML=(w.img?'<img src="'+w.img+'"/>':ph)+soldRib;
   document.getElementById('dTitle').textContent=w.title;
   document.getElementById('dChips').innerHTML=(h?'<span class="chip hn">'+h+'</span>':'')+(w.price?'<span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD99;font-weight:500;">'+fmtKRW(w.price)+'</span>':'')+[w.year,w.genre,w.medium,w.size].filter(Boolean).map(function(v){return'<span class="chip">'+v+'</span>';}).join('')+(w.sold?'<span class="chip sold">'+t('soldBadge')+'</span>':'');
   document.getElementById('dDesc').textContent=w.desc||'';
