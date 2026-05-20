@@ -416,7 +416,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
 <div class="ov" id="addOv" onclick="ovClick(event,'addOv')">
   <div class="modal">
     <div class="modal-header"><h2 id="modalTitle">새 작품 추가</h2><button class="modal-close" onclick="closeOv('addOv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="frow"><div class="ff"><label>제목</label><input id="fTitle" placeholder="작품 제목"/></div><div class="ff"><label>연도</label><input id="fYear2" type="number" value="2024"/></div></div>
+    <div class="frow"><div class="ff"><label>제목 <button onclick="cleanTitle()" style="font-size:10px;padding:1px 7px;border-radius:5px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;margin-left:6px;">파일명 정리</button></label><input id="fTitle" placeholder="작품 제목"/></div><div class="ff"><label>연도</label><input id="fYear2" type="number" value="2024"/></div></div>
     <div class="frow"><div class="ff"><label>장르</label><select id="fGenre2"><option>회화</option><option>조각</option><option>사진</option><option>설치미술</option><option>판화</option><option>드로잉</option><option>디지털아트</option><option>혼합매체</option></select></div><div class="ff"><label>크기 (cm)</label><input id="fSize" placeholder="예: 53x45.5" oninput="previewHN()"/><div id="hnprev" style="margin-top:5px;min-height:20px;"></div></div></div>
     <div class="ff"><label>매체</label><input id="fMedium" placeholder="예: 캔버스에 아크릴"/></div>
     <div class="ff"><label>가격 (원)</label><input id="fPrice" type="number" placeholder="예: 3000000" oninput="updatePricePreview()"/><div id="pricePreview" style="margin-top:5px;font-size:12px;color:var(--text3);min-height:18px;"></div></div>
@@ -1210,6 +1210,22 @@ async function saveWork(){
 
 // ===================== DETAIL =====================
 
+
+function cleanTitle(){
+  var raw=document.getElementById('fTitle').value.trim();
+  if(!raw)return;
+  var parsed=parseFilename(raw+'.jpg');
+  if(parsed.title&&parsed.title!==raw){
+    document.getElementById('fTitle').value=parsed.title;
+    if(parsed.year&&!document.getElementById('fYear2').value)document.getElementById('fYear2').value=parsed.year;
+    if(parsed.size&&!document.getElementById('fSize').value)document.getElementById('fSize').value=parsed.size;
+    if(parsed.medium&&!document.getElementById('fMedium').value)document.getElementById('fMedium').value=parsed.medium;
+    showToast('제목이 정리됐어요');
+  } else {
+    showToast('이미 정리된 제목이에요');
+  }
+}
+
 function copyCaption(){
   var txt=window._currentCaption||'';
   if(!txt)return;
@@ -1430,7 +1446,7 @@ async function handleFiles(files){
   for(var ii=0;ii<imgs.length;ii++){
     var imgFile=imgs[ii];
     var url=await readURL(imgFile);
-    var baseName=imgFile.name.replace(/\.[^.]+$/,'');
+    var baseName=imgFile.name.replace(/\.[^.]+$/,'').normalize('NFC');
     var _parsed=parseFilename(imgFile.name);
     var p={
       title:_parsed.title,
