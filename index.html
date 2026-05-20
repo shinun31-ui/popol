@@ -1017,10 +1017,8 @@ function allFiltered(){
     if(gn&&w.genre!==gn)return false;
     if(sd!==''&&(sd==='1'?!w.sold:w.sold))return false;
     if(q){
-      var searchIn=[w.title,w.genre,w.medium,w.desc,w.award,String(w.year)].join(' ').toLowerCase();
-      // 모든 검색어 토큰이 하나라도 포함되면 OK
-      var tokens=q.split(/\s+/).filter(Boolean);
-      var matched=tokens.every(function(tok){return searchIn.includes(tok);});
+      var searchIn=[w.title,w.genre,w.medium,w.desc,w.award,String(w.year)].filter(Boolean).join(' ');
+      var matched=searchIn.toLowerCase().includes(q.toLowerCase());
       if(!matched)return false;
     }
     if(hn){var h=getHN(w);if(!h||h.split('호')[0]!==hn)return false;}
@@ -1247,15 +1245,22 @@ function openPreview(){
   initAutoLoginUI();
 applyLang();
 fetchRates();
-// 검색 이벤트 - 한글 IME 지원
+// 검색 이벤트 - 한글 완성형/자모 모두 지원
 (function(){
   var fq=document.getElementById('fQ');
   if(!fq)return;
+  var composing=false;
   var timer=null;
-  function doSearch(){clearTimeout(timer);timer=setTimeout(function(){goPage(1);},120);}
-  fq.addEventListener('input',doSearch);
-  fq.addEventListener('compositionend',function(){clearTimeout(timer);goPage(1);});
-  fq.addEventListener('keyup',function(e){if(e.key==='Enter')goPage(1);});
+  fq.addEventListener('compositionstart',function(){composing=true;});
+  fq.addEventListener('compositionend',function(){composing=false;clearTimeout(timer);goPage(1);});
+  fq.addEventListener('input',function(){
+    if(composing)return;
+    clearTimeout(timer);
+    timer=setTimeout(function(){goPage(1);},80);
+  });
+  fq.addEventListener('keyup',function(e){
+    if(e.key==='Enter'){clearTimeout(timer);goPage(1);}
+  });
 })();renderPreviewList(ids);
   document.getElementById('prevOv').classList.add('on');
 }
