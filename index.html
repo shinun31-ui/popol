@@ -343,9 +343,9 @@ body.loading .modal-close,body.loading button{cursor:wait;}
       </div>
     </div>
     <button class="btn btn-sm" id="editModeBtn" onclick="toggleEditMode()">편집</button>
-    <button class="btn btn-sm" id="navUpload" onclick="showApp();showTab('upload')">간편 업로드</button>
-    <button class="btn btn-sm" id="navList" onclick="openPreview()">리스트</button>
-    <button class="btn btn-sm btn-dark" id="navAdd" onclick="openAdd()">+ 추가</button>
+    <button class="btn btn-sm" id="navUpload" onclick="showApp();showTab('upload')"><span id="navUpload">간편 업로드</span></button>
+    <button class="btn btn-sm" id="navList" onclick="openPreview()"><span id="navList">리스트</span></button>
+    <button class="btn btn-sm btn-dark" id="navAdd" onclick="openAdd()"><span id="navAdd">+ 추가</span></button>
   </div>
 </nav>
 
@@ -380,7 +380,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
           <div class="ps-btns"><button class="psb" data-n="20" onclick="setPS(20)">20</button><button class="psb on" data-n="30" onclick="setPS(30)">30</button><button class="psb" data-n="50" onclick="setPS(50)">50</button><button class="psb" data-n="9999" onclick="setPS(9999)">전체</button></div>
         </div>
       </div>
-      <div class="selbar" id="selbar" style="display:none;"><strong id="selcnt">0</strong><div class="r"><button class="btn btn-sm" onclick="clearSel()">해제</button><button class="btn btn-sm" onclick="selAll()">전체</button><button class="btn btn-sm btn-blue" onclick="openPreview()">리스트 만들기</button></div></div>
+      <div class="selbar" id="selbar" style="display:none;"><strong id="selcnt">0</strong><div class="r"><button class="btn btn-sm" id="selClearBtn" onclick="clearSel()">해제</button><button class="btn btn-sm" id="selAllBtn2" onclick="selAll()">전체</button><button class="btn btn-sm btn-blue" id="makeListBtn" onclick="openPreview()">리스트 만들기</button></div></div>
     </div>
     <div id="list"></div>
     <div class="pgn" id="pgn"></div>
@@ -388,19 +388,19 @@ body.loading .modal-close,body.loading button{cursor:wait;}
 
   <div id="tabU" style="display:none;">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;">
-      <div><div style="font-size:18px;font-weight:600;margin-bottom:2px;">간편 업로드</div><div style="font-size:13px;color:var(--text2);">이미지나 CSV를 올리면 작품 정보를 자동으로 읽어와요.</div></div>
+      <div><div style="font-size:18px;font-weight:600;margin-bottom:2px;" id="uploadTabTitle">간편 업로드</div><div style="font-size:13px;color:var(--text2);" id="uploadTabSub">이미지나 CSV를 올리면 작품 정보를 자동으로 읽어와요.</div></div>
       <button class="modal-close" onclick="showTab('portfolio')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="uzzone" id="uzzone" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)" onclick="document.getElementById('fileInp').click()">
       <div class="uzico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-      <div class="uztitle">파일을 끌어다 놓거나 클릭해서 선택</div>
+      <div class="uztitle" id="uploadDropText">파일을 끌어다 놓거나 클릭해서 선택</div>
       <div class="uzsub">파일명에서 제목, 연도, 재료, 크기 자동 추출 / CSV 일괄 등록</div>
     </div>
     <input type="file" id="fileInp" multiple accept="image/*,.csv" style="display:none" onchange="handleFiles(this.files)"/>
     <div class="howgrid">
-      <div class="howcard"><div class="hown">방법 1 — 이미지</div><div class="howt">파일명 자동 파싱</div><div class="howd">제목_연도_재료_크기 순서로 저장하면 자동 인식해요.</div></div>
-      <div class="howcard"><div class="hown">방법 2 — CSV</div><div class="howt">목록 일괄 등록</div><div class="howd">엑셀을 CSV로 저장해서 올리면 컬럼 자동 매핑해요.</div></div>
-      <div class="howcard"><div class="hown">방법 3 — 함께</div><div class="howt">이미지 + CSV 매칭</div><div class="howd">둘 다 올리면 제목 기준으로 이미지를 자동 연결해요.</div></div>
+      <div class="howcard"><div class="hown" id="how1n">방법 1 — 이미지</div><div class="howt" id="how1t">파일명 자동 파싱</div><div class="howd" id="how1d">제목_연도_재료_크기 순서로 저장하면 자동 인식해요.</div></div>
+      <div class="howcard"><div class="hown" id="how2n">방법 2 — CSV</div><div class="howt" id="how2t">목록 일괄 등록</div><div class="howd" id="how2d">엑셀을 CSV로 저장해서 올리면 컬럼 자동 매핑해요.</div></div>
+      <div class="howcard"><div class="hown" id="how3n">방법 3 — 함께</div><div class="howt" id="how3t">이미지 + CSV 매칭</div><div class="howd" id="how3d">둘 다 올리면 제목 기준으로 이미지를 자동 연결해요.</div></div>
     </div>
     <div id="impSec"></div>
   </div>
@@ -452,7 +452,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
     <p class="psub" id="prevSub"></p>
     <div class="artbar"><div><div class="aname" id="pArtistName">작가 이름 미설정</div><div class="acontact" id="pArtistContact"></div></div><button class="btn btn-sm" onclick="closeOv('prevOv');openArtist()">정보 편집</button></div>
     <div class="price-section">
-      <div class="price-toggle-row"><span class="price-toggle-label">가격 표시</span><div class="price-checkbox on" id="priceToggle" onclick="togglePriceShow()"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+      <div class="price-toggle-row"><span class="price-toggle-label" id="priceShowLabel">가격 표시</span><div class="price-checkbox on" id="priceToggle" onclick="togglePriceShow()"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
       <div id="currencyPicker">
         <div class="currency-grid">
           <button class="cur-btn on" data-cur="KRW" onclick="setCur('KRW')"><span class="cur-symbol">&#8361;</span>한화</button>
@@ -468,15 +468,15 @@ body.loading .modal-close,body.loading button{cursor:wait;}
     <div class="sttl">내보내기</div>
     <div class="expgrid">
       <button class="expbtn" onclick="doExport('csv')"><div class="expico" style="background:#EAF3DE;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div><div class="expname">엑셀 (CSV)</div><div class="expdesc">번호, 제목, 연도, 장르, 호수</div></div></button>
-      <button class="expbtn" onclick="doExport('pdf')"><div class="expico" style="background:#FCEBEB;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div class="expname">PDF (A4)</div><div class="expdesc">깔끔한 표</div></div></button>
-      <button class="expbtn" onclick="doExport('img')"><div class="expico" style="background:#E6F1FB;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div><div class="expname">이미지만</div><div class="expdesc">작품 사진 다운로드</div></div></button>
-      <button class="expbtn" onclick="doExport('txt')"><div class="expico" style="background:#EEEDFE;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg></div><div><div class="expname">캡션 텍스트</div><div class="expdesc">클립보드에 복사</div></div></button>
+      <button class="expbtn" onclick="doExport('pdf')"><div class="expico" style="background:#FCEBEB;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div class="expname" id="expPdfName">PDF (A4)</div><div class="expdesc" id="expPdfDesc">깔끔한 표</div></div></button>
+      <button class="expbtn" onclick="doExport('img')"><div class="expico" style="background:#E6F1FB;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div><div class="expname" id="expImgName">이미지만</div><div class="expdesc" id="expImgDesc">작품 사진 다운로드</div></div></button>
+      <button class="expbtn" onclick="doExport('txt')"><div class="expico" style="background:#EEEDFE;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg></div><div><div class="expname" id="expTxtName">캡션 텍스트</div><div class="expdesc" id="expTxtDesc">클립보드에 복사</div></div></button>
     </div>
-    <div class="sttl">공유</div>
+    <div class="sttl" id="shareSectionTitle">공유</div>
     <div class="sharerow">
-      <button class="shbtn" onclick="shareVia('sms')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>문자</button>
-      <button class="shbtn" onclick="shareVia('email')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>메일</button>
-      <button class="shbtn" onclick="shareVia('copy')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>링크 복사</button>
+      <button class="shbtn" onclick="shareVia('sms')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span id="btnSmsText">문자</span></button>
+      <button class="shbtn" onclick="shareVia('email')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span id="btnMailText">메일</span></button>
+      <button class="shbtn" onclick="shareVia('copy')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><span id="btnCopyText">링크 복사</span></button>
     </div>
     <div class="mact" style="margin-top:14px;"><button class="btn" onclick="closeOv('prevOv')">닫기</button></div>
   </div>
@@ -485,9 +485,9 @@ body.loading .modal-close,body.loading button{cursor:wait;}
 <!-- REVIEW MODAL -->
 <div class="ov" id="reviewOv" onclick="ovClick(event,'reviewOv')">
   <div class="rmodal">
-    <div class="rmhead"><div style="display:flex;align-items:center;justify-content:space-between;"><h2>인식 결과 확인</h2><button class="modal-close" onclick="closeOv('reviewOv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><p id="reviewSub"></p></div>
+    <div class="rmhead"><div style="display:flex;align-items:center;justify-content:space-between;"><h2 id="reviewModalTitle">인식 결과 확인</h2><button class="modal-close" onclick="closeOv('reviewOv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><p id="reviewSub"></p></div>
     <div class="rmbody" id="reviewBody"></div>
-    <div class="rmfoot"><div style="font-size:12px;color:var(--text2);" id="footInfo"></div><div style="display:flex;gap:8px;"><button class="btn btn-sm" onclick="closeOv('reviewOv')">취소</button><button class="btn btn-sm btn-dark" onclick="importSel()">선택 항목 등록</button></div></div>
+    <div class="rmfoot"><div style="font-size:12px;color:var(--text2);" id="footInfo"></div><div style="display:flex;gap:8px;"><button class="btn btn-sm" onclick="closeOv('reviewOv')"><span id="btnCancelReview">취소</span></button><button class="btn btn-sm btn-dark" id="btnImportSel" onclick="importSel()"><span id="btnImportSelText">선택 항목 등록</span></button></div></div>
   </div>
 </div>
 
@@ -860,6 +860,134 @@ function setLang(l){curLang=l;localStorage.setItem('popol_lang',l);document.getE
 function toggleLangMenu(){document.getElementById('langMenu').classList.toggle('hide');}
 document.addEventListener('click',function(e){var m=document.getElementById('langMenu'),b=document.getElementById('langBtn');if(m&&b&&!m.contains(e.target)&&!b.contains(e.target))m.classList.add('hide');});
 
+
+// ===================== LANGUAGE DATA =====================
+var LANG={
+  ko:{
+    navUpload:'간편 업로드',navList:'리스트',navAdd:'+ 추가',editBtn:'편집',editDone:'편집 완료',
+    filterYear:'전체 연도',filterGenre:'전체 장르',filterHnum:'전체 호수',filterMedium:'전체 재료',filterAll:'전체 상태',filterAvail:'판매 가능',filterSold:'판매 완료',
+    sortYearDesc:'연도 최신순',sortYearAsc:'연도 오래된순',sortHnumAsc:'호수 작은순',sortHnumDesc:'호수 큰순',sortTitleAsc:'제목 가나다순',
+    addTitle:'새 작품 추가',editTitle:'작품 수정',
+    fTitle:'제목',fTitlePh:'작품 제목',fYear:'연도',fGenre:'장르',fSize:'크기 (cm)',fSizePh:'예: 53x45.5',
+    fMedium:'매체',fMediumPh:'예: 캔버스에 아크릴',fPrice:'가격 (원)',fPricePh:'예: 3000000',
+    fDesc:'작품 설명',fDescPh:'작가 노트, 작품 배경 등...',fAward:'수상 / 출판 이력',fAwardPh:'예: 2024 서울 청년작가상',
+    fImage:'이미지',fImagePh:'클릭해서 이미지 업로드',soldToggle:'판매 완료',soldSub:'켜면 카드에 판매 완료 표시가 나타나요',
+    cancel:'취소',save:'저장',close:'닫기',
+    artistTitle:'작가 정보',artistName:'작가 이름',artistNamePh:'홍길동',artistPhone:'연락처',artistPhonePh:'010-0000-0000',artistEmail:'이메일',artistEmailPh:'artist@email.com',
+    previewTitle:'작품 리스트 미리보기',previewEditInfo:'정보 편집',priceShow:'가격 표시',
+    expTitle:'내보내기',expCsv:'엑셀 (CSV)',expCsvSub:'번호, 제목, 연도, 장르, 호수',expPdf:'PDF (A4)',expPdfSub:'깔끔한 표',expImg:'이미지만',expImgSub:'작품 사진 다운로드',expTxt:'캡션 텍스트',expTxtSub:'클립보드에 복사',
+    shareTitle:'공유',shareSms:'문자',shareMail:'메일',shareCopy:'링크 복사',
+    uploadTitle:'간편 업로드',uploadSub:'이미지나 CSV를 올리면 작품 정보를 자동으로 읽어와요.',uploadDrop:'파일을 끌어다 놓거나 클릭해서 선택',
+    how1n:'방법 1 — 이미지',how1t:'파일명 자동 파싱',how1d:'제목_연도_재료_크기 순서로 저장하면 자동 인식해요.',
+    how2n:'방법 2 — CSV',how2t:'목록 일괄 등록',how2d:'엑셀을 CSV로 저장해서 올리면 컬럼 자동 매핑해요.',
+    how3n:'방법 3 — 함께',how3t:'이미지 + CSV 매칭',how3d:'둘 다 올리면 제목 기준으로 이미지를 자동 연결해요.',
+    reviewTitle:'인식 결과 확인',reviewCancel:'취소',reviewImport:'선택 항목 등록',
+    logout:'로그아웃',soldBadge:'판매 완료',prevBtn:'미리보기',selAll:'전체 선택',selClear:'해제',makeList:'리스트 만들기',
+    selAllYr:'전체 선택',selClearYr:'선택 해제',addCard:'추가',
+    toastSaved:'저장됐어요',toastNoTitle:'제목을 입력해주세요',toastCsv:'CSV 다운로드됐어요',toastPdf:'PDF 인쇄 창이 열렸어요',toastNoImg:'이미지가 없어요',toastImgDl:'개 다운로드 중...',toastTxt:'캡션이 복사됐어요',toastCopied:'복사됐어요',toastImported:'개 작품이 추가됐어요',toastNone:'선택된 항목이 없어요',toastNoWork:'인식된 작품이 없어요',hnUnknown:'호수 인식 불가',selWorks:'개 작품 선택됨',soldCount:'판매 완료 ',soldIncluded:'점 포함)',emptyList:'등록된 작품이 없어요.',emptyListSub:'+ 추가 버튼으로 시작해보세요.'
+  },
+  en:{
+    navUpload:'Quick Upload',navList:'List',navAdd:'+ Add',editBtn:'Edit',editDone:'Done',
+    filterYear:'All Years',filterGenre:'All Genres',filterHnum:'All Sizes',filterMedium:'All Media',filterAll:'All Status',filterAvail:'Available',filterSold:'Sold',
+    sortYearDesc:'Newest',sortYearAsc:'Oldest',sortHnumAsc:'Size: Small→Large',sortHnumDesc:'Size: Large→Small',sortTitleAsc:'Title A-Z',
+    addTitle:'Add New Work',editTitle:'Edit Work',
+    fTitle:'Title',fTitlePh:'Work title',fYear:'Year',fGenre:'Genre',fSize:'Size (cm)',fSizePh:'e.g. 53x45.5',
+    fMedium:'Medium',fMediumPh:'e.g. Acrylic on canvas',fPrice:'Price (KRW)',fPricePh:'e.g. 3000000',
+    fDesc:'Description',fDescPh:"Artist's note...",fAward:'Awards',fAwardPh:'e.g. 2024 Seoul Award',
+    fImage:'Image',fImagePh:'Click to upload',soldToggle:'Mark as Sold',soldSub:'Shows sold badge on card',
+    cancel:'Cancel',save:'Save',close:'Close',
+    artistTitle:'Artist Info',artistName:'Name',artistNamePh:'Your name',artistPhone:'Phone',artistPhonePh:'+82 10-0000-0000',artistEmail:'Email',artistEmailPh:'artist@email.com',
+    previewTitle:'Portfolio List Preview',previewEditInfo:'Edit Info',priceShow:'Show Price',
+    expTitle:'Export',expCsv:'Excel (CSV)',expCsvSub:'No, title, year, genre, size',expPdf:'PDF (A4)',expPdfSub:'Clean table',expImg:'Images',expImgSub:'Download photos',expTxt:'Caption',expTxtSub:'Copy to clipboard',
+    shareTitle:'Share',shareSms:'Text',shareMail:'Email',shareCopy:'Copy Link',
+    uploadTitle:'Quick Upload',uploadSub:'Drop images or CSV to auto-extract info.',uploadDrop:'Drop files or click to select',
+    how1n:'Method 1 — Image',how1t:'Auto-parse filename',how1d:'Save as title_year_medium_size to auto-detect.',
+    how2n:'Method 2 — CSV',how2t:'Bulk import',how2d:'Save Excel as CSV for auto column mapping.',
+    how3n:'Method 3 — Both',how3t:'Image + CSV match',how3d:'Upload both to auto-link images by title.',
+    reviewTitle:'Review Results',reviewCancel:'Cancel',reviewImport:'Import Selected',
+    logout:'Logout',soldBadge:'Sold',prevBtn:'Preview',selAll:'Select All',selClear:'Clear',makeList:'Make List',
+    selAllYr:'Select All',selClearYr:'Deselect',addCard:'Add',
+    toastSaved:'Saved!',toastNoTitle:'Enter a title',toastCsv:'CSV downloaded',toastPdf:'Print opened',toastNoImg:'No images',toastImgDl:' downloading...',toastTxt:'Caption copied',toastCopied:'Copied!',toastImported:' works added',toastNone:'None selected',toastNoWork:'No works detected',hnUnknown:'Size not recognized',selWorks:' works selected',soldCount:'Sold: ',soldIncluded:' sold)',emptyList:'No works yet.',emptyListSub:'Tap + Add to get started.'
+  },
+  ja:{
+    navUpload:'簡単アップ',navList:'リスト',navAdd:'+ 追加',editBtn:'編集',editDone:'完了',
+    filterYear:'全ての年',filterGenre:'全ジャンル',filterHnum:'全サイズ',filterMedium:'全素材',filterAll:'全状態',filterAvail:'販売中',filterSold:'売却済',
+    sortYearDesc:'新しい順',sortYearAsc:'古い順',sortHnumAsc:'号数：小→大',sortHnumDesc:'号数：大→小',sortTitleAsc:'タイトル順',
+    addTitle:'作品を追加',editTitle:'作品を編集',
+    fTitle:'タイトル',fTitlePh:'作品タイトル',fYear:'制作年',fGenre:'ジャンル',fSize:'サイズ (cm)',fSizePh:'例：53x45.5',
+    fMedium:'素材',fMediumPh:'例：キャンバスにアクリル',fPrice:'価格 (円)',fPricePh:'例：3000000',
+    fDesc:'作品説明',fDescPh:'アーティストノート...',fAward:'受賞歴',fAwardPh:'例：2024年受賞',
+    fImage:'画像',fImagePh:'クリックしてアップロード',soldToggle:'売却済みにする',soldSub:'売却済みバッジを表示',
+    cancel:'キャンセル',save:'保存',close:'閉じる',
+    artistTitle:'アーティスト情報',artistName:'氏名',artistNamePh:'山田 太郎',artistPhone:'電話番号',artistPhonePh:'090-0000-0000',artistEmail:'メール',artistEmailPh:'artist@email.com',
+    previewTitle:'作品リストのプレビュー',previewEditInfo:'情報を編集',priceShow:'価格表示',
+    expTitle:'エクスポート',expCsv:'Excel (CSV)',expCsvSub:'番号、タイトル、年、ジャンル',expPdf:'PDF (A4)',expPdfSub:'一覧表',expImg:'画像のみ',expImgSub:'個別ダウンロード',expTxt:'キャプション',expTxtSub:'コピー',
+    shareTitle:'シェア',shareSms:'SMS',shareMail:'メール',shareCopy:'リンクをコピー',
+    uploadTitle:'簡単アップロード',uploadSub:'画像やCSVをアップするだけ。',uploadDrop:'ここにドロップまたはクリック',
+    how1n:'方法1 — 画像',how1t:'ファイル名解析',how1d:'タイトル_年_素材_サイズで保存。',
+    how2n:'方法2 — CSV',how2t:'CSV一括登録',how2d:'ExcelをCSVで保存してアップ。',
+    how3n:'方法3 — 両方',how3t:'画像+CSV照合',how3d:'両方アップでタイトル照合。',
+    reviewTitle:'認識結果の確認',reviewCancel:'キャンセル',reviewImport:'登録',
+    logout:'ログアウト',soldBadge:'売却済',prevBtn:'プレビュー',selAll:'全選択',selClear:'解除',makeList:'リスト作成',
+    selAllYr:'全選択',selClearYr:'解除',addCard:'追加',
+    toastSaved:'保存しました',toastNoTitle:'タイトルを入力してください',toastCsv:'CSVダウンロード完了',toastPdf:'印刷ダイアログ',toastNoImg:'画像なし',toastImgDl:'枚ダウンロード中',toastTxt:'コピーしました',toastCopied:'コピーしました',toastImported:'点追加しました',toastNone:'未選択',toastNoWork:'作品未検出',hnUnknown:'サイズ不明',selWorks:'点選択中',soldCount:'売却済：',soldIncluded:'点含む)',emptyList:'作品がありません。',emptyListSub:'+ 追加ボタンで始めましょう。'
+  }
+};
+function t(k){var d=LANG[curLang]||LANG.ko;return d[k]!==undefined?d[k]:(LANG.ko[k]||k);}
+function setLang(l){
+  curLang=l;
+  localStorage.setItem('popol_lang',l);
+  document.getElementById('langMenu').classList.add('hide');
+  applyLang();
+  render();
+}
+function applyLang(){
+  function s(id,v){var el=document.getElementById(id);if(el&&v!==undefined)el.textContent=v;}
+  function p(id,v){var el=document.getElementById(id);if(el&&v!==undefined)el.placeholder=v;}
+  var L=LANG[curLang]||LANG.ko;
+  // nav
+  s('navUpload',L.navUpload);s('navList',L.navList);s('navAdd',L.navAdd);
+  // langBtn
+  s('langBtnLabel',curLang==='ko'?'한국어':curLang==='en'?'English':'日本語');
+  // filter selects
+  var fy=document.getElementById('fYear');if(fy&&fy.options[0])fy.options[0].text=L.filterYear;
+  var fg=document.getElementById('fGenre');if(fg&&fg.options[0])fg.options[0].text=L.filterGenre;
+  var fh=document.getElementById('fHnum');if(fh&&fh.options[0])fh.options[0].text=L.filterHnum;
+  var fm=document.getElementById('fMediumF');if(fm&&fm.options[0])fm.options[0].text=L.filterMedium;
+  var fs=document.getElementById('fSold');if(fs&&fs.options.length>=3){fs.options[0].text=L.filterAll;fs.options[1].text=L.filterAvail;fs.options[2].text=L.filterSold;}
+  var so=document.getElementById('sortBy');if(so&&so.options.length>=5){so.options[0].text=L.sortYearDesc;so.options[1].text=L.sortYearAsc;so.options[2].text=L.sortHnumAsc;so.options[3].text=L.sortHnumDesc;so.options[4].text=L.sortTitleAsc;}
+  // selbar
+  var sb=document.getElementById('selClearBtn');if(sb)sb.textContent=L.selClear;
+  var sa=document.getElementById('selAllBtn2');if(sa)sa.textContent=L.selAll;
+  var ml=document.getElementById('makeListBtn');if(ml)ml.textContent=L.makeList;
+  // add modal
+  s('modalTitle',L.addTitle);
+  // artist modal
+  s('artistModalTitle',L.artistTitle);
+  p('aName',L.artistNamePh);p('aPhone',L.artistPhonePh);p('aEmail',L.artistEmailPh);
+  // preview
+  s('prevPanelTitle',L.previewTitle);
+  s('btnEditArtist',L.previewEditInfo);
+  s('priceShowLabel',L.priceShow);
+  // export
+  s('expCsvName',L.expCsv);s('expCsvDesc',L.expCsvSub);
+  s('expPdfName',L.expPdf);s('expPdfDesc',L.expPdfSub);
+  s('expImgName',L.expImg);s('expImgDesc',L.expImgSub);
+  s('expTxtName',L.expTxt);s('expTxtDesc',L.expTxtSub);
+  s('shareSectionTitle',L.shareTitle);
+  s('btnSmsText',L.shareSms);s('btnMailText',L.shareMail);s('btnCopyText',L.shareCopy);
+  // upload tab
+  s('uploadTabTitle',L.uploadTitle);s('uploadTabSub',L.uploadSub);s('uploadDropText',L.uploadDrop);
+  s('how1n',L.how1n);s('how1t',L.how1t);s('how1d',L.how1d);
+  s('how2n',L.how2n);s('how2t',L.how2t);s('how2d',L.how2d);
+  s('how3n',L.how3n);s('how3t',L.how3t);s('how3d',L.how3d);
+  // review
+  s('reviewModalTitle',L.reviewTitle);
+  s('btnCancelReview',L.reviewCancel);s('btnImportSel',L.reviewImport);
+  // logout
+  document.querySelectorAll('.logout-btn').forEach(function(b){b.textContent=L.logout;});
+}
+
 // ===================== CURRENCY =====================
 function fmtKRW(w){if(!w)return'';return w.toLocaleString()+'원';}
 function fmtPrice(w,cur){if(!w)return'';if(cur==='KRW')return fmtKRW(w);var r=rates[cur];if(!r)return fmtKRW(w);var c=w*r,s={USD:'$',EUR:'€',JPY:'¥',CNY:'¥'}[cur]||'';return cur==='JPY'?s+Math.round(c).toLocaleString()+' JPY':s+c.toFixed(2)+' '+cur;}
@@ -1081,6 +1209,7 @@ function openPreview(){
   var tEl=document.getElementById('prevPanelTitle');
   if(tEl)tEl.textContent=artist.name?artist.name+' 작가의 작품 목록':'작품 리스트 미리보기';
   initAutoLoginUI();
+applyLang();
 fetchRates();renderPreviewList(ids);
   document.getElementById('prevOv').classList.add('on');
 }
