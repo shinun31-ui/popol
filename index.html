@@ -1016,7 +1016,13 @@ function allFiltered(){
     if(yr&&w.year!=yr)return false;
     if(gn&&w.genre!==gn)return false;
     if(sd!==''&&(sd==='1'?!w.sold:w.sold))return false;
-    if(q&&!w.title.toLowerCase().includes(q))return false;
+    if(q){
+      var searchIn=[w.title,w.genre,w.medium,w.desc,w.award,String(w.year)].join(' ').toLowerCase();
+      // 모든 검색어 토큰이 하나라도 포함되면 OK
+      var tokens=q.split(/\s+/).filter(Boolean);
+      var matched=tokens.every(function(tok){return searchIn.includes(tok);});
+      if(!matched)return false;
+    }
     if(hn){var h=getHN(w);if(!h||h.split('호')[0]!==hn)return false;}
     if(mf&&classifyMedium(w.medium)!==mf)return false;
     return true;
