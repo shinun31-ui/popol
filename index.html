@@ -484,6 +484,18 @@ body.loading .modal-close,body.loading button{cursor:wait;}
   </div>
 </div>
 
+
+<!-- LOADER -->
+<div id="loaderOv" style="display:none;position:fixed;inset:0;background:rgba(44,44,42,.85);z-index:9998;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+  <div class="splash-logo" id="loaderLogo" style="width:48px;height:48px;">
+    <div class="sq" id="lsq0"></div>
+    <div class="sq" id="lsq1"></div>
+    <div class="sq" id="lsq3"></div>
+    <div class="sq" id="lsq2"></div>
+  </div>
+  <div id="loaderMsg" style="font-size:13px;color:rgba(241,239,232,.6);letter-spacing:.05em;"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
@@ -543,10 +555,10 @@ async function loginWithEmail(){
   var pw=document.getElementById('loginPassword').value;
   var err=document.getElementById('loginError'); err.textContent='';
   if(!email||!pw){err.textContent='이메일과 비밀번호를 입력해주세요';return;}
-  document.body.classList.add('loading');
+  showLoader('로그인 중...');
   var btn=document.getElementById('loginEmailBtn'); btn.textContent='로그인 중...'; btn.disabled=true;
   var res=await supa.auth.signInWithPassword({email:email,password:pw});
-  document.body.classList.remove('loading');
+  hideLoader();
   if(res.error){err.textContent=res.error.message==='Invalid login credentials'?'이메일 또는 비밀번호가 틀렸어요':res.error.message;btn.textContent='로그인';btn.disabled=false;}
 }
 var signupMode=false;
@@ -770,7 +782,7 @@ function openAdd(id){
 }
 function loadImg(input){var f=input.files[0];if(!f)return;pendingImgFile=f;var r=new FileReader();r.onload=function(e){pendingImg=e.target.result;document.getElementById('dropZone').innerHTML='<img class="imgpt" src="'+e.target.result+'"/>';};r.readAsDataURL(f);}
 async function saveWork(){
-  document.body.classList.add('loading');
+  showLoader('저장 중...');
   var title=document.getElementById('fTitle').value.trim();if(!title){showToast(t('toastNoTitle'));return;}
   var data={title:title,year:parseInt(document.getElementById('fYear2').value),genre:document.getElementById('fGenre2').value,medium:document.getElementById('fMedium').value.trim(),size:document.getElementById('fSize').value.trim(),desc:document.getElementById('fDesc').value.trim(),award:document.getElementById('fAward').value.trim(),sold:soldF,price:parseInt(document.getElementById('fPrice').value)||0};
   if(currentUser){
@@ -781,8 +793,7 @@ async function saveWork(){
     var ok=await saveWorkToDB(data,!!editId,w?w.dbId:null);if(!ok)return;
     await loadWorksFromDB();
   }
-  closeOv('addOv');showToast(t('toastSaved'));
-  document.body.classList.remove('loading');
+  closeOv('addOv');showToast(t('toastSaved'));hideLoader();
 }
 
 // ===================== DETAIL =====================
@@ -935,27 +946,50 @@ function toggleAllR(){var a=reviewItems.every(function(r){return r.checked;});re
 async function importSel(){
   var toAdd=reviewItems.filter(function(r){return r.checked;});
   if(!toAdd.length){showToast(t('toastNone'));return;}
-  document.body.classList.add('loading');
   var btn=document.getElementById('btnImportSel');
   if(btn){btn.textContent='저장 중...';btn.disabled=true;}
-  try{
-    if(currentUser){
-      for(var i=0;i<toAdd.length;i++){
-        var it=toAdd[i];
-        var row={user_id:currentUser.id,title:it.title,year:it.year,genre:it.genre||'회화',medium:it.medium||'',size:it.size||'',description:it.desc||'',award:it.award||'',price:0,sold:false,img_url:it.img||null,color_bg:PAL[i%PAL.length][0],color_fg:PAL[i%PAL.length][1],sort_order:0,updated_at:new Date().toISOString()};
-        var res=await supa.from('works').insert(row);
-        if(res.error){showToast('저장 실패: '+res.error.message);return;}
-      }
-      await loadWorksFromDB();
+  showLoader('저장 중...');
+  var success=true;
+  if(currentUser){
+    for(var i=0;i<toAdd.length;i++){
+      var it=toAdd[i];
+      var row={user_id:currentUser.id,title:it.title,year:it.year||new Date().getFullYear(),genre:it.genre||'회화',medium:it.medium||'',size:it.size||'',description:it.desc||'',award:it.award||'',price:0,sold:false,img_url:it.img||null,color_bg:PAL[i%PAL.length][0],color_fg:PAL[i%PAL.length][1],sort_order:i,updated_at:new Date().toISOString()};
+      var res=await supa.from('works').insert(row);
+      if(res.error){hideLoader();showToast('저장 실패: '+res.error.message);success=false;break;}
     }
+    if(success)await loadWorksFromDB();
+  }
+  hideLoader();
+  if(btn){btn.textContent='선택 항목 등록';btn.disabled=false;}
+  if(success){
     closeOv('reviewOv');
     reviewItems=[];
     showTab('portfolio');
     showToast(toAdd.length+t('toastImported'));
-  } finally {
-    document.body.classList.remove('loading');
-    if(btn){btn.textContent='선택 항목 등록';btn.disabled=false;}
   }
+}
+
+
+// ===================== LOADER =====================
+var loaderStep=0,loaderTimer=null;
+var loaderLevels=[1.0,0.55,0.25,0.1];
+function showLoader(msg){
+  var ov=document.getElementById('loaderOv');
+  var lsqs=[document.getElementById('lsq0'),document.getElementById('lsq1'),document.getElementById('lsq2'),document.getElementById('lsq3')];
+  document.getElementById('loaderMsg').textContent=msg||'';
+  ov.style.display='flex';
+  loaderStep=0;
+  lsqs.forEach(function(s){if(s)s.style.transition='none';});
+  function loaderTick(){
+    lsqs.forEach(function(s,i){if(s)s.style.opacity=loaderLevels[((i-loaderStep)%4+4)%4];});
+    loaderStep++;
+    loaderTimer=setTimeout(loaderTick,280);
+  }
+  loaderTick();
+}
+function hideLoader(){
+  clearTimeout(loaderTimer);
+  document.getElementById('loaderOv').style.display='none';
 }
 
 // ===================== UI UTILS =====================
