@@ -1209,10 +1209,14 @@ function setSoldStatus(status){
   btns.forEach(function(id,i){
     var el=document.getElementById(id);
     if(!el)return;
-    var active=vals[i]===status||(status===false&&i===0);
-    el.style.fontWeight=active?'600':'400';
-    el.style.opacity=active?'1':'0.6';
+    var isActive=(status===vals[i]);
+    el.style.fontWeight=isActive?'700':'400';
+    el.style.opacity=isActive?'1':'0.5';
+    el.style.transform=isActive?'scale(1.03)':'scale(1)';
   });
+  // soldTrack 하위호환
+  var track=document.getElementById('soldTrack');
+  if(track)track.classList.toggle('on',status===true);
 }
 
 function openAddWithYear(yr){openAdd(null,parseInt(yr));}
@@ -1220,7 +1224,7 @@ function openAdd(id,defaultYear){
   id=id||null;editId=id;pendingImg=null;pendingImgFile=null;
   var w=id?works.find(function(x){return x.id===id;}):null;
   soldF=w?w.sold:false;
-  setTimeout(function(){setSoldStatus(soldF);},10);
+  setTimeout(function(){setSoldStatus(soldF);},50);
   document.getElementById('modalTitle').textContent=w?t('editTitle'):t('addTitle');
   document.getElementById('fTitle').value=w?w.title:'';
   document.getElementById('fYear2').value=w?w.year:(defaultYear||new Date().getFullYear());
@@ -1230,7 +1234,7 @@ function openAdd(id,defaultYear){
   document.getElementById('fDesc').value=w?w.desc:'';
   document.getElementById('fAward').value=w?w.award:'';
   if(w)document.getElementById('fGenre2').value=w.genre;
-  document.getElementById('soldTrack').classList.toggle('on',soldF);
+  // sold status handled by setSoldStatus
   document.getElementById('hnprev').innerHTML='';
   document.getElementById('pricePreview').textContent='';
   document.getElementById('dropZone').innerHTML=w&&w.img?'<img class="imgpt" src="'+w.img+'"/>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> <span id="dropZoneText">클릭해서 이미지 업로드</span>';
