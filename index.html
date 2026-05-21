@@ -1168,7 +1168,13 @@ function toggleYearSel(yr){
   render();
 }
 function clearSel(){sel.clear();render();}
-function selAll(){allFiltered().forEach(function(w){sel.add(w.id);});render();}
+function selAll(){
+  var all=allFiltered();
+  var allSelected=all.every(function(w){return sel.has(w.id);});
+  if(allSelected){all.forEach(function(w){sel.delete(w.id);});}
+  else{all.forEach(function(w){sel.add(w.id);});}
+  render();
+}
 
 // ===================== EDIT/DRAG =====================
 function toggleEditMode(){
@@ -1182,10 +1188,17 @@ function toggleEditMode(){
 async function setSelSoldStatus(status){
   if(sel.size===0){showToast('작품을 선택해주세요');return;}
   var ids=[...sel];
-  var label=status===true?'판매 완료':status==='reserve'?'예약중':'판매 가능';
-  if(!confirm(ids.length+'개 작품을 '+label+'으로 변경할까요?'))return;
+  // 선택된 작품들이 이미 같은 상태면 판매가능으로 토글
+  var selWorks=works.filter(function(w){return ids.indexOf(w.id)>=0;});
+  var allSameStatus=selWorks.every(function(w){
+    if(status===true)return w.sold===true||w.sold==='true';
+    if(status==='reserve')return w.sold==='reserve';
+    return w.sold===false||w.sold==='false';
+  });
+  var finalStatus=allSameStatus?false:status;
+  var label=finalStatus===true?'판매 완료':finalStatus==='reserve'?'예약중':'판매 가능';
   showLoader(label+'으로 변경 중...');
-  var soldVal=status===true?'true':status==='reserve'?'reserve':'false';
+  var soldVal=finalStatus===true?'true':finalStatus==='reserve'?'reserve':'false';
   if(currentUser){
     for(var i=0;i<ids.length;i++){
       var w=works.find(function(x){return x.id===ids[i];});
