@@ -356,6 +356,19 @@ body.loading .modal-close,body.loading button{cursor:wait;}
 </nav>
 
 <!-- APP -->
+<div id="editBarWrap" style="display:none;background:#111110;border-bottom:0.5px solid rgba(255,255,255,.15);padding:10px 16px;position:sticky;top:52px;z-index:40;">
+  <div style="max-width:780px;margin:0 auto;display:flex;align-items:center;gap:8px;">
+    <span style="font-size:13px;font-weight:500;color:#F1EFE8;flex-shrink:0;">편집 모드</span>
+    <span style="font-size:11px;color:rgba(241,239,232,.4);" id="editSelCount"></span>
+    <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
+      <button class="btn btn-sm" onclick="selAll()" style="color:rgba(241,239,232,.8);border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.06);">전체 선택</button>
+      <button class="btn btn-sm" onclick="setSelSoldStatus(false)" style="color:rgba(241,239,232,.8);border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.06);">판매 가능</button>
+      <button class="btn btn-sm" onclick="setSelSoldStatus('reserve')" style="color:#FAC775;border-color:rgba(250,199,117,.5);background:rgba(250,199,117,.08);">예약중</button>
+      <button class="btn btn-sm" onclick="setSelSoldStatus(true)" style="color:#F09595;border-color:rgba(163,45,45,.5);background:rgba(163,45,45,.08);">판매 완료</button>
+      <button class="btn btn-sm btn-red" onclick="deleteSelected()">삭제</button>
+    </div>
+  </div>
+</div>
 <div id="appScreen">
 <div class="main">
   <div id="tabP">
@@ -1160,7 +1173,7 @@ function selAll(){allFiltered().forEach(function(w){sel.add(w.id);});render();}
 // ===================== EDIT/DRAG =====================
 function toggleEditMode(){
   editMode=!editMode;
-  var btn=document.getElementById('editModeBtn'),bar=document.getElementById('editBar'),listEl=document.getElementById('list');
+  var btn=document.getElementById('editModeBtn'),bar=document.getElementById('editBarWrap'),listEl=document.getElementById('list');
   if(editMode){if(btn){btn.textContent='편집 완료';btn.className='btn btn-sm btn-blue';}if(bar)bar.style.display='flex';if(listEl)listEl.classList.add('edit-mode');}
   else{if(btn){btn.textContent='편집';btn.className='btn btn-sm';}if(bar)bar.style.display='none';if(listEl)listEl.classList.remove('edit-mode');sel.clear();}
   render();
