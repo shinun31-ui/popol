@@ -359,14 +359,17 @@ body.loading .modal-close,body.loading button{cursor:wait;}
 <div id="appScreen">
 <div class="main">
   <div id="tabP">
-    <div class="edit-bar" id="editBar" style="display:none;">
-      <span class="edit-bar-title">편집 모드</span>
-      <span style="font-size:11px;color:rgba(241,239,232,.4);" id="editSelCount"></span>
-      <div style="margin-left:auto;display:flex;gap:8px;">
-        <button class="btn btn-sm" onclick="selAll()">전체 선택</button>
-        <button class="btn btn-sm btn-red" onclick="deleteSelected()">선택 삭제</button>
+    <div class="ed<div class="edit-bar" id="editBar" style="display:none;">
+        <span class="edit-bar-title">편집 모드</span>
+        <span style="font-size:11px;color:rgba(241,239,232,.4);" id="editSelCount"></span>
+        <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <button class="btn btn-sm" onclick="selAll()" style="color:rgba(241,239,232,.7);border-color:rgba(255,255,255,.2);">전체 선택</button>
+          <button class="btn btn-sm" onclick="setSelSoldStatus(false)" style="color:rgba(241,239,232,.7);border-color:rgba(255,255,255,.2);">판매 가능</button>
+          <button class="btn btn-sm" onclick="setSelSoldStatus('reserve')" style="color:#FAC775;border-color:rgba(250,199,117,.5);">예약중</button>
+          <button class="btn btn-sm" onclick="setSelSoldStatus(true)" style="color:#F09595;border-color:rgba(163,45,45,.5);">판매 완료</button>
+          <button class="btn btn-sm btn-red" onclick="deleteSelected()">삭제</button>
+        </div>
       </div>
-    </div>
     <div class="filter-bar">
       <div class="filter-row">
         <select id="fYear" onchange="goPage(1)"><option value="">전체 연도</option></select>
