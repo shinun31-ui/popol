@@ -261,7 +261,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 .spinner{width:30px;height:30px;border:2.5px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .loadwrap{text-align:center;padding:2rem;}
-.yr-move-item{padding:8px 12px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text);}
+.yr-move-item{padding:8px 12px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text);transition:background .12s,color .12s;}
+.yr-move-item:hover{background:var(--blue);color:#fff;}
 .yr-move-item:hover{background:var(--bg2);}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--charcoal);color:var(--warm);font-size:13px;padding:9px 20px;border-radius:8px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;}
 .toast.on{opacity:1;}
@@ -1314,7 +1315,8 @@ function toggleYearMoveMenu(){
 }
 
 async function moveSelToYear(yr){
-  document.getElementById('yearMoveMenu').style.display='none';
+  var m1=document.getElementById('yearMoveMenu');if(m1)m1.style.display='none';
+  var m2=document.getElementById('selYearMenu');if(m2)m2.style.display='none';
   if(sel.size===0){showToast('작품을 선택해주세요');return;}
   var ids=[...sel];
   if(!confirm(ids.length+'개 작품을 '+yr+'년으로 이동할까요?'))return;
