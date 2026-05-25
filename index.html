@@ -426,6 +426,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
               <button class="btn btn-sm" onclick="toggleSelYearMenu()" id="selYearBtn" style="color:#F1EFE8;border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.1);">연도 이동 &#9660;</button>
               <div id="selYearMenu" style="display:none;position:absolute;top:34px;left:0;background:var(--bg);border:0.5px solid var(--border2);border-radius:10px;padding:6px;z-index:300;min-width:130px;box-shadow:0 8px 24px rgba(0,0,0,.2);max-height:220px;overflow-y:auto;"></div>
             </div>
+            <button class="btn btn-sm" onclick="openSelPriceModal()" style="color:#F1EFE8;border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.1);">가격 설정</button>
             <button class="btn btn-sm btn-blue" id="makeListBtn" onclick="openPreview()">리스트 만들기</button>
           </div>
         </div>
@@ -553,6 +554,31 @@ body.loading .modal-close,body.loading button{cursor:wait;}
     </svg>
   </div>
   <div id="loaderMsg" style="font-size:13px;color:rgba(241,239,232,.6);letter-spacing:.05em;"></div>
+</div>
+
+<div class="ov" id="selPriceOv" onclick="ovClick(event,'selPriceOv')">
+  <div class="modal" style="max-width:340px;">
+    <div class="modal-header">
+      <h2>가격 일괄 설정</h2>
+      <button class="modal-close" onclick="closeOv('selPriceOv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px;" id="selPriceDesc"></p>
+    <div class="ff">
+      <label>가격 (원)</label>
+      <input id="selPriceInput" type="number" placeholder="예: 3000000" oninput="updateSelPricePreview()"/>
+      <div id="selPricePreview" style="margin-top:6px;font-size:12px;color:var(--text3);min-height:18px;"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:13px;">
+      <button onclick="setSelPriceInput(0)" style="flex:1;padding:7px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:12px;">가격 없음</button>
+      <button onclick="setSelPriceInput(500000)" style="flex:1;padding:7px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:12px;">50만</button>
+      <button onclick="setSelPriceInput(1000000)" style="flex:1;padding:7px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:12px;">100만</button>
+      <button onclick="setSelPriceInput(3000000)" style="flex:1;padding:7px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:12px;">300만</button>
+    </div>
+    <div class="mact">
+      <button class="btn" onclick="closeOv('selPriceOv')">취소</button>
+      <button class="btn btn-dark" onclick="applySelPrice()">적용</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1269,6 +1295,47 @@ function toggleEditMode(){
 }
 
 
+
+
+function openSelPriceModal(){
+  if(sel.size===0){showToast('작품을 선택해주세요');return;}
+  var desc=document.getElementById('selPriceDesc');
+  if(desc)desc.textContent='선택된 '+sel.size+'개 작품의 가격을 일괄 설정해요.';
+  document.getElementById('selPriceInput').value='';
+  document.getElementById('selPricePreview').textContent='';
+  document.getElementById('selPriceOv').classList.add('on');
+}
+function setSelPriceInput(val){
+  document.getElementById('selPriceInput').value=val||'';
+  updateSelPricePreview();
+}
+function updateSelPricePreview(){
+  var val=parseInt(document.getElementById('selPriceInput').value);
+  var el=document.getElementById('selPricePreview');
+  if(!val||val<=0){el.textContent=val===0?'가격 없음으로 설정':'';return;}
+  var parts=[val.toLocaleString()+'원'];
+  if(rates.USD)parts.push('$'+(val*rates.USD).toFixed(2)+' USD');
+  if(rates.EUR)parts.push('€'+(val*rates.EUR).toFixed(2)+' EUR');
+  if(rates.JPY)parts.push('¥'+Math.round(val*rates.JPY)+' JPY');
+  el.textContent=parts.join(' / ');
+}
+async function applySelPrice(){
+  var val=parseInt(document.getElementById('selPriceInput').value)||0;
+  var ids=[...sel];
+  var label=val===0?'가격 없음':val.toLocaleString()+'원';
+  closeOv('selPriceOv');
+  showLoader(ids.length+'개 작품 가격 설정 중...');
+  if(currentUser){
+    for(var i=0;i<ids.length;i++){
+      var w=works.find(function(x){return x.id===ids[i];});
+      if(w){await supa.from('works').update({price:val,updated_at:new Date().toISOString()}).eq('id',w.dbId||w.id);}
+    }
+    await loadWorksFromDB();
+  }
+  hideLoader();
+  sel.clear();
+  showToast(ids.length+'개 작품 가격을 '+label+'으로 설정했어요');
+}
 
 function toggleSelYearMenu(){
   var menu=document.getElementById('selYearMenu');
