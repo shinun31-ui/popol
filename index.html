@@ -414,7 +414,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
           <div class="legend-item"><div class="ldot" style="background:rgba(163,45,45,.7);"></div>판매 완료</div>
         </div>
         <div class="r-ctrl">
-          <div class="sort-wrap">정렬<select id="sortBy" onchange="goPage(1)"><option value="custom">사용자 순서</option><option value="year_desc">연도 최신순</option><option value="year_asc">연도 오래된순</option><option value="hnum_asc">호수 작은순</option><option value="hnum_desc">호수 큰순</option><option value="title_asc">제목 가나다순</option></select></div>
+          <div class="sort-wrap">정렬<select id="sortBy" onchange="goPage(1)"><option value="year_desc">연도 최신순</option><option value="year_asc">연도 오래된순</option><option value="hnum_asc">호수 작은순</option><option value="hnum_desc">호수 큰순</option><option value="title_asc">제목 가나다순</option></select></div>
           <div class="ps-btns"><button class="psb" data-n="20" onclick="setPS(20)">20</button><button class="psb on" data-n="30" onclick="setPS(30)">30</button><button class="psb" data-n="50" onclick="setPS(50)">50</button><button class="psb" data-n="9999" onclick="setPS(9999)">전체</button></div>
         </div>
       </div>
@@ -891,9 +891,10 @@ async function loadWorksFromDB(){
       id:w.id,title:w.title||'',year:w.year||2024,genre:w.genre||'회화',
       medium:w.medium||'',size:w.size||'',desc:w.description||'',award:w.award||'',
       price:w.price||0,sold:w.sold==='reserve'?'reserve':(w.sold==='true'||w.sold===true?true:false),
-      img:w.img_url||null,c:[w.color_bg||PAL[0][0],w.color_fg||PAL[0][1]],dbId:w.id
+      img:w.img_url||null,c:[w.color_bg||PAL[0][0],w.color_fg||PAL[0][1]],dbId:w.id,
+      sort_order:w.sort_order||0
     };
-    item._hn=detHN(item.size); // 호수 미리 계산
+    item._hn=detHN(item.size);
     return item;
   });
   _filtersDirty=true;
@@ -1125,8 +1126,18 @@ function allFiltered(){
 }
 function sortW(list){
   var s=document.getElementById('sortBy')?document.getElementById('sortBy').value:'year_desc';
-  if(s==='custom')return[...list]; // works 배열 순서 그대로
-  return[...list].sort(function(a,b){if(s==='year_asc')return a.year-b.year;if(s==='year_desc')return b.year-a.year;if(s==='hnum_asc')return getHNV(a)-getHNV(b);if(s==='hnum_desc')return getHNV(b)-getHNV(a);if(s==='title_asc')return a.title.localeCompare(b.title,'ko');return b.year-a.year;});
+  // 사용자 순서: works 배열 순서 유지하되 연도/장르 그룹은 유지
+  if(s==='custom')return[...list];
+  return[...list].sort(function(a,b){
+    // 연도별 정렬 시 같은 연도 안에서는 sort_order 유지
+    if(s==='year_asc'){if(a.year!==b.year)return a.year-b.year;return(a.sort_order||0)-(b.sort_order||0);}
+    if(s==='year_desc'){if(a.year!==b.year)return b.year-a.year;return(a.sort_order||0)-(b.sort_order||0);}
+    if(s==='hnum_asc')return getHNV(a)-getHNV(b);
+    if(s==='hnum_desc')return getHNV(b)-getHNV(a);
+    if(s==='title_asc')return a.title.localeCompare(b.title,'ko');
+    if(a.year!==b.year)return b.year-a.year;
+    return(a.sort_order||0)-(b.sort_order||0);
+  });
 }
 function updFilters(){
   var yr=document.getElementById('fYear'),gn=document.getElementById('fGenre'),hn=document.getElementById('fHnum'),mf=document.getElementById('fMediumF');
@@ -1463,21 +1474,27 @@ async function deleteSelected(){
   else{works=works.filter(function(w){return ids.indexOf(w.id)<0;});render();}
   sel.clear();render();showToast(ids.length+'개 작품을 삭제했어요');
 }
-async function saveOrder(){if(!currentUser)return;for(var i=0;i<works.length;i++){await supa.from('works').update({sort_order:i}).eq('id',works[i].id);}}
+async function saveOrder(){
+  if(!currentUser)return;
+  for(var i=0;i<works.length;i++){
+    works[i].sort_order=i;
+    await supa.from('works').update({sort_order:i}).eq('id',works[i].dbId||works[i].id);
+  }
+}
 function onDragStart(e,id){dragSrcId=id;e.dataTransfer.effectAllowed='move';setTimeout(function(){var el=document.querySelector('.card[data-id="'+id+'"]');if(el)el.classList.add('dragging');},0);}
 function onDragOver(e,id){e.preventDefault();document.querySelectorAll('.card').forEach(function(c){c.classList.remove('drag-over');});var el=document.querySelector('.card[data-id="'+id+'"]');if(el&&id!==dragSrcId)el.classList.add('drag-over');}
 function onDragEnd(){document.querySelectorAll('.card').forEach(function(c){c.classList.remove('dragging');c.classList.remove('drag-over');});}
 function onDrop(e,tid){
   e.preventDefault();
   if(!dragSrcId||dragSrcId===tid)return;
+  var srcWork=works.find(function(w){return w.id===dragSrcId;});
+  var tgtWork=works.find(function(w){return w.id===tid;});
+  if(!srcWork||!tgtWork)return;
   var si=works.findIndex(function(w){return w.id===dragSrcId;});
   var ti=works.findIndex(function(w){return w.id===tid;});
   if(si<0||ti<0)return;
   var mv=works.splice(si,1)[0];
   works.splice(ti,0,mv);
-  // 정렬을 사용자 순서로 자동 전환
-  var sb=document.getElementById('sortBy');
-  if(sb&&sb.value!=='custom')sb.value='custom';
   saveOrder();
   render();
   dragSrcId=null;
