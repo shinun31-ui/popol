@@ -409,9 +409,15 @@ body.loading .modal-close,body.loading button{cursor:wait;}
         <input id="fQ" placeholder="작품 검색..."/>
       </div>
       <div class="ctrl-row">
-        <div class="legend">
-          <div class="legend-item"><div class="ldot" style="background:rgba(241,239,232,.3);"></div>판매 가능</div>
-          <div class="legend-item"><div class="ldot" style="background:rgba(163,45,45,.7);"></div>판매 완료</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div class="legend">
+            <div class="legend-item"><div class="ldot" style="background:rgba(241,239,232,.3);"></div>판매 가능</div>
+            <div class="legend-item"><div class="ldot" style="background:rgba(163,45,45,.7);"></div>판매 완료</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:3px;background:rgba(255,255,255,.06);border-radius:20px;padding:3px;border:0.5px solid rgba(255,255,255,.12);">
+            <button id="viewModeWork" onclick="setViewMode('work')" style="font-size:11px;padding:3px 10px;border-radius:16px;border:none;cursor:pointer;background:#F1EFE8;color:#1a1a18;font-weight:600;">작품</button>
+            <button id="viewModeSales" onclick="setViewMode('sales')" style="font-size:11px;padding:3px 10px;border-radius:16px;border:none;cursor:pointer;background:transparent;color:rgba(241,239,232,.5);">매출</button>
+          </div>
         </div>
         <div class="r-ctrl">
           <div class="sort-wrap">정렬<select id="sortBy" onchange="goPage(1)"><option value="year_desc">연도 최신순</option><option value="year_asc">연도 오래된순</option><option value="hnum_asc">호수 작은순</option><option value="hnum_desc">호수 큰순</option><option value="title_asc">제목 가나다순</option></select></div>
