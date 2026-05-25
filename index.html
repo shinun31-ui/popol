@@ -51,8 +51,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 .lin-anim .login-social-btn{animation:linIn .5s ease .42s both;}
 @keyframes linIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 /* APP */
-#mainNav{display:none;align-items:center;justify-content:space-between;padding:0 16px;height:52px;border-bottom:0.5px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:50;}
-#appScreen{display:none;min-height:calc(100vh - 52px);width:100%;}
+#mainNav{display:none;align-items:center;justify-content:space-between;padding:0 16px;height:52px;border-bottom:0.5px solid var(--border);background:var(--bg);position:fixed;top:0;left:0;right:0;z-index:50;}
+#appScreen{display:none;width:100%;}
 .nav-logo{display:flex;align-items:center;gap:8px;cursor:pointer;}
 .nav-icon{width:30px;height:30px;background:var(--charcoal);border-radius:7px;display:flex;align-items:center;justify-content:center;}
 .nav-word{font-size:17px;font-weight:800;font-style:italic;letter-spacing:.04em;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;}
@@ -73,8 +73,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 .lang-opt{padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text);}
 .lang-opt:hover{background:var(--bg2);}
 /* MAIN */
-.main{max-width:780px;margin:0 auto;padding:14px 16px 120px;}
-.filter-bar{background:#1a1a18;padding:10px 16px;margin:-14px -16px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);position:sticky;top:52px;z-index:40;}
+.main{max-width:780px;margin:0 auto;padding:160px 16px 120px;}
+.filter-bar{background:#1a1a18;padding:10px 16px;border-bottom:0.5px solid rgba(255,255,255,.08);position:fixed;top:52px;left:0;right:0;z-index:40;}
 .filter-bar select,.filter-bar input{background:#2C2C2A;color:#F1EFE8;border:0.5px solid rgba(255,255,255,.15);font-size:13px;padding:7px 9px;border-radius:8px;outline:none;}
 .filter-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px;}
 .ctrl-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
@@ -366,7 +366,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
 </nav>
 
 <!-- APP -->
-<div id="editBarWrap" style="display:none;background:#111110;border-bottom:0.5px solid rgba(255,255,255,.15);padding:10px 16px;position:sticky;top:52px;z-index:45;">
+<div id="editBarWrap" style="display:none;background:#111110;border-bottom:0.5px solid rgba(255,255,255,.15);padding:10px 16px;position:fixed;top:52px;left:0;right:0;z-index:45;">
   <div style="max-width:780px;margin:0 auto;display:flex;align-items:center;gap:8px;">
     <span style="font-size:13px;font-weight:500;color:#F1EFE8;flex-shrink:0;">편집 모드</span>
     <span style="font-size:11px;color:rgba(241,239,232,.4);" id="editSelCount"></span>
@@ -1234,16 +1234,19 @@ function toggleEditMode(){
   editMode=!editMode;
   var btn=document.getElementById('editModeBtn'),bar=document.getElementById('editBarWrap'),listEl=document.getElementById('list');
   var fb=document.getElementById('filterBarEl')||document.querySelector('.filter-bar');
+  var mainEl=document.querySelector('.main');
   if(editMode){
     if(btn){btn.textContent='편집 완료';btn.className='btn btn-sm btn-blue';}
     if(bar)bar.style.display='flex';
     if(listEl)listEl.classList.add('edit-mode');
-    if(fb)fb.style.top='98px'; // 52(nav) + 46(editbar)
+    if(fb)fb.style.top='98px';
+    if(mainEl)mainEl.style.paddingTop='206px';
   } else {
     if(btn){btn.textContent='편집';btn.className='btn btn-sm';}
     if(bar)bar.style.display='none';
     if(listEl)listEl.classList.remove('edit-mode');
     if(fb)fb.style.top='52px';
+    if(mainEl)mainEl.style.paddingTop='160px';
     sel.clear();
   }
   render();
