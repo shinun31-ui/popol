@@ -261,6 +261,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 .loadwrap{text-align:center;padding:2rem;}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--charcoal);color:var(--warm);font-size:13px;padding:9px 20px;border-radius:8px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;}
 .toast.on{opacity:1;}
+/* 성능 최적화 */
+.card{will-change:transform;contain:layout style;}
+.thumb img{will-change:opacity;}
+.card:active{transform:scale(0.98);transition:transform .1s ease;}
+.modal,.dmodal,.ppanel,.rmodal{will-change:opacity;}
+.ov.on{animation:ovIn .18s ease both;}
+@keyframes ovIn{from{opacity:0;}to{opacity:1;}}
+.dmodal,.modal,.ppanel,.rmodal{animation:modalIn .2s cubic-bezier(.4,0,.2,1) both;}
+@keyframes modalIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
 @media(max-width:520px){.howgrid,.expgrid,.frow{grid-template-columns:1fr;}.dmodal,.ppanel,.modal,.rmodal{border-radius:var(--rlg) var(--rlg) 0 0;margin:auto 0 0;}.ov{padding:0;align-items:flex-end;}}
 
 body.loading{cursor:wait;}
@@ -1087,50 +1097,57 @@ function updFilters(){
   }
 }
 function setPS(n){pageSize=n;document.querySelectorAll('.psb').forEach(function(b){b.classList.toggle('on',parseInt(b.dataset.n)===n||(n===9999&&b.dataset.n==='9999'));});goPage(1);}
-function goPage(p){
-  curPage=p;
-  if(window._renderFrame)cancelAnimationFrame(window._renderFrame);
-  window._renderFrame=requestAnimationFrame(function(){render();});
-}
+function goPage(p){curPage=p;render();}
 var _filtersDirty=true;
 function markFiltersDirty(){_filtersDirty=true;}
+
 function render(){
   if(_filtersDirty){updFilters();_filtersDirty=false;}
   var all=sortW(allFiltered()),total=all.length;
   var ps=pageSize===9999?total:pageSize,tp=Math.max(1,Math.ceil(total/ps));
   if(curPage>tp)curPage=tp;
   var page=all.slice((curPage-1)*ps,curPage*ps);
-  var sb=document.getElementById('selbar');if(sb)sb.style.display=sel.size>0?'flex':'none';
-  var sc=document.getElementById('selcnt');if(sc)sc.textContent=sel.size+'개 선택됨';
-  var esc2=document.getElementById('editSelCount');if(esc2)esc2.textContent=sel.size>0?sel.size+'개 선택됨':'';
+
+  // selbar
+  var sb=document.getElementById('selbar');
+  if(sb)sb.style.display=sel.size>0?'flex':'none';
+  var sc=document.getElementById('selcnt');
+  if(sc)sc.textContent=sel.size+'개 선택됨';
+  var esc2=document.getElementById('editSelCount');
+  if(esc2)esc2.textContent=sel.size>0?sel.size+'개 선택됨':'';
+
   var sv=document.getElementById('sortBy')?document.getElementById('sortBy').value:'year_desc';
   var byY=sv==='year_desc'||sv==='year_asc';
   var gc=pageSize<=20?'g20':pageSize<=30?'g30':pageSize<=50?'g50':'g60';
-  var el=document.getElementById('list');if(!el)return;
+  var el=document.getElementById('list');
+  if(!el)return;
+
   if(!page.length){
     el.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text3);font-size:14px;">등록된 작품이 없어요.<br/>+ 추가 버튼으로 시작해보세요.</div>';
     document.getElementById('pgn').innerHTML='';
     return;
   }
+
+  // innerHTML 한 번만 업데이트
+  var html2='';
   if(byY){
     var bY={};
     page.forEach(function(w){if(!bY[w.year])bY[w.year]=[];bY[w.year].push(w);});
     var yrs=Object.keys(bY).sort(function(a,b){return sv==='year_asc'?a-b:b-a;});
-    var html2='';
     yrs.forEach(function(yr){
       var yrW=bY[yr];
       var allSel=yrW.length>0&&yrW.every(function(w){return sel.has(w.id);});
       var selN=yrW.filter(function(w){return sel.has(w.id);}).length;
-      var btnTxt=allSel?'✓ 선택 해제':(selN>0?'전체 선택 ('+selN+'/'+yrW.length+')':'전체 선택');
+      var btnTxt=allSel?'선택 해제':(selN>0?'전체 선택 ('+selN+'/'+yrW.length+')':'전체 선택');
       var btnStyle='font-size:11px;padding:3px 11px;border-radius:20px;cursor:pointer;white-space:nowrap;border:0.5px solid '+(allSel?'#185FA5':'var(--border2)')+';background:'+(allSel?'#185FA5':'var(--bg2)')+';color:'+(allSel?'#fff':'var(--text2)')+';';
-      html2+='<div class="ygroup">';
       var totalYrWorks=works.filter(function(w){return String(w.year)===String(yr);}).length;
       var soldYrWorks=works.filter(function(w){return String(w.year)===String(yr)&&(w.sold===true||w.sold==='true');}).length;
+      html2+='<div class="ygroup">';
       html2+='<div class="ylabel" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:7px;">';
-      html2+='<div style="display:flex;align-items:center;gap:8px;">'+
-        '<span style="font-size:13px;font-weight:700;color:var(--text);">'+yr+'</span>'+
-        '<span style="font-size:11px;color:var(--text3);">총 '+totalYrWorks+'점'+(soldYrWorks>0?' · 판매완료 '+soldYrWorks+'점':'')+' </span>'+
-      '</div>';
+      html2+='<div style="display:flex;align-items:center;gap:8px;">';
+      html2+='<span style="font-size:13px;font-weight:700;color:var(--text);">'+yr+'</span>';
+      html2+='<span style="font-size:11px;color:var(--text3);">총 '+totalYrWorks+'점'+(soldYrWorks>0?' · 판매완료 '+soldYrWorks+'점':'')+' </span>';
+      html2+='</div>';
       html2+='<button data-yr="'+yr+'" onclick="toggleYearSel(this.dataset.yr)" style="'+btnStyle+'">'+btnTxt+'</button>';
       html2+='</div>';
       html2+='<div class="grid '+gc+'">';
@@ -1138,10 +1155,12 @@ function render(){
       html2+='<div class="addcard" data-yr="'+yr+'" onclick="openAddWithYear(this.dataset.yr)" style="min-height:120px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</div>';
       html2+='</div></div>';
     });
-    el.innerHTML=html2;
   } else {
-    el.innerHTML='<div class="grid '+gc+'">'+page.map(cHtml).join('')+'</div>';
+    html2='<div class="grid '+gc+'">';
+    page.forEach(function(w){html2+=cHtml(w);});
+    html2+='</div>';
   }
+  el.innerHTML=html2;
   renderPgn(tp,total);
 }
 
@@ -1178,14 +1197,19 @@ function renderPgn(tp,total){
 // ===================== SELECTION =====================
 function toggleSel(id){
   if(sel.has(id))sel.delete(id);else sel.add(id);
-  // 선택만 변경 - 카드 클래스만 업데이트 (전체 re-render 없이)
-  var card=document.querySelector('.card[data-id="'+id+'"]');
+  // DOM 직접 업데이트 (전체 re-render 없이)
+  var card=document.querySelector('.card[data-id="'+String(id)+'"]');
   if(card){
-    card.classList.toggle('sel',sel.has(id));
+    var isSelected=sel.has(id);
+    card.classList.toggle('sel',isSelected);
     var chk=card.querySelector('.chkbtn');
-    if(chk)chk.style.background=sel.has(id)?'var(--blue)':'rgba(0,0,0,.22)';
+    if(chk){
+      chk.style.background=isSelected?'var(--blue)':'rgba(0,0,0,.22)';
+      chk.style.borderColor=isSelected?'var(--blue)':'rgba(255,255,255,.88)';
+      var svg=chk.querySelector('svg');
+      if(svg)svg.style.display=isSelected?'block':'none';
+    }
   }
-  // selbar만 업데이트
   var sb=document.getElementById('selbar');if(sb)sb.style.display=sel.size>0?'flex':'none';
   var sc=document.getElementById('selcnt');if(sc)sc.textContent=sel.size+'개 선택됨';
   var esc2=document.getElementById('editSelCount');if(esc2)esc2.textContent=sel.size>0?sel.size+'개 선택됨':'';
@@ -1685,7 +1709,11 @@ function hideLoader(){
 
 // ===================== UI UTILS =====================
 function showTab(t2){document.getElementById('tabP').style.display=t2==='portfolio'?'block':'none';document.getElementById('tabU').style.display=t2==='upload'?'block':'none';}
-function closeOv(id){document.getElementById(id).classList.remove('on');}
+function closeOv(id){
+  var el=document.getElementById(id);
+  if(!el)return;
+  el.classList.remove('on');
+}
 function ovClick(e,id){if(e.target.id===id)closeOv(id);}
 var toastT;
 function showToast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){el.classList.remove('on');},2500);}
