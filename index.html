@@ -113,10 +113,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 .card.sel .chkbtn{background:var(--blue);border-color:var(--blue);}
 .chkbtn svg{display:none;width:11px;height:11px;}
 .card.sel .chkbtn svg{display:block;}
-.drag-handle{position:absolute;top:50%;right:7px;transform:translateY(-50%);width:20px;height:20px;display:none;align-items:center;justify-content:center;cursor:grab;z-index:5;opacity:.4;}
-.edit-mode .drag-handle{display:flex;}
-.card.dragging{opacity:.4;border:1.5px dashed var(--blue);}
-.card.drag-over{border:1.5px solid var(--blue);}
+.drag-handle{position:absolute;top:50%;right:7px;transform:translateY(-50%);width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:grab;z-index:5;opacity:.25;transition:opacity .15s;}
+.card:hover .drag-handle{opacity:.7;}
+.card.dragging .drag-handle{opacity:0;}
+.card.dragging{opacity:.3;border:1.5px dashed var(--blue);transform:rotate(1deg);transition:transform .1s;}
+.card.drag-over{border:2px solid var(--blue);background:var(--bluebg);transform:scale(1.02);transition:transform .1s;}
 .thumb{width:100%;aspect-ratio:1/1;overflow:hidden;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;}
 .thumb img{width:100%;height:100%;object-fit:cover;}
 .cbody{padding:6px 8px 2px;cursor:pointer;z-index:2;}
@@ -413,7 +414,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
           <div class="legend-item"><div class="ldot" style="background:rgba(163,45,45,.7);"></div>판매 완료</div>
         </div>
         <div class="r-ctrl">
-          <div class="sort-wrap">정렬<select id="sortBy" onchange="goPage(1)"><option value="year_desc">연도 최신순</option><option value="year_asc">연도 오래된순</option><option value="hnum_asc">호수 작은순</option><option value="hnum_desc">호수 큰순</option><option value="title_asc">제목 가나다순</option></select></div>
+          <div class="sort-wrap">정렬<select id="sortBy" onchange="goPage(1)"><option value="custom">사용자 순서</option><option value="year_desc">연도 최신순</option><option value="year_asc">연도 오래된순</option><option value="hnum_asc">호수 작은순</option><option value="hnum_desc">호수 큰순</option><option value="title_asc">제목 가나다순</option></select></div>
           <div class="ps-btns"><button class="psb" data-n="20" onclick="setPS(20)">20</button><button class="psb on" data-n="30" onclick="setPS(30)">30</button><button class="psb" data-n="50" onclick="setPS(50)">50</button><button class="psb" data-n="9999" onclick="setPS(9999)">전체</button></div>
         </div>
       </div>
@@ -1124,6 +1125,7 @@ function allFiltered(){
 }
 function sortW(list){
   var s=document.getElementById('sortBy')?document.getElementById('sortBy').value:'year_desc';
+  if(s==='custom')return[...list]; // works 배열 순서 그대로
   return[...list].sort(function(a,b){if(s==='year_asc')return a.year-b.year;if(s==='year_desc')return b.year-a.year;if(s==='hnum_asc')return getHNV(a)-getHNV(b);if(s==='hnum_desc')return getHNV(b)-getHNV(a);if(s==='title_asc')return a.title.localeCompare(b.title,'ko');return b.year-a.year;});
 }
 function updFilters(){
@@ -1142,6 +1144,8 @@ function updFilters(){
 function setPS(n){pageSize=n;document.querySelectorAll('.psb').forEach(function(b){b.classList.toggle('on',parseInt(b.dataset.n)===n||(n===9999&&b.dataset.n==='9999'));});goPage(1);}
 function goPage(p){curPage=p;render();}
 var _filtersDirty=true;
+var viewMode='work';
+function setViewMode(m){viewMode=m;var wb=document.getElementById('viewModeWork'),sb=document.getElementById('viewModeSales');if(wb){wb.style.background=m==='work'?'#F1EFE8':'transparent';wb.style.color=m==='work'?'#1a1a18':'rgba(241,239,232,.5)';wb.style.fontWeight=m==='work'?'600':'400';}if(sb){sb.style.background=m==='sales'?'#F1EFE8':'transparent';sb.style.color=m==='sales'?'#1a1a18':'rgba(241,239,232,.5)';sb.style.fontWeight=m==='sales'?'600':'400';}render();}
 function markFiltersDirty(){_filtersDirty=true;}
 
 function render(){
@@ -1183,13 +1187,24 @@ function render(){
       var selN=yrW.filter(function(w){return sel.has(w.id);}).length;
       var btnTxt=allSel?'선택 해제':(selN>0?'전체 선택 ('+selN+'/'+yrW.length+')':'전체 선택');
       var btnStyle='font-size:11px;padding:3px 11px;border-radius:20px;cursor:pointer;white-space:nowrap;border:0.5px solid '+(allSel?'#185FA5':'var(--border2)')+';background:'+(allSel?'#185FA5':'var(--bg2)')+';color:'+(allSel?'#fff':'var(--text2)')+';';
-      var totalYrWorks=works.filter(function(w){return String(w.year)===String(yr);}).length;
-      var soldYrWorks=works.filter(function(w){return String(w.year)===String(yr)&&(w.sold===true||w.sold==='true');}).length;
+      var allYrWorks=works.filter(function(w){return String(w.year)===String(yr);});
+      var totalYrWorks=allYrWorks.length;
+      var soldYrWorks=allYrWorks.filter(function(w){return w.sold===true||w.sold==='true';}).length;
+      var salesAmount=allYrWorks.filter(function(w){return w.sold===true||w.sold==='true';}).reduce(function(sum,w){return sum+(w.price||0);},0);
       html2+='<div class="ygroup">';
       html2+='<div class="ylabel" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:7px;">';
+      var statsText='총 '+totalYrWorks+'점';
+      if(viewMode==='sales'){
+        if(soldYrWorks>0){
+          statsText+=' · 판매완료 '+soldYrWorks+'점';
+          if(salesAmount>0)statsText+=' · '+salesAmount.toLocaleString()+'원';
+        }
+      } else {
+        if(soldYrWorks>0)statsText+=' · 판매완료 '+soldYrWorks+'점';
+      }
       html2+='<div style="display:flex;align-items:center;gap:8px;">';
       html2+='<span style="font-size:13px;font-weight:700;color:var(--text);">'+yr+'</span>';
-      html2+='<span style="font-size:11px;color:var(--text3);">총 '+totalYrWorks+'점'+(soldYrWorks>0?' · 판매완료 '+soldYrWorks+'점':'')+' </span>';
+      html2+='<span style="font-size:11px;color:'+(viewMode==='sales'&&salesAmount>0?'#9FE1CB':'var(--text3)')+';">'+statsText+'</span>';
       html2+='</div>';
       html2+='<button data-yr="'+yr+'" onclick="toggleYearSel(this.dataset.yr)" style="'+btnStyle+'">'+btnTxt+'</button>';
       html2+='</div>';
@@ -1211,7 +1226,7 @@ function cHtml(w){
   var s=sel.has(w.id),h=getHN(w),c0=w.c[0],c1=w.c[1];
   var ph='<div style="width:100%;height:100%;background:'+c0+';display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="3" fill="'+c1+'" opacity=".18"/><circle cx="9" cy="9" r="3" fill="'+c1+'" opacity=".45"/><path d="M1 21l6-8 4 5 4-4 8 7H1z" fill="'+c1+'" opacity=".45"/></svg></div>';
   var wid=String(w.id);
-  var dragAttrs=editMode?' draggable="true" data-wid="'+wid+'" ondragstart="onDragStart(event,this.dataset.wid)" ondragover="onDragOver(event,this.dataset.wid)" ondrop="onDrop(event,this.dataset.wid)" ondragend="onDragEnd()"':'';
+  var dragAttrs=' draggable="true" data-wid="'+wid+'" ondragstart="onDragStart(event,this.dataset.wid)" ondragover="onDragOver(event,this.dataset.wid)" ondrop="onDrop(event,this.dataset.wid)" ondragend="onDragEnd()"';
   var soldClass=(w.sold===true||w.sold==='true')?' sold-card':w.sold==='reserve'?' reserve-card':'';
   var html='<div class="card'+(s?' sel':'')+soldClass+'" data-id="'+wid+'"'+dragAttrs+'>';
   var soldOv=(w.sold===true||w.sold==='true')?'<div class="sold-ov"></div><div class="sold-badge">판매 완료</div>':w.sold==='reserve'?'<div class="sold-ov" style="background:rgba(250,199,117,.08);"></div><div class="sold-badge" style="background:rgba(180,130,20,.85);">예약중</div>':'';
@@ -1452,7 +1467,22 @@ async function saveOrder(){if(!currentUser)return;for(var i=0;i<works.length;i++
 function onDragStart(e,id){dragSrcId=id;e.dataTransfer.effectAllowed='move';setTimeout(function(){var el=document.querySelector('.card[data-id="'+id+'"]');if(el)el.classList.add('dragging');},0);}
 function onDragOver(e,id){e.preventDefault();document.querySelectorAll('.card').forEach(function(c){c.classList.remove('drag-over');});var el=document.querySelector('.card[data-id="'+id+'"]');if(el&&id!==dragSrcId)el.classList.add('drag-over');}
 function onDragEnd(){document.querySelectorAll('.card').forEach(function(c){c.classList.remove('dragging');c.classList.remove('drag-over');});}
-function onDrop(e,tid){e.preventDefault();if(!dragSrcId||dragSrcId===tid)return;var si=works.findIndex(function(w){return w.id===dragSrcId;}),ti=works.findIndex(function(w){return w.id===tid;});if(si<0||ti<0)return;var mv=works.splice(si,1)[0];works.splice(ti,0,mv);saveOrder();render();dragSrcId=null;}
+function onDrop(e,tid){
+  e.preventDefault();
+  if(!dragSrcId||dragSrcId===tid)return;
+  var si=works.findIndex(function(w){return w.id===dragSrcId;});
+  var ti=works.findIndex(function(w){return w.id===tid;});
+  if(si<0||ti<0)return;
+  var mv=works.splice(si,1)[0];
+  works.splice(ti,0,mv);
+  // 정렬을 사용자 순서로 자동 전환
+  var sb=document.getElementById('sortBy');
+  if(sb&&sb.value!=='custom')sb.value='custom';
+  saveOrder();
+  render();
+  dragSrcId=null;
+  showToast('순서가 변경됐어요');
+}
 
 // ===================== ADD/EDIT WORK =====================
 
