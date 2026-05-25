@@ -1693,9 +1693,9 @@ function doExport(type){
       'body{font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:9pt;color:#111;}'+
       '.hd{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:8px;border-bottom:2px solid #111;margin-bottom:12px;}'+
       '.name{font-size:15pt;font-weight:700;}'+
-      'table{width:100%;border-collapse:collapse;font-size:8.5pt;}'+
+      'table{width:100%;border-collapse:collapse;font-size:8.5pt;table-layout:fixed;}'+
       'th{padding:6px 8px;text-align:left;border-bottom:1.5px solid #222;font-size:8pt;background:#f8f8f8;}'+
-      'td{padding:6px 8px;border-bottom:0.5px solid #ddd;vertical-align:middle;}'+
+      'td{padding:6px 8px;border-bottom:0.5px solid #ddd;vertical-align:middle;overflow:hidden;word-break:break-word;}'+
       'tr:last-child td{border-bottom:none;}'+
       '</style></head><body>'+
       '<div class="hd">'+
@@ -1703,14 +1703,14 @@ function doExport(type){
         '<div style="text-align:right;font-size:8pt;color:#555;">'+(ac?ac+'<br/>':'')+today+'</div>'+
       '</div>'+
       '<table><thead><tr>'+
-        '<th style="width:30px;">No.</th>'+
-        '<th style="width:68px;">이미지</th>'+
-        '<th>제목</th>'+
-        '<th style="width:40px;">연도</th>'+
-        '<th style="width:60px;">호수</th>'+
-        '<th style="width:80px;">매체</th>'+
+        '<th style="width:24px;text-align:center;">No.</th>'+
+        '<th style="width:72px;">이미지</th>'+
+        '<th style="width:220px;">제목</th>'+
+        '<th style="width:36px;text-align:center;">연도</th>'+
+        '<th style="width:54px;">호수</th>'+
+        '<th style="width:90px;">매체</th>'+
         '<th style="width:80px;">크기</th>'+
-        '<th style="width:80px;">가격</th>'+
+        '<th style="width:70px;text-align:right;">가격</th>'+
         '</tr></thead><tbody>'+r2+'</tbody></table>'+
       '</body></html>');
     pw.document.close();
