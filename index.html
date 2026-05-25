@@ -87,7 +87,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 .ps-btns{display:flex;gap:3px;}
 .psb{font-size:12px;padding:5px 9px;border-radius:7px;border:0.5px solid rgba(255,255,255,.15);background:transparent;color:rgba(241,239,232,.5);cursor:pointer;}
 .psb.on{background:#F1EFE8;color:#1a1a18;border-color:#F1EFE8;}
-.selbar{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:0.5px solid rgba(255,255,255,.1);border-radius:var(--r);padding:9px 13px;margin-top:8px;font-size:13px;color:rgba(241,239,232,.6);}
+.selbar{display:flex;align-items:center;gap:8px;background:rgba(24,95,165,.15);border:0.5px solid rgba(24,95,165,.4);border-radius:var(--r);padding:9px 13px;margin-top:8px;font-size:13px;color:rgba(241,239,232,.8);}
 .selbar strong{color:#F1EFE8;}
 .selbar .r{margin-left:auto;display:flex;gap:6px;}
 .edit-bar{background:#111110;padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:0.5px solid rgba(255,255,255,.15);position:sticky;top:52px;z-index:25;}
@@ -414,7 +414,18 @@ body.loading .modal-close,body.loading button{cursor:wait;}
           <div class="ps-btns"><button class="psb" data-n="20" onclick="setPS(20)">20</button><button class="psb on" data-n="30" onclick="setPS(30)">30</button><button class="psb" data-n="50" onclick="setPS(50)">50</button><button class="psb" data-n="9999" onclick="setPS(9999)">전체</button></div>
         </div>
       </div>
-      <div class="selbar" id="selbar" style="display:none;"><strong id="selcnt">0</strong><div class="r"><button class="btn btn-sm" id="selClearBtn" onclick="clearSel()">해제</button><button class="btn btn-sm" id="selAllBtn2" onclick="selAll()">전체</button><button class="btn btn-sm btn-blue" id="makeListBtn" onclick="openPreview()">리스트 만들기</button></div></div>
+      <div class="selbar" id="selbar" style="display:none;">
+          <strong id="selcnt" style="color:#F1EFE8;font-size:13px;"></strong>
+          <div class="r" style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn btn-sm" id="selClearBtn" onclick="clearSel()" style="color:#F1EFE8;border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.1);">해제</button>
+            <button class="btn btn-sm" id="selAllBtn2" onclick="selAll()" style="color:#F1EFE8;border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.1);">전체</button>
+            <div style="position:relative;">
+              <button class="btn btn-sm" onclick="toggleSelYearMenu()" id="selYearBtn" style="color:#F1EFE8;border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.1);">연도 이동 &#9660;</button>
+              <div id="selYearMenu" style="display:none;position:absolute;bottom:34px;left:0;background:var(--bg);border:0.5px solid var(--border2);border-radius:10px;padding:6px;z-index:300;min-width:130px;box-shadow:0 -4px 24px rgba(0,0,0,.15);max-height:200px;overflow-y:auto;"></div>
+            </div>
+            <button class="btn btn-sm btn-blue" id="makeListBtn" onclick="openPreview()">리스트 만들기</button>
+          </div>
+        </div>
     </div>
     <div id="list"></div>
     <div class="pgn" id="pgn"></div>
@@ -1254,6 +1265,30 @@ function toggleEditMode(){
   render();
 }
 
+
+
+function toggleSelYearMenu(){
+  var menu=document.getElementById('selYearMenu');
+  if(!menu)return;
+  if(menu.style.display==='none'){
+    var years=[...new Set(works.map(function(w){return w.year;}))].sort(function(a,b){return b-a;});
+    menu.innerHTML=years.map(function(yr){
+      return '<div data-yr="'+yr+'" onclick="moveSelToYear(parseInt(this.dataset.yr))" class="yr-move-item">'+yr+'년</div>';
+    }).join('')+'<div onclick="moveSelToNewYear()" class="yr-move-item" style="color:var(--blue);">+ 새 연도 입력</div>';
+    menu.style.display='block';
+    setTimeout(function(){
+      document.addEventListener('click',function closeSelMenu(e){
+        var btn=document.getElementById('selYearBtn');
+        if(menu&&!menu.contains(e.target)&&e.target!==btn){
+          menu.style.display='none';
+          document.removeEventListener('click',closeSelMenu);
+        }
+      });
+    },10);
+  } else {
+    menu.style.display='none';
+  }
+}
 
 function toggleYearMoveMenu(){
   var menu=document.getElementById('yearMoveMenu');
