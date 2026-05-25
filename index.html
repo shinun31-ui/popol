@@ -409,16 +409,10 @@ body.loading .modal-close,body.loading button{cursor:wait;}
         <input id="fQ" placeholder="작품 검색..."/>
       </div>
       <div class="ctrl-row">
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-          <div class="legend">
-            <div class="legend-item"><div class="ldot" style="background:rgba(241,239,232,.3);"></div>판매 가능</div>
-            <div class="legend-item"><div class="ldot" style="background:rgba(163,45,45,.7);"></div>판매 완료</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:3px;background:rgba(255,255,255,.06);border-radius:20px;padding:3px;border:0.5px solid rgba(255,255,255,.12);">
+        <div style="display:flex;align-items:center;gap:3px;background:rgba(255,255,255,.06);border-radius:20px;padding:3px;border:0.5px solid rgba(255,255,255,.12);">
             <button id="viewModeWork" onclick="setViewMode('work')" style="font-size:11px;padding:3px 10px;border-radius:16px;border:none;cursor:pointer;background:#F1EFE8;color:#1a1a18;font-weight:600;">작품</button>
             <button id="viewModeSales" onclick="setViewMode('sales')" style="font-size:11px;padding:3px 10px;border-radius:16px;border:none;cursor:pointer;background:transparent;color:rgba(241,239,232,.5);">매출</button>
           </div>
-        </div>
         <div class="r-ctrl">
           <div class="sort-wrap">정렬<select id="sortBy" onchange="goPage(1)"><option value="year_desc">연도 최신순</option><option value="year_asc">연도 오래된순</option><option value="hnum_asc">호수 작은순</option><option value="hnum_desc">호수 큰순</option><option value="title_asc">제목 가나다순</option></select></div>
           <div class="ps-btns"><button class="psb" data-n="20" onclick="setPS(20)">20</button><button class="psb on" data-n="30" onclick="setPS(30)">30</button><button class="psb" data-n="50" onclick="setPS(50)">50</button><button class="psb" data-n="9999" onclick="setPS(9999)">전체</button></div>
@@ -1652,8 +1646,24 @@ function doExport(type){
   var ids=sel.size>0?[...sel]:works.map(function(w){return w.id;});
   var tw=sortW(works.filter(function(w){return ids.indexOf(w.id)>=0;}));
   if(type==='csv'){
-    var rows=tw.map(function(w,i){var h=getHN(w);return[i+1,'"'+w.title+'"',w.year,w.genre,h||'-','"'+w.medium+'"','"'+w.size+'"',w.price?fmtKRW(w.price):'-',w.sold?'판매완료':'판매가능'].join(',');});
-    var csv='\uFEFF'+'번호,제목,연도,장르,호수,매체,크기,가격,판매여부\n'+rows.join('\n');
+    var rows=tw.map(function(w,i){
+    var h=getHN(w);
+    var soldTxt=w.sold===true||w.sold==='true'?'판매완료':w.sold==='reserve'?'예약중':'판매가능';
+    var priceTxt=w.price?w.price.toLocaleString()+'원':'-';
+    return[
+      i+1,
+      '"'+w.title.replace(/"/g,'""')+'"',
+      w.year,
+      w.genre,
+      h||'-',
+      '"'+(w.medium||'').replace(/"/g,'""')+'"',
+      '"'+(w.size||'').replace(/"/g,'""')+'"',
+      '"'+priceTxt+'"',
+      '"'+soldTxt+'"',
+      '"'+(w.img||'')+'"'
+    ].join(',');
+  });
+    var csv='\uFEFF'+'번호,제목,연도,장르,호수,매체,크기,가격,판매여부,이미지URL\n'+rows.join('\n');
     var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
     var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='POPOL_'+(artist.name||'포트폴리오')+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
     showToast(t('toastCsv'));
@@ -1661,9 +1671,51 @@ function doExport(type){
     var pw=window.open('','_blank');
     var an=artist.name||'작가이름',ac=[artist.phone,artist.email].filter(Boolean).join(' · ');
     var today=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
-    var r2=tw.map(function(w,i){var h=getHN(w);return'<tr'+(w.sold?' style="background:#fff5f5;"':'')+"><td>"+(i+1)+"</td><td><b>"+w.title+"</b>"+(w.sold?"<br/><small style='color:#A32D2D'>판매완료</small>":"")+"</td><td>"+w.year+"</td><td>"+w.genre+"</td><td>"+(h||"-")+"</td><td>"+(w.medium||"-")+"</td><td>"+(w.size||"-")+"</td></tr>";}).join('');
-    pw.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>@page{size:A4 landscape;margin:15mm;}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Apple SD Gothic Neo",sans-serif;font-size:10pt;}.hd{display:flex;justify-content:space-between;padding-bottom:10px;border-bottom:2px solid #111;margin-bottom:14px;}.name{font-size:17pt;font-weight:700;}table{width:100%;border-collapse:collapse;font-size:8.5pt;}th{padding:6px 8px;text-align:left;border-bottom:1.5px solid #222;}td{padding:7px 8px;border-bottom:0.5px solid #ddd;}</style></head><body><div class="hd"><div><div class="name">'+an+'</div><div style="font-size:8pt;color:#666;">작품목록 '+tw.length+'점</div></div><div style="text-align:right;font-size:8pt;color:#555;">'+(ac?ac+'<br/>':'')+'<span style="color:#999;">'+today+'</span></div></div><table><thead><tr><th>No.</th><th>제목</th><th>연도</th><th>장르</th><th>호수</th><th>매체</th><th>크기</th></tr></thead><tbody>'+r2+'</tbody></table></body></html>');
-    pw.document.close();setTimeout(function(){pw.print();},500);showToast(t('toastPdf'));
+    var r2=tw.map(function(w,i){
+      var h=getHN(w);
+      var soldTxt=w.sold===true||w.sold==='true'?'<span style="color:#A32D2D;font-size:9pt;">판매완료</span>':w.sold==='reserve'?'<span style="color:#9a7010;font-size:9pt;">예약중</span>':'';
+      var imgCell=w.img?'<img src="'+w.img+'" style="width:60px;height:60px;object-fit:cover;border-radius:4px;display:block;">':'<div style="width:60px;height:60px;background:#f0f0f0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9pt;color:#aaa;">없음</div>';
+      var priceTxt=w.price?w.price.toLocaleString()+'원':'-';
+      return '<tr'+(w.sold===true||w.sold==='true'?' style="background:#fff5f5;"':w.sold==='reserve'?' style="background:#fffbea;"':'')+'>'+
+        '<td style="text-align:center;">'+(i+1)+'</td>'+
+        '<td>'+imgCell+'</td>'+
+        '<td><b>'+w.title+'</b><br/>'+soldTxt+'</td>'+
+        '<td>'+w.year+'</td>'+
+        '<td>'+(h||'-')+'</td>'+
+        '<td>'+(w.medium||'-')+'</td>'+
+        '<td>'+(w.size||'-')+'</td>'+
+        '<td style="text-align:right;">'+priceTxt+'</td>'+
+        '</tr>';
+    }).join('');
+    pw.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>'+
+      '@page{size:A4 landscape;margin:12mm;}'+
+      '*{box-sizing:border-box;margin:0;padding:0;}'+
+      'body{font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:9pt;color:#111;}'+
+      '.hd{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:8px;border-bottom:2px solid #111;margin-bottom:12px;}'+
+      '.name{font-size:15pt;font-weight:700;}'+
+      'table{width:100%;border-collapse:collapse;font-size:8.5pt;}'+
+      'th{padding:6px 8px;text-align:left;border-bottom:1.5px solid #222;font-size:8pt;background:#f8f8f8;}'+
+      'td{padding:6px 8px;border-bottom:0.5px solid #ddd;vertical-align:middle;}'+
+      'tr:last-child td{border-bottom:none;}'+
+      '</style></head><body>'+
+      '<div class="hd">'+
+        '<div><div class="name">'+an+'</div><div style="font-size:8pt;color:#666;margin-top:2px;">작품목록 '+tw.length+'점</div></div>'+
+        '<div style="text-align:right;font-size:8pt;color:#555;">'+(ac?ac+'<br/>':'')+today+'</div>'+
+      '</div>'+
+      '<table><thead><tr>'+
+        '<th style="width:30px;">No.</th>'+
+        '<th style="width:68px;">이미지</th>'+
+        '<th>제목</th>'+
+        '<th style="width:40px;">연도</th>'+
+        '<th style="width:60px;">호수</th>'+
+        '<th style="width:80px;">매체</th>'+
+        '<th style="width:80px;">크기</th>'+
+        '<th style="width:80px;">가격</th>'+
+        '</tr></thead><tbody>'+r2+'</tbody></table>'+
+      '</body></html>');
+    pw.document.close();
+    setTimeout(function(){pw.print();},800);
+    showToast(t('toastPdf'));
   } else if(type==='img'){
     var imgs=tw.filter(function(w){return w.img;});if(!imgs.length){showToast(t('toastNoImg'));return;}
     imgs.forEach(function(w,i){setTimeout(function(){var a=document.createElement('a');a.href=w.img;a.download=w.year+'_'+w.title+'.jpg';a.click();},i*400);});
