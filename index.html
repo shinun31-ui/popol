@@ -1334,6 +1334,7 @@ async function applySelPrice(){
   }
   hideLoader();
   sel.clear();
+  render();
   showToast(ids.length+'개 작품 가격을 '+label+'으로 설정했어요');
 }
 
@@ -1397,6 +1398,7 @@ async function moveSelToYear(yr){
   }
   hideLoader();
   sel.clear();
+  render();
   showToast(ids.length+'개 작품을 '+yr+'년으로 이동했어요');
 }
 
@@ -1432,6 +1434,7 @@ async function setSelSoldStatus(status){
   }
   hideLoader();
   sel.clear();
+  render();
   showToast(ids.length+'개 작품을 '+label+'으로 변경했어요');
 }
 
@@ -1442,7 +1445,7 @@ async function deleteSelected(){
   if(!confirm(nm+' 총 '+ids.length+'개 작품을 삭제할까요?'))return;
   if(currentUser){for(var i=0;i<sw.length;i++){await supa.from('works').delete().eq('id',sw[i].dbId||sw[i].id);}await loadWorksFromDB();}
   else{works=works.filter(function(w){return ids.indexOf(w.id)<0;});render();}
-  sel.clear();showToast(ids.length+'개 작품을 삭제했어요');
+  sel.clear();render();showToast(ids.length+'개 작품을 삭제했어요');
 }
 async function saveOrder(){if(!currentUser)return;for(var i=0;i<works.length;i++){await supa.from('works').update({sort_order:i}).eq('id',works[i].id);}}
 function onDragStart(e,id){dragSrcId=id;e.dataTransfer.effectAllowed='move';setTimeout(function(){var el=document.querySelector('.card[data-id="'+id+'"]');if(el)el.classList.add('dragging');},0);}
