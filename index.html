@@ -73,8 +73,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 .lang-opt{padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text);}
 .lang-opt:hover{background:var(--bg2);}
 /* MAIN */
-.main{max-width:780px;margin:0 auto;padding:14px 16px 80px;}
-.filter-bar{background:#1a1a18;padding:10px 16px;margin:-14px -16px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);position:relative;z-index:1;}
+.main{max-width:780px;margin:0 auto;padding:14px 16px 120px;}
+.filter-bar{background:#1a1a18;padding:10px 16px;margin:-14px -16px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);position:sticky;top:52px;z-index:40;}
 .filter-bar select,.filter-bar input{background:#2C2C2A;color:#F1EFE8;border:0.5px solid rgba(255,255,255,.15);font-size:13px;padding:7px 9px;border-radius:8px;outline:none;}
 .filter-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px;}
 .ctrl-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
@@ -366,7 +366,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
 </nav>
 
 <!-- APP -->
-<div id="editBarWrap" style="display:none;background:#111110;border-bottom:0.5px solid rgba(255,255,255,.15);padding:10px 16px;position:sticky;top:52px;z-index:40;">
+<div id="editBarWrap" style="display:none;background:#111110;border-bottom:0.5px solid rgba(255,255,255,.15);padding:10px 16px;position:sticky;top:52px;z-index:45;">
   <div style="max-width:780px;margin:0 auto;display:flex;align-items:center;gap:8px;">
     <span style="font-size:13px;font-weight:500;color:#F1EFE8;flex-shrink:0;">편집 모드</span>
     <span style="font-size:11px;color:rgba(241,239,232,.4);" id="editSelCount"></span>
@@ -1233,8 +1233,19 @@ function selAll(){
 function toggleEditMode(){
   editMode=!editMode;
   var btn=document.getElementById('editModeBtn'),bar=document.getElementById('editBarWrap'),listEl=document.getElementById('list');
-  if(editMode){if(btn){btn.textContent='편집 완료';btn.className='btn btn-sm btn-blue';}if(bar)bar.style.display='flex';if(listEl)listEl.classList.add('edit-mode');}
-  else{if(btn){btn.textContent='편집';btn.className='btn btn-sm';}if(bar)bar.style.display='none';if(listEl)listEl.classList.remove('edit-mode');sel.clear();}
+  var fb=document.getElementById('filterBarEl')||document.querySelector('.filter-bar');
+  if(editMode){
+    if(btn){btn.textContent='편집 완료';btn.className='btn btn-sm btn-blue';}
+    if(bar)bar.style.display='flex';
+    if(listEl)listEl.classList.add('edit-mode');
+    if(fb)fb.style.top='98px'; // 52(nav) + 46(editbar)
+  } else {
+    if(btn){btn.textContent='편집';btn.className='btn btn-sm';}
+    if(bar)bar.style.display='none';
+    if(listEl)listEl.classList.remove('edit-mode');
+    if(fb)fb.style.top='52px';
+    sel.clear();
+  }
   render();
 }
 
