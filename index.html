@@ -259,6 +259,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 .spinner{width:30px;height:30px;border:2.5px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .loadwrap{text-align:center;padding:2rem;}
+.yr-move-item{padding:8px 12px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text);}
+.yr-move-item:hover{background:var(--bg2);}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--charcoal);color:var(--warm);font-size:13px;padding:9px 20px;border-radius:8px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;}
 .toast.on{opacity:1;}
 /* 성능 최적화 */
@@ -1250,6 +1252,55 @@ function toggleEditMode(){
     sel.clear();
   }
   render();
+}
+
+
+function toggleYearMoveMenu(){
+  var menu=document.getElementById('yearMoveMenu');
+  if(!menu)return;
+  if(menu.style.display==='none'){
+    // 연도 목록 채우기
+    var years=[...new Set(works.map(function(w){return w.year;}))].sort(function(a,b){return b-a;});
+    menu.innerHTML=years.map(function(yr){
+      return '<div data-yr="'+yr+'" onclick="moveSelToYear(parseInt(this.dataset.yr))" class="yr-move-item">'+yr+'년</div>';
+    }).join('')+'<div onclick="moveSelToNewYear()" class="yr-move-item" style="color:var(--blue);">+ 새 연도 입력</div>';
+    menu.style.display='block';
+    setTimeout(function(){
+      document.addEventListener('click',function closeMenu(e){
+        var btn=document.getElementById('yearMoveBtn');
+        if(!menu.contains(e.target)&&e.target!==btn){menu.style.display='none';document.removeEventListener('click',closeMenu);}
+      });
+    },0);
+  } else {
+    menu.style.display='none';
+  }
+}
+
+async function moveSelToYear(yr){
+  document.getElementById('yearMoveMenu').style.display='none';
+  if(sel.size===0){showToast('작품을 선택해주세요');return;}
+  var ids=[...sel];
+  if(!confirm(ids.length+'개 작품을 '+yr+'년으로 이동할까요?'))return;
+  showLoader(yr+'년으로 이동 중...');
+  if(currentUser){
+    for(var i=0;i<ids.length;i++){
+      var w=works.find(function(x){return x.id===ids[i];});
+      if(w){await supa.from('works').update({year:yr,updated_at:new Date().toISOString()}).eq('id',w.dbId||w.id);}
+    }
+    await loadWorksFromDB();
+  }
+  hideLoader();
+  sel.clear();
+  showToast(ids.length+'개 작품을 '+yr+'년으로 이동했어요');
+}
+
+function moveSelToNewYear(){
+  document.getElementById('yearMoveMenu').style.display='none';
+  var yr=prompt('이동할 연도를 입력해주세요 (예: 2023)');
+  if(!yr)return;
+  var yrNum=parseInt(yr);
+  if(isNaN(yrNum)||yrNum<1900||yrNum>2100){showToast('올바른 연도를 입력해주세요');return;}
+  moveSelToYear(yrNum);
 }
 
 async function setSelSoldStatus(status){
