@@ -558,14 +558,14 @@ body.loading .modal-close,body.loading button{cursor:wait;}
 
 
 <!-- LOADER -->
-<div id="loaderOv" style="display:none;position:fixed;inset:0;background:rgba(44,44,42,.85);z-index:99999;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
-  <div id="loaderLogo" style="width:56px;height:56px;">
-    <svg width="56" height="56" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" id="loaderLogoSvg" style="animation:spin 1s linear infinite;">
-      <rect width="36" height="36" rx="8" fill="rgba(241,239,232,.12)"/>
-      <text x="18" y="18" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="800" font-style="italic" fill="#F1EFE8" text-anchor="middle" dominant-baseline="central">P</text>
-    </svg>
+<div id="loaderOv" style="display:none;position:fixed;inset:0;background:#2C2C2A;z-index:99999;flex-direction:column;align-items:center;justify-content:center;gap:20px;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:56px;height:56px;">
+    <div id="lsq0" style="border-radius:5px;background:#F1EFE8;transition:opacity .3s ease;"></div>
+    <div id="lsq1" style="border-radius:5px;background:#F1EFE8;opacity:.55;transition:opacity .3s ease;"></div>
+    <div id="lsq3" style="border-radius:5px;background:#F1EFE8;opacity:.55;transition:opacity .3s ease;"></div>
+    <div id="lsq2" style="border-radius:5px;background:#F1EFE8;opacity:.25;transition:opacity .3s ease;"></div>
   </div>
-  <div id="loaderMsg" style="font-size:13px;color:rgba(241,239,232,.6);letter-spacing:.05em;"></div>
+  <div id="loaderMsg" style="font-size:13px;color:rgba(241,239,232,.5);letter-spacing:.05em;"></div>
 </div>
 
 <div class="ov" id="selPriceOv" onclick="ovClick(event,'selPriceOv')">
@@ -909,6 +909,28 @@ async function loadWorksFromDB(){
   });
   _filtersDirty=true;
   render();
+  // 이미지 프리로드 - 전체 로딩 완료 후 hideLoader
+  preloadAllImages();
+}
+
+function preloadAllImages(){
+  var imgs=works.filter(function(w){return w.img;}).map(function(w){return w.img;});
+  if(!imgs.length){hideLoader();return;}
+  var loaded=0,total=imgs.length;
+  var msgEl=document.getElementById('loaderMsg');
+  var deadline=setTimeout(function(){hideLoader();},5000); // 최대 5초
+  imgs.forEach(function(src){
+    var img=new Image();
+    img.onload=img.onerror=function(){
+      loaded++;
+      if(msgEl)msgEl.textContent='작품 불러오는 중... ('+loaded+'/'+total+')';
+      if(loaded>=total){
+        clearTimeout(deadline);
+        hideLoader();
+      }
+    };
+    img.src=src;
+  });
 }
 async function saveWorkToDB(data,isEdit,dbId){
   var row={user_id:currentUser.id,title:data.title,year:data.year,genre:data.genre,
@@ -1988,14 +2010,43 @@ function dataURLtoBlob(dataURL){
 // ===================== LOADER =====================
 var loaderStep=0,loaderTimer=null;
 var loaderLevels=[1.0,0.55,0.25,0.1];
+var _loaderTimer=null,_loaderStep=0;
+var _loaderLevels=[1.0,0.55,0.25,0.1];
+// 북서=lsq0, 북동=lsq1, 남서=lsq3, 남동=lsq2
+// 시계방향: 북서→북동→남동→남서
+var _loaderOrder=['lsq0','lsq1','lsq2','lsq3'];
 function showLoader(msg){
   var ov=document.getElementById('loaderOv');
-  document.getElementById('loaderMsg').textContent=msg||'';
+  var msgEl=document.getElementById('loaderMsg');
+  if(msgEl)msgEl.textContent=msg||'';
   ov.style.display='flex';
+  _loaderStep=0;
+  clearInterval(_loaderTimer);
+  _loaderTimer=setInterval(function(){
+    var els=[document.getElementById('lsq0'),document.getElementById('lsq1'),document.getElementById('lsq2'),document.getElementById('lsq3')];
+    // 시계방향: 0(북서)→1(북동)→2(남동)→3(남서)
+    var order=[0,1,2,3]; // lsq0,lsq1,lsq2,lsq3
+    order.forEach(function(idx,i){
+      if(els[idx]){
+        var phase=(i-_loaderStep%4+4)%4;
+        els[idx].style.opacity=_loaderLevels[phase];
+      }
+    });
+    _loaderStep++;
+  },280);
 }
 function hideLoader(){
-  clearTimeout(loaderTimer);
-  document.getElementById('loaderOv').style.display='none';
+  clearInterval(_loaderTimer);
+  var ov=document.getElementById('loaderOv');
+  if(ov){
+    ov.style.transition='opacity .4s ease';
+    ov.style.opacity='0';
+    setTimeout(function(){
+      ov.style.display='none';
+      ov.style.opacity='1';
+      ov.style.transition='';
+    },400);
+  }
 }
 
 // ===================== UI UTILS =====================
