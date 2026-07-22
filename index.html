@@ -927,6 +927,7 @@ function showApp(){
   var app=document.getElementById('appScreen');
   app.style.display='block';
   app.style.width='100%';
+  app.style.marginTop='52px';
   app.style.minHeight='calc(100vh - 52px)';
   initSearchEvents();
 }
@@ -2175,10 +2176,25 @@ function showTab(t2){
   ['tabP','tabU','tabCV','tabNotes'].forEach(function(id){
     var el=document.getElementById(id);if(el)el.style.display='none';
   });
-  if(t2==='portfolio'&&document.getElementById('tabP'))document.getElementById('tabP').style.display='block';
-  else if(t2==='upload'&&document.getElementById('tabU'))document.getElementById('tabU').style.display='block';
-  else if(t2==='cv'){document.getElementById('tabCV').style.display='block';loadCV();}
-  else if(t2==='notes'){document.getElementById('tabNotes').style.display='block';loadNotes();}
+  var fb=document.querySelector('.filter-bar');
+  var eb=document.getElementById('editBarWrap');
+  if(t2==='portfolio'){
+    document.getElementById('tabP').style.display='block';
+    if(fb)fb.style.display='block';
+  } else if(t2==='upload'){
+    document.getElementById('tabU').style.display='block';
+    if(fb)fb.style.display='none';
+  } else if(t2==='cv'){
+    document.getElementById('tabCV').style.display='block';
+    if(fb)fb.style.display='none';
+    if(eb)eb.style.display='none';
+    loadCV();
+  } else if(t2==='notes'){
+    document.getElementById('tabNotes').style.display='block';
+    if(fb)fb.style.display='none';
+    if(eb)eb.style.display='none';
+    loadNotes();
+  }
 }
 function closeOv(id){
   var el=document.getElementById(id);
