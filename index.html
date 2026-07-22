@@ -276,10 +276,10 @@ html{scroll-behavior:smooth;-webkit-overflow-scrolling:touch;}
   display:block;
   transform:translateZ(0);
   backface-visibility:hidden;
-  transition:opacity .3s ease;
-  opacity:0;
+  opacity:1;
 }
-.thumb img.loaded{opacity:1;}
+.thumb img.lazy{opacity:0;transition:opacity .25s ease;}
+.thumb img.lazy.loaded{opacity:1;}
 .card:active{transform:scale(0.98);transition:transform .1s ease;}
 .modal,.dmodal,.ppanel,.rmodal{will-change:opacity;}
 .ov.on{animation:ovIn .18s ease both;}
@@ -425,7 +425,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
           </div>
         <div class="r-ctrl">
           <div class="sort-wrap">정렬<select id="sortBy" onchange="goPage(1)"><option value="year_desc">연도 최신순</option><option value="year_asc">연도 오래된순</option><option value="hnum_asc">호수 작은순</option><option value="hnum_desc">호수 큰순</option><option value="title_asc">제목 가나다순</option></select></div>
-          <div class="ps-btns"><button class="psb" data-n="20" onclick="setPS(20)">20</button><button class="psb on" data-n="30" onclick="setPS(30)">30</button><button class="psb" data-n="50" onclick="setPS(50)">50</button><button class="psb" data-n="9999" onclick="setPS(9999)">전체</button></div>
+          <div class="ps-btns"><button class="psb on" data-n="20" onclick="setPS(20)">20</button><button class="psb" data-n="30" onclick="setPS(30)">30</button><button class="psb" data-n="50" onclick="setPS(50)">50</button><button class="psb" data-n="9999" onclick="setPS(9999)">전체</button></div>
         </div>
       </div>
       <div class="selbar" id="selbar" style="display:none;">
@@ -960,7 +960,7 @@ const GENRES=['회화','조각','사진','설치미술','판화','드로잉','�
 const HT=[{n:0,F:[18,14],S:[18,12],P:[18,10]},{n:1,F:[22,16],S:[22,14],P:[22,12]},{n:2,F:[24,19],S:[24,16],P:[24,14]},{n:3,F:[27.3,22],S:[27.3,19],P:[27.3,16]},{n:4,F:[33.4,24.2],S:[33.4,21.2],P:[33.4,18.2]},{n:5,F:[35,27],S:[35,24],P:[35,22]},{n:6,F:[40.9,31.8],S:[40.9,27.3],P:[40.9,24.2]},{n:8,F:[45.5,38],S:[45.5,33.4],P:[45.5,27.3]},{n:10,F:[53,45.5],S:[53,40.9],P:[53,33.4]},{n:12,F:[60.6,50],S:[60.6,45.5],P:[60.6,40.9]},{n:15,F:[65.2,53],S:[65.2,50],P:[65.2,45.5]},{n:20,F:[72.7,60.6],S:[72.7,53],P:[72.7,45.5]},{n:25,F:[80.3,65.2],S:[80.3,60.6],P:[80.3,53]},{n:30,F:[90.9,72.7],S:[90.9,65.2],P:[90.9,60.6]},{n:40,F:[100,80.3],S:[100,72.7],P:[100,65.2]},{n:50,F:[116.7,90.9],S:[116.7,80.3],P:[116.7,72.7]},{n:60,F:[130.3,97],S:[130.3,89.4],P:[130.3,80.3]},{n:80,F:[145.5,112.1],S:[145.5,97],P:[145.5,89.4]},{n:100,F:[162.2,130.3],S:[162.2,112.1],P:[162.2,97]},{n:120,F:[193.9,130.3],S:[193.9,112.1],P:[193.9,97]},{n:150,F:[227.3,181.8],S:[227.3,162.2],P:[227.3,145.5]},{n:200,F:[259.1,193.9],S:[259.1,181.8],P:[259.1,162.2]},{n:300,F:[290.9,218.2],S:[290.9,197],P:[290.9,181.8]},{n:400,F:[333.4,248.5],S:[333.4,227.3],P:[333.4,209.1]},{n:500,F:[363.6,259.1],S:[363.6,245.5],P:[363.6,227.3]}];
 let works=[],sel=new Set(),editId=null,pendingImg=null,pendingImgFile=null,soldF=false;
 let artist={name:'',phone:'',email:''};
-let pageSize=30,curPage=1,reviewItems=[],editMode=false,dragSrcId=null;
+let pageSize=20,curPage=1,reviewItems=[],editMode=false,dragSrcId=null;
 let showPrice=true,selCur='KRW',rates={KRW:1,USD:0,EUR:0,JPY:0,CNY:0},selSizeForPreview=null;
 var curLang=localStorage.getItem('popol_lang')||'ko';
 
@@ -1241,6 +1241,7 @@ function render(){
   }
   el.innerHTML=html2;
   renderPgn(tp,total);
+  requestAnimationFrame(initImgObserver);
 }
 
 function cHtml(w){
@@ -1254,7 +1255,7 @@ function cHtml(w){
   html+=soldOv;
   html+='<div class="chkbtn" data-cid="'+wid+'" onclick="event.stopPropagation();toggleSel(this.dataset.cid)"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
   html+='<div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg></div>';
-  html+='<div class="thumb" data-tid="'+wid+'" onclick="toggleSel(this.dataset.tid)">'+(w.img?'<img src="'+w.img+'" decoding="async" onload="this.classList.add(\'loaded\')" onerror="this.classList.add(\'loaded\')" class=""/>':ph)+'</div>';
+  html+='<div class="thumb" data-tid="'+wid+'" onclick="toggleSel(this.dataset.tid)">'+(w.img?'<img data-src="'+w.img+'" decoding="async" class="lazy" alt=""/>':ph)+'</div>';
   html+='<div class="cbody" data-bid="'+wid+'" onclick="toggleSel(this.dataset.bid)">';
   html+='<div class="ctitle'+(w.sold?' sold-text':'')+'">'+w.title+'</div>';
   html+='<div class="cmeta">'+w.year+' · '+w.genre+'</div>';
@@ -2007,6 +2008,30 @@ function closeOv(id){
 function ovClick(e,id){if(e.target.id===id)closeOv(id);}
 var toastT;
 function showToast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){el.classList.remove('on');},2500);}
+
+
+// ===================== LAZY IMAGE LOADER =====================
+var _imgObserver=null;
+function initImgObserver(){
+  if(_imgObserver)_imgObserver.disconnect();
+  _imgObserver=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        var img=entry.target;
+        if(img.dataset.src){
+          img.src=img.dataset.src;
+          img.onload=function(){img.classList.add('loaded');};
+          img.onerror=function(){img.classList.add('loaded');};
+          delete img.dataset.src;
+          _imgObserver.unobserve(img);
+        }
+      }
+    });
+  },{rootMargin:'100px 0px',threshold:0.01});
+  document.querySelectorAll('img.lazy[data-src]').forEach(function(img){
+    _imgObserver.observe(img);
+  });
+}
 
 // ===================== SPLASH =====================
 (function(){
