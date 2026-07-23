@@ -428,6 +428,40 @@ body.loading .modal-close,body.loading button{cursor:wait;}
   </div>
 </div>
 <div id="appScreen">
+
+<div id="tabCV" style="display:none;">
+  <div style="max-width:780px;margin:0 auto;padding:16px 16px 120px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div><div style="font-size:18px;font-weight:700;">CV</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">이력을 관리하고 선택해서 내보내요</div></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-sm" onclick="exportCVSelected()" style="color:var(--text2);">선택 내보내기</button>
+        <button class="btn btn-sm btn-dark" onclick="openCVAdd()">+ 추가</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+      <button class="cv-type-btn active" data-type="all" onclick="setCVType('all')">전체</button>
+      <button class="cv-type-btn" data-type="solo" onclick="setCVType('solo')">개인전</button>
+      <button class="cv-type-btn" data-type="group" onclick="setCVType('group')">단체전</button>
+      <button class="cv-type-btn" data-type="award" onclick="setCVType('award')">수상</button>
+      <button class="cv-type-btn" data-type="residency" onclick="setCVType('residency')">레지던시</button>
+      <button class="cv-type-btn" data-type="publication" onclick="setCVType('publication')">출판/도록</button>
+      <button class="cv-type-btn" data-type="education" onclick="setCVType('education')">학력</button>
+    </div>
+    <div id="cvList"></div>
+  
+<!-- 작업노트 탭 -->
+<div id="tabNotes" style="display:none;">
+  <div style="max-width:780px;margin:0 auto;padding:16px 16px 120px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div><div style="font-size:18px;font-weight:700;">작업노트</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">시리즈별 작업 기록을 관리해요</div></div>
+      <button class="btn btn-sm btn-dark" onclick="openNoteAdd()">+ 새 시리즈</button>
+    </div>
+    <div id="notesList"></div>
+  </div>
+</div>
+</div>
+</div>
+
 <div class="main">
   <div id="tabP">
     <div class="ed<div class="edit-bar" id="editBar" style="display:none;">
@@ -501,28 +535,6 @@ body.loading .modal-close,body.loading button{cursor:wait;}
 </div>
 
 <!-- CV 탭 -->
-<div id="tabCV" style="display:none;">
-  <div style="max-width:780px;margin:0 auto;padding:16px 16px 120px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-      <div><div style="font-size:18px;font-weight:700;">CV</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">이력을 관리하고 선택해서 내보내요</div></div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-sm" onclick="exportCVSelected()" style="color:var(--text2);">선택 내보내기</button>
-        <button class="btn btn-sm btn-dark" onclick="openCVAdd()">+ 추가</button>
-      </div>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
-      <button class="cv-type-btn active" data-type="all" onclick="setCVType('all')">전체</button>
-      <button class="cv-type-btn" data-type="solo" onclick="setCVType('solo')">개인전</button>
-      <button class="cv-type-btn" data-type="group" onclick="setCVType('group')">단체전</button>
-      <button class="cv-type-btn" data-type="award" onclick="setCVType('award')">수상</button>
-      <button class="cv-type-btn" data-type="residency" onclick="setCVType('residency')">레지던시</button>
-      <button class="cv-type-btn" data-type="publication" onclick="setCVType('publication')">출판/도록</button>
-      <button class="cv-type-btn" data-type="education" onclick="setCVType('education')">학력</button>
-    </div>
-    <div id="cvList"></div>
-  </div>
-</div>
-
 <!-- CV 추가/수정 모달 -->
 <div class="ov" id="cvAddOv" onclick="ovClick(event,'cvAddOv')">
   <div class="modal" style="max-width:400px;">
@@ -548,17 +560,6 @@ body.loading .modal-close,body.loading button{cursor:wait;}
     <p style="font-size:13px;color:var(--text2);margin-bottom:14px;">선택된 이력을 내보내요.</p>
     <div id="cvExportList"></div>
     <div class="mact"><button class="btn" onclick="closeOv('cvExportOv')">취소</button><button class="btn" onclick="copyCVText()">텍스트 복사</button><button class="btn btn-dark" onclick="exportCVPDF()">PDF 출력</button></div>
-  </div>
-</div>
-
-<!-- 작업노트 탭 -->
-<div id="tabNotes" style="display:none;">
-  <div style="max-width:780px;margin:0 auto;padding:16px 16px 120px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-      <div><div style="font-size:18px;font-weight:700;">작업노트</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">시리즈별 작업 기록을 관리해요</div></div>
-      <button class="btn btn-sm btn-dark" onclick="openNoteAdd()">+ 새 시리즈</button>
-    </div>
-    <div id="notesList"></div>
   </div>
 </div>
 
