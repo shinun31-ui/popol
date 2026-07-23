@@ -449,6 +449,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
       <button class="cv-type-btn" data-type="residency" onclick="setCVType('residency')">레지던시</button>
       <button class="cv-type-btn" data-type="publication" onclick="setCVType('publication')">출판/도록</button>
       <button class="cv-type-btn" data-type="education" onclick="setCVType('education')">학력</button>
+      <button class="cv-type-btn" data-type="etc" onclick="setCVType('etc')">기타</button>
     </div>
     <div id="cvList"></div>
   </div>
@@ -558,7 +559,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
 <div class="ov" id="cvAddOv" onclick="ovClick(event,'cvAddOv')">
   <div class="modal" style="max-width:400px;">
     <div class="modal-header"><h2 id="cvModalTitle">이력 추가</h2><button class="modal-close" onclick="closeOv('cvAddOv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="ff"><label>분류</label><select id="cvType"><option value="solo">개인전</option><option value="group">단체전</option><option value="award">수상</option><option value="residency">레지던시</option><option value="publication">출판/도록</option><option value="education">학력</option></select></div>
+    <div class="ff"><label>분류</label><select id="cvType"><option value="solo">개인전</option><option value="group">단체전</option><option value="award">수상</option><option value="residency">레지던시</option><option value="publication">출판/도록</option><option value="education">학력</option><option value="etc">기타</option></select></div>
     <div class="frow">
       <div class="ff"><label>연도</label><input id="cvYear" type="number" placeholder="2024"/></div>
       <div class="ff"><label>제목/전시명</label><input id="cvTitle2" placeholder="전시명 또는 수상명"/></div>
@@ -2327,53 +2328,55 @@ var parsedCVItems=[];
 function parseCVText(text){
   var lines=text.split(/\n/).map(function(l){return l.trim();}).filter(Boolean);
   var items=[];
-  var currentType='group';
+  var currentType='etc'; // 기본값: 기타
 
-  // 타입 키워드 매핑
-  var typeMap={
-    '개인전':'solo','solo exhibition':'solo','solo show':'solo',
-    '단체전':'group','그룹전':'group','기획전':'group','group exhibition':'group','group show':'group','selected exhibition':'group','exhibition':'group',
-    '수상':'award','award':'award','prize':'award','선정':'award','수혜':'award','grant':'award',
-    '레지던시':'residency','residency':'residency','입주':'residency','artist in residence':'residency',
-    '출판':'publication','도록':'publication','publication':'publication','book':'publication','catalog':'publication',
-    '학력':'education','education':'education','학교':'education','대학':'education','university':'education','college':'education','졸업':'education'
-  };
+  // 섹션 헤더만 타입 변경 (짧은 줄 + 키워드)
+  var sectionMap=[
+    {keys:['개인전','solo exhibition','solo show'],type:'solo'},
+    {keys:['단체전','그룹전','기획전','group exhibition','group show','selected exhibition'],type:'group'},
+    {keys:['수상','award','prize','수혜','grant'],type:'award'},
+    {keys:['레지던시','residency','입주작가','artist in residence'],type:'residency'},
+    {keys:['출판','도록','publication','catalog'],type:'publication'},
+    {keys:['학력','education','university','college'],type:'education'}
+  ];
 
   lines.forEach(function(line){
-    // 섹션 헤더 감지
-    var lowerLine=line.toLowerCase().replace(/[\s_\-:：]/g,'');
-    var matchedType=null;
-    Object.keys(typeMap).forEach(function(k){
-      if(lowerLine.includes(k.toLowerCase().replace(/[\s_\-:：]/g,''))){
-        matchedType=typeMap[k];
-      }
-    });
-    if(matchedType&&line.length<30){
-      currentType=matchedType;
-      return;
+    var lower=line.toLowerCase();
+
+    // 섹션 헤더 감지 - 짧은 줄(30자 이하)이고 연도 없을 때만
+    var hasYear=/\d{4}/.test(line);
+    if(!hasYear&&line.length<=40){
+      var matched=false;
+      sectionMap.forEach(function(s){
+        if(!matched){
+          s.keys.forEach(function(k){
+            if(!matched&&lower.includes(k.toLowerCase())){
+              currentType=s.type;
+              matched=true;
+            }
+          });
+        }
+      });
+      if(matched)return; // 섹션 헤더면 아이템 추가 안 함
     }
 
     // 연도 패턴: 줄 시작에 4자리 연도
     var yearMatch=line.match(/^(\d{4})[\s\.,\-：:]/);
-    if(!yearMatch){
-      // 줄 중간에 연도
-      yearMatch=line.match(/(\d{4})/);
-    }
-    if(!yearMatch)return;
+    if(!yearMatch)return; // 줄 시작 연도 없으면 스킵
 
     var year=parseInt(yearMatch[1]);
     if(year<1950||year>2100)return;
 
-    // 연도 제거한 나머지 텍스트
+    // 연도 제거한 나머지
     var rest=line.replace(/^\d{4}[\s\.,\-：:]*/, '').trim();
     if(!rest||rest.length<2)return;
 
-    // 장소 추출 (쉼표나 괄호로 구분)
+    // 장소 추출
     var venue='',location='',title=rest;
     var commaIdx=rest.indexOf(',');
     var parenIdx=rest.indexOf('(');
 
-    if(commaIdx>0&&commaIdx<rest.length-2){
+    if(commaIdx>0){
       title=rest.slice(0,commaIdx).trim();
       var venueRest=rest.slice(commaIdx+1).trim();
       var comma2=venueRest.indexOf(',');
@@ -2390,13 +2393,13 @@ function parseCVText(text){
 
     if(!title)return;
 
-    // 타입 자동 감지 (제목에서)
+    // 제목에서만 타입 감지 (명확한 키워드만)
     var detectedType=currentType;
-    var t=title.toLowerCase();
-    if(t.includes('개인전')||t.includes('solo'))detectedType='solo';
-    else if(t.includes('단체전')||t.includes('그룹')||t.includes('group'))detectedType='group';
-    else if(t.includes('수상')||t.includes('award')||t.includes('prize'))detectedType='award';
-    else if(t.includes('레지던시')||t.includes('residency'))detectedType='residency';
+    var t=title;
+    if(t.includes('개인전'))detectedType='solo';
+    else if(t.includes('단체전')||t.includes('그룹전'))detectedType='group';
+    else if(t.includes('레지던시'))detectedType='residency';
+    // 수상은 제목에서 자동 감지 안 함
 
     items.push({type:detectedType,year:year,title:title,venue:venue,location:location});
   });
@@ -2496,7 +2499,7 @@ async function saveParsedCV(){
 
 // ===================== CV =====================
 var cvItems=[],cvSelSet=new Set(),cvTypeFilter='all',editingCVId=null;
-var CV_LABELS={solo:'개인전',group:'단체전',award:'수상',residency:'레지던시',publication:'출판/도록',education:'학력'};
+var CV_LABELS={solo:'개인전',group:'단체전',award:'수상',residency:'레지던시',publication:'출판/도록',education:'학력',etc:'기타'};
 
 async function loadCV(){
   if(!currentUser)return;
