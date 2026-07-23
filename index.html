@@ -52,7 +52,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 @keyframes linIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 /* APP */
 #mainNav{display:none;align-items:center;justify-content:space-between;padding:0 16px;height:52px;border-bottom:0.5px solid var(--border);background:var(--bg);position:fixed;top:0;left:0;right:0;z-index:50;}
-#appScreen{display:none;width:100%;}
+#appScreen{display:none;width:100%;padding-top:52px;}
 .nav-logo{display:flex;align-items:center;gap:8px;cursor:pointer;}
 .nav-icon{width:30px;height:30px;background:var(--charcoal);border-radius:7px;display:flex;align-items:center;justify-content:center;}
 .nav-word{font-size:17px;font-weight:800;font-style:italic;letter-spacing:.04em;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;}
@@ -73,7 +73,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 .lang-opt{padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text);}
 .lang-opt:hover{background:var(--bg2);}
 /* MAIN */
-.main{max-width:780px;margin:0 auto;padding:160px 16px 120px;transform:translateZ(0);}
+.main{max-width:780px;margin:0 auto;padding:100px 16px 120px;transform:translateZ(0);}
 .filter-bar{background:#1a1a18;padding:10px 16px;border-bottom:0.5px solid rgba(255,255,255,.08);position:fixed;top:52px;left:0;right:0;z-index:40;}
 .filter-bar select,.filter-bar input{background:#2C2C2A;color:#F1EFE8;border:0.5px solid rgba(255,255,255,.15);font-size:13px;padding:7px 9px;border-radius:8px;outline:none;}
 .filter-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px;}
@@ -927,7 +927,7 @@ function showApp(){
   var app=document.getElementById('appScreen');
   app.style.display='block';
   app.style.width='100%';
-  app.style.marginTop='52px';
+  app.style.marginTop='0';
   app.style.minHeight='calc(100vh - 52px)';
   initSearchEvents();
 }
