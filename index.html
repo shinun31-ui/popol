@@ -436,7 +436,7 @@ body.loading .modal-close,body.loading button{cursor:wait;}
       <div><div style="font-size:18px;font-weight:700;">CV</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">이력을 관리하고 선택해서 내보내요</div></div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-sm" onclick="document.getElementById('cvFileInput').click()" style="color:var(--text2);">📄 파일 업로드</button>
-        <input type="file" id="cvFileInput" accept=".docx,.txt,.hwp" style="display:none;" onchange="handleCVFile(this)"/>
+        <input type="file" id="cvFileInput" accept=".docx,.txt" style="display:none;" onchange="handleCVFile(this)"/>
         <button class="btn btn-sm" onclick="exportCVSelected()" style="color:var(--text2);">선택 내보내기</button>
         <button class="btn btn-sm btn-dark" onclick="openCVAdd()">+ 추가</button>
       </div>
@@ -2323,6 +2323,87 @@ function initImgObserver(){
 // ===================== CV 파일 파싱 =====================
 var parsedCVItems=[];
 
+
+function parseCVText(text){
+  var lines=text.split(/\n/).map(function(l){return l.trim();}).filter(Boolean);
+  var items=[];
+  var currentType='group';
+
+  // 타입 키워드 매핑
+  var typeMap={
+    '개인전':'solo','solo exhibition':'solo','solo show':'solo',
+    '단체전':'group','그룹전':'group','기획전':'group','group exhibition':'group','group show':'group','selected exhibition':'group','exhibition':'group',
+    '수상':'award','award':'award','prize':'award','선정':'award','수혜':'award','grant':'award',
+    '레지던시':'residency','residency':'residency','입주':'residency','artist in residence':'residency',
+    '출판':'publication','도록':'publication','publication':'publication','book':'publication','catalog':'publication',
+    '학력':'education','education':'education','학교':'education','대학':'education','university':'education','college':'education','졸업':'education'
+  };
+
+  lines.forEach(function(line){
+    // 섹션 헤더 감지
+    var lowerLine=line.toLowerCase().replace(/[\s_\-:：]/g,'');
+    var matchedType=null;
+    Object.keys(typeMap).forEach(function(k){
+      if(lowerLine.includes(k.toLowerCase().replace(/[\s_\-:：]/g,''))){
+        matchedType=typeMap[k];
+      }
+    });
+    if(matchedType&&line.length<30){
+      currentType=matchedType;
+      return;
+    }
+
+    // 연도 패턴: 줄 시작에 4자리 연도
+    var yearMatch=line.match(/^(\d{4})[\s\.,\-：:]/);
+    if(!yearMatch){
+      // 줄 중간에 연도
+      yearMatch=line.match(/(\d{4})/);
+    }
+    if(!yearMatch)return;
+
+    var year=parseInt(yearMatch[1]);
+    if(year<1950||year>2100)return;
+
+    // 연도 제거한 나머지 텍스트
+    var rest=line.replace(/^\d{4}[\s\.,\-：:]*/, '').trim();
+    if(!rest||rest.length<2)return;
+
+    // 장소 추출 (쉼표나 괄호로 구분)
+    var venue='',location='',title=rest;
+    var commaIdx=rest.indexOf(',');
+    var parenIdx=rest.indexOf('(');
+
+    if(commaIdx>0&&commaIdx<rest.length-2){
+      title=rest.slice(0,commaIdx).trim();
+      var venueRest=rest.slice(commaIdx+1).trim();
+      var comma2=venueRest.indexOf(',');
+      if(comma2>0){
+        venue=venueRest.slice(0,comma2).trim();
+        location=venueRest.slice(comma2+1).trim().replace(/[()]/g,'');
+      } else {
+        venue=venueRest.replace(/[()]/g,'').trim();
+      }
+    } else if(parenIdx>0){
+      title=rest.slice(0,parenIdx).trim();
+      venue=rest.slice(parenIdx+1).replace(/\)/g,'').trim();
+    }
+
+    if(!title)return;
+
+    // 타입 자동 감지 (제목에서)
+    var detectedType=currentType;
+    var t=title.toLowerCase();
+    if(t.includes('개인전')||t.includes('solo'))detectedType='solo';
+    else if(t.includes('단체전')||t.includes('그룹')||t.includes('group'))detectedType='group';
+    else if(t.includes('수상')||t.includes('award')||t.includes('prize'))detectedType='award';
+    else if(t.includes('레지던시')||t.includes('residency'))detectedType='residency';
+
+    items.push({type:detectedType,year:year,title:title,venue:venue,location:location});
+  });
+
+  return items;
+}
+
 async function handleCVFile(input){
   var file=input.files[0];
   if(!file)return;
@@ -2349,42 +2430,15 @@ async function handleCVFile(input){
 
   if(!text.trim()){showToast('파일 내용이 없어요');hideLoader();return;}
 
-  // AI로 CV 파싱
+  // 규칙 기반 CV 파싱
   try{
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:4000,
-        messages:[{
-          role:'user',
-          content:`다음은 작가의 CV(이력서) 텍스트입니다. 이 텍스트에서 이력 항목들을 추출하여 JSON 배열로만 응답하세요. 다른 텍스트 없이 순수 JSON만 출력하세요.
-
-각 항목은 다음 형식으로:
-{"type":"solo|group|award|residency|publication|education","year":2024,"title":"전시/수상 제목","venue":"장소/기관명","location":"도시/국가"}
-
-type 분류 기준:
-- solo: 개인전
-- group: 단체전, 그룹전
-- award: 수상, 선정
-- residency: 레지던시, 입주작가
-- publication: 출판, 도록, 책
-- education: 학력, 졸업
-
-CV 텍스트:
-${text.slice(0,3000)}`
-        }]
-      })
-    });
-    var data=await resp.json();
-    var aiText=data.content[0].text.trim();
-    // JSON 추출
-    var jsonMatch=aiText.match(/\[[\s\S]*\]/);
-    if(!jsonMatch)throw new Error('JSON 파싱 실패');
-    parsedCVItems=JSON.parse(jsonMatch[0]);
+    parsedCVItems=parseCVText(text);
+    if(!parsedCVItems.length){
+      showToast('이력 항목을 찾지 못했어요. 직접 추가해주세요.');
+      hideLoader();return;
+    }
   } catch(e){
-    showToast('AI 분석 실패, 직접 추가해주세요');
+    showToast('파싱 실패: '+e.message);
     hideLoader();return;
   }
 
