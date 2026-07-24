@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<title>POPOL Dev</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100%;background:#1a1a18;color:#F1EFE8;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;}
+
+.wrap{max-width:480px;margin:0 auto;padding:48px 24px 60px;}
+
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:48px;}
+.logo-icon{width:40px;height:40px;background:#2C2C2A;border-radius:9px;display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:8px;}
+.logo-icon div{border-radius:2px;background:#F1EFE8;}
+.logo-icon div:nth-child(2){opacity:.55;}
+.logo-icon div:nth-child(3){opacity:.55;}
+.logo-icon div:nth-child(4){opacity:.25;}
+.logo-word{font-size:22px;font-weight:800;font-style:italic;letter-spacing:.04em;color:#F1EFE8;}
+.logo-sub{font-size:11px;color:rgba(241,239,232,.35);margin-left:2px;margin-top:2px;}
+
+.section-label{font-size:10px;font-weight:600;letter-spacing:.1em;color:rgba(241,239,232,.3);text-transform:uppercase;margin-bottom:12px;}
+
+.launch-btn{
+  display:block;width:100%;
+  background:#185FA5;color:#fff;
+  border:none;border-radius:14px;
+  padding:18px 20px;
+  font-size:16px;font-weight:700;
+  cursor:pointer;
+  text-align:left;
+  margin-bottom:14px;
+  transition:background .15s,transform .1s;
+  position:relative;
+  overflow:hidden;
+}
+.launch-btn:active{transform:scale(0.98);}
+.launch-btn:hover{background:#1a6dbf;}
+.launch-btn .btn-icon{font-size:22px;margin-bottom:6px;display:block;}
+.launch-btn .btn-title{display:block;font-size:15px;font-weight:700;margin-bottom:2px;}
+.launch-btn .btn-desc{display:block;font-size:11px;font-weight:400;opacity:.65;}
+
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;}
+
+.card{
+  background:#2C2C2A;
+  border:0.5px solid rgba(241,239,232,.1);
+  border-radius:14px;
+  padding:16px;
+  cursor:pointer;
+  transition:background .15s,transform .1s;
+  text-align:left;
+}
+.card:active{transform:scale(0.97);}
+.card:hover{background:#333330;}
+.card .c-icon{font-size:20px;margin-bottom:8px;display:block;}
+.card .c-title{display:block;font-size:13px;font-weight:600;color:#F1EFE8;margin-bottom:2px;}
+.card .c-url{display:block;font-size:10px;color:rgba(241,239,232,.35);}
+
+.divider{height:0.5px;background:rgba(241,239,232,.08);margin:28px 0;}
+
+.open-all-btn{
+  display:block;width:100%;
+  background:#F1EFE8;color:#1a1a18;
+  border:none;border-radius:14px;
+  padding:16px;
+  font-size:15px;font-weight:700;
+  cursor:pointer;
+  text-align:center;
+  transition:opacity .15s,transform .1s;
+}
+.open-all-btn:active{transform:scale(0.98);opacity:.9;}
+
+.tip{font-size:11px;color:rgba(241,239,232,.3);text-align:center;margin-top:12px;line-height:1.6;}
+
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:#F1EFE8;color:#1a1a18;
+  padding:10px 20px;border-radius:30px;
+  font-size:13px;font-weight:600;
+  opacity:0;transition:opacity .3s;
+  pointer-events:none;white-space:nowrap;
+}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 로고 -->
+  <div class="logo">
+    <div class="logo-icon">
+      <div></div><div></div><div></div><div></div>
+    </div>
+    <div>
+      <div class="logo-word">POPOL</div>
+      <div class="logo-sub">개발 런처</div>
+    </div>
+  </div>
+
+  <!-- 한번에 열기 -->
+  <button class="open-all-btn" onclick="openAll()">
+    🚀 개발 환경 한번에 열기
+  </button>
+  <p class="tip">Claude · GitHub · Vercel · Supabase 동시에 열려요</p>
+
+  <div class="divider"></div>
+
+  <!-- 개별 링크 -->
+  <div class="section-label">개별 열기</div>
+  <div class="cards">
+    <div class="card" onclick="open('https://claude.ai','_blank')">
+      <span class="c-icon">🤖</span>
+      <span class="c-title">Claude</span>
+      <span class="c-url">claude.ai</span>
+    </div>
+    <div class="card" onclick="open('https://github.com/shinun31-ui/popol','_blank')">
+      <span class="c-icon">🐙</span>
+      <span class="c-title">GitHub</span>
+      <span class="c-url">shinun31-ui/popol</span>
+    </div>
+    <div class="card" onclick="open('https://vercel.com/shinun31-uis-projects/popol','_blank')">
+      <span class="c-icon">▲</span>
+      <span class="c-title">Vercel</span>
+      <span class="c-url">popol 배포</span>
+    </div>
+    <div class="card" onclick="open('https://supabase.com/dashboard/project/jriljajqtseoedeqlxag','_blank')">
+      <span class="c-icon">🗄️</span>
+      <span class="c-title">Supabase</span>
+      <span class="c-url">DB · 스토리지</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 앱 바로가기 -->
+  <div class="section-label">앱 바로가기</div>
+  <button class="launch-btn" onclick="open('https://popol-six.vercel.app','_blank')">
+    <span class="btn-icon">📱</span>
+    <span class="btn-title">POPOL 앱 열기</span>
+    <span class="btn-desc">popol-six.vercel.app</span>
+  </button>
+
+</div>
+
+<div class="toast" id="toast">창이 열렸어요!</div>
+
+<script>
+function openAll(){
+  var urls=[
+    'https://claude.ai',
+    'https://github.com/shinun31-ui/popol',
+    'https://vercel.com/shinun31-uis-projects/popol',
+    'https://supabase.com/dashboard/project/jriljajqtseoedeqlxag'
+  ];
+  urls.forEach(function(url){window.open(url,'_blank');});
+  showToast();
+}
+
+function showToast(){
+  var t=document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2000);
+}
+</script>
+</body>
+</html>
