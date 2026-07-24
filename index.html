@@ -74,7 +74,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 .lang-opt:hover{background:var(--bg2);}
 /* MAIN */
 .main{max-width:780px;margin:0 auto;padding:148px 16px 120px;transform:translateZ(0);}
-.filter-bar{background:#1a1a18;padding:10px 16px;border-bottom:0.5px solid rgba(255,255,255,.08);position:fixed;top:52px;left:0;right:0;z-index:40;}
+.filter-bar{background:#1a1a18;padding:10px 16px;border-bottom:0.5px solid rgba(255,255,255,.08);position:fixed;top:52px;left:0;right:0;z-index:40;display:block;}
 .filter-bar select,.filter-bar input{background:#2C2C2A;color:#F1EFE8;border:0.5px solid rgba(255,255,255,.15);font-size:13px;padding:7px 9px;border-radius:8px;outline:none;}
 .filter-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px;}
 .ctrl-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
@@ -2202,18 +2202,18 @@ function showTab(t2){
   window.scrollTo(0,0);
   if(t2==='portfolio'){
     document.getElementById('tabP').style.display='block';
-    if(fb)fb.style.display='block';
+    if(fb){fb.style.display='block';fb.style.visibility='visible';}
   } else if(t2==='upload'){
     document.getElementById('tabU').style.display='block';
-    if(fb)fb.style.display='none';
+    if(fb){fb.style.display='none';fb.style.visibility='hidden';}
   } else if(t2==='cv'){
     document.getElementById('tabCV').style.display='block';
-    if(fb)fb.style.display='none';
+    if(fb){fb.style.display='none';fb.style.visibility='hidden';}
     if(eb)eb.style.display='none';
     loadCV();
   } else if(t2==='notes'){
     document.getElementById('tabNotes').style.display='block';
-    if(fb)fb.style.display='none';
+    if(fb){fb.style.display='none';fb.style.visibility='hidden';}
     if(eb)eb.style.display='none';
     loadNotes();
   }
