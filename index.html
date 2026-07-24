@@ -52,7 +52,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 @keyframes linIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 /* APP */
 #mainNav{display:none;align-items:center;justify-content:space-between;padding:0 16px;height:52px;border-bottom:0.5px solid var(--border);background:var(--bg);position:fixed;top:0;left:0;right:0;z-index:50;}
-#appScreen{display:none;width:100%;padding-top:52px;}
+#appScreen{display:none;width:100%;}
 .nav-logo{display:flex;align-items:center;gap:8px;cursor:pointer;}
 .nav-icon{width:30px;height:30px;background:var(--charcoal);border-radius:7px;display:flex;align-items:center;justify-content:center;}
 .nav-word{font-size:17px;font-weight:800;font-style:italic;letter-spacing:.04em;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;}
@@ -73,7 +73,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Apple 
 .lang-opt{padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text);}
 .lang-opt:hover{background:var(--bg2);}
 /* MAIN */
-.main{max-width:780px;margin:0 auto;padding:100px 16px 120px;transform:translateZ(0);}
+.main{max-width:780px;margin:0 auto;padding:148px 16px 120px;transform:translateZ(0);}
 .filter-bar{background:#1a1a18;padding:10px 16px;border-bottom:0.5px solid rgba(255,255,255,.08);position:fixed;top:52px;left:0;right:0;z-index:40;}
 .filter-bar select,.filter-bar input{background:#2C2C2A;color:#F1EFE8;border:0.5px solid rgba(255,255,255,.15);font-size:13px;padding:7px 9px;border-radius:8px;outline:none;}
 .filter-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px;}
@@ -2326,11 +2326,13 @@ var parsedCVItems=[];
 
 
 function parseCVText(text){
+  // 다양한 줄바꿈 처리
+  text=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
   var lines=text.split(/\n/).map(function(l){return l.trim();}).filter(Boolean);
   var items=[];
-  var currentType='etc'; // 기본값: 기타
+  var currentType='etc';
 
-  // 섹션 헤더만 타입 변경 (짧은 줄 + 키워드)
+  // 섹션 헤더 키워드
   var sectionMap=[
     {keys:['개인전','solo exhibition','solo show'],type:'solo'},
     {keys:['단체전','그룹전','기획전','group exhibition','group show','selected exhibition'],type:'group'},
@@ -2343,7 +2345,7 @@ function parseCVText(text){
   lines.forEach(function(line){
     var lower=line.toLowerCase();
 
-    // 섹션 헤더 감지 - 짧은 줄(30자 이하)이고 연도 없을 때만
+    // 섹션 헤더 감지 - 연도 없고 짧은 줄
     var hasYear=/\d{4}/.test(line);
     if(!hasYear&&line.length<=40){
       var matched=false;
@@ -2357,49 +2359,55 @@ function parseCVText(text){
           });
         }
       });
-      if(matched)return; // 섹션 헤더면 아이템 추가 안 함
+      if(matched)return;
     }
 
-    // 연도 패턴: 줄 시작에 4자리 연도
-    var yearMatch=line.match(/^(\d{4})[\s\.,\-：:]/);
-    if(!yearMatch)return; // 줄 시작 연도 없으면 스킵
-
+    // 연도 찾기 - 줄 어디에든 있는 4자리 연도
+    var yearMatch=line.match(/(\d{4})/);
+    if(!yearMatch)return;
     var year=parseInt(yearMatch[1]);
     if(year<1950||year>2100)return;
 
-    // 연도 제거한 나머지
-    var rest=line.replace(/^\d{4}[\s\.,\-：:]*/, '').trim();
+    // 연도 기준으로 텍스트 분리
+    var yearStr=yearMatch[1];
+    var yearPos=line.indexOf(yearStr);
+    var rest='';
+
+    // 연도 뒤 텍스트
+    rest=line.slice(yearPos+4).replace(/^[\s\.,\-：:·\|]+/,'').trim();
+    // 연도 앞 텍스트 (연도 앞에 내용 있으면)
+    if(!rest){
+      rest=line.slice(0,yearPos).replace(/[\s\.,\-：:·\|]+$/,'').trim();
+    }
     if(!rest||rest.length<2)return;
 
     // 장소 추출
     var venue='',location='',title=rest;
     var commaIdx=rest.indexOf(',');
     var parenIdx=rest.indexOf('(');
+    var dotIdx=rest.indexOf('·');
 
-    if(commaIdx>0){
+    if(commaIdx>2){
       title=rest.slice(0,commaIdx).trim();
       var venueRest=rest.slice(commaIdx+1).trim();
       var comma2=venueRest.indexOf(',');
-      if(comma2>0){
-        venue=venueRest.slice(0,comma2).trim();
-        location=venueRest.slice(comma2+1).trim().replace(/[()]/g,'');
-      } else {
-        venue=venueRest.replace(/[()]/g,'').trim();
-      }
-    } else if(parenIdx>0){
+      if(comma2>0){venue=venueRest.slice(0,comma2).trim();location=venueRest.slice(comma2+1).trim().replace(/[()]/g,'');}
+      else{venue=venueRest.replace(/[()]/g,'').trim();}
+    } else if(parenIdx>2){
       title=rest.slice(0,parenIdx).trim();
       venue=rest.slice(parenIdx+1).replace(/\)/g,'').trim();
+    } else if(dotIdx>2){
+      title=rest.slice(0,dotIdx).trim();
+      venue=rest.slice(dotIdx+1).trim();
     }
 
-    if(!title)return;
+    if(!title||title.length<2)return;
 
-    // 제목에서만 타입 감지 (명확한 키워드만)
+    // 제목에서 타입 보정 (명확한 것만)
     var detectedType=currentType;
-    var t=title;
-    if(t.includes('개인전'))detectedType='solo';
-    else if(t.includes('단체전')||t.includes('그룹전'))detectedType='group';
-    else if(t.includes('레지던시'))detectedType='residency';
-    // 수상은 제목에서 자동 감지 안 함
+    if(title.includes('개인전'))detectedType='solo';
+    else if(title.includes('단체전')||title.includes('그룹전'))detectedType='group';
+    else if(title.includes('레지던시'))detectedType='residency';
 
     items.push({type:detectedType,year:year,title:title,venue:venue,location:location});
   });
