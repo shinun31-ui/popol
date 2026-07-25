@@ -1055,42 +1055,14 @@ async function loadWorksFromDB(){
 }
 
 function preloadAllImages(){
-  var imgs=works.filter(function(w){return w.img;}).map(function(w){return w.img;});
-  if(!imgs.length){hideLoader();return;}
-  var loaded=0,total=imgs.length;
-  var msgEl=document.getElementById('loaderMsg');
-  var deadline=setTimeout(function(){hideLoader();},8000); // 최대 8초
-  function loadNext(i){
-    if(i>=imgs.length)return;
-    var img=new Image();
-    img.crossOrigin='anonymous';
-    img.onload=img.onerror=function(){
-      loaded++;
-      if(msgEl)msgEl.textContent='작품 불러오는 중... ('+loaded+'/'+total+')';
-      if(loaded>=total){
-        clearTimeout(deadline);
-        hideLoader();
-      }
-    };
-    img.src=imgs[i];
-  }
-  // 병렬로 최대 6개씩 로드
-  var batch=Math.min(6,imgs.length);
-  for(var i=0;i<batch;i++)loadNext(i);
-  var next=batch;
-  function onDone(){
-    if(next<imgs.length)loadNext(next++);
-  }
-  imgs.slice(0,batch).forEach(function(src){
-    var img=new Image();
-    img.onload=img.onerror=function(){
-      loaded++;
-      if(msgEl)msgEl.textContent='작품 불러오는 중... ('+loaded+'/'+total+')';
-      if(loaded>=total){clearTimeout(deadline);hideLoader();}
-      else onDone();
-    };
-    img.crossOrigin='anonymous';
-    img.src=src;
+  // 로딩화면 없이 바로 앱 보여주고 백그라운드에서 이미지 캐시
+  hideLoader();
+  // 브라우저 캐시에 미리 저장 (다음번엔 즉시 로드)
+  works.forEach(function(w){
+    if(w.img){
+      var img=new Image();
+      img.src=w.img;
+    }
   });
 }
 async function saveWorkToDB(data,isEdit,dbId){
@@ -1438,7 +1410,14 @@ function cHtml(w){
   html+=soldOv;
   html+='<div class="chkbtn" data-cid="'+wid+'" onclick="event.stopPropagation();toggleSel(this.dataset.cid)"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
   html+='<div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg></div>';
-  html+='<div class="thumb" data-tid="'+wid+'" onclick="toggleSel(this.dataset.tid)">'+(w.img?'<img src="'+w.img+'" decoding="async" loading="lazy" alt="" onload="this.style.opacity=1" onerror="this.style.opacity=1" style="opacity:0;transition:opacity .3s;"/>':ph)+'</div>';
+  html+='<div class="thumb" data-tid="'+wid+'" onclick="toggleSel(this.dataset.tid)">'+(w.img?(function(src){
+      // Supabase 이미지 리사이즈 (썸네일용 300px)
+      var thumbSrc=src;
+      if(src&&src.includes('supabase.co/storage')){
+        thumbSrc=src+'?width=300&quality=70';
+      }
+      return '<img src="'+thumbSrc+'" decoding="async" loading="lazy" alt="" onload="this.style.opacity=1" onerror="this.style.opacity=0.3" style="opacity:0;transition:opacity .25s;"/>';
+    })(w.img):ph)+'</div>';
   html+='<div class="cbody" data-bid="'+wid+'" onclick="toggleSel(this.dataset.bid)">';
   html+='<div class="ctitle'+(w.sold?' sold-text':'')+'">'+w.title+'</div>';
   html+='<div class="cmeta">'+w.year+' · '+w.genre+'</div>';
