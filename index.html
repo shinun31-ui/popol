@@ -308,8 +308,7 @@ html{scroll-behavior:smooth;-webkit-overflow-scrolling:touch;}
   backface-visibility:hidden;
   opacity:1;
 }
-.thumb img.lazy{opacity:0;transition:opacity .25s ease;}
-.thumb img.lazy.loaded{opacity:1;}
+.thumb img{opacity:0;transition:opacity .3s ease;}
 .card:active{transform:scale(0.98);transition:transform .1s ease;}
 .modal,.dmodal,.ppanel,.rmodal{will-change:opacity;}
 .ov.on{animation:ovIn .18s ease both;}
@@ -1060,9 +1059,11 @@ function preloadAllImages(){
   if(!imgs.length){hideLoader();return;}
   var loaded=0,total=imgs.length;
   var msgEl=document.getElementById('loaderMsg');
-  var deadline=setTimeout(function(){hideLoader();},5000); // 최대 5초
-  imgs.forEach(function(src){
+  var deadline=setTimeout(function(){hideLoader();},8000); // 최대 8초
+  function loadNext(i){
+    if(i>=imgs.length)return;
     var img=new Image();
+    img.crossOrigin='anonymous';
     img.onload=img.onerror=function(){
       loaded++;
       if(msgEl)msgEl.textContent='작품 불러오는 중... ('+loaded+'/'+total+')';
@@ -1071,6 +1072,24 @@ function preloadAllImages(){
         hideLoader();
       }
     };
+    img.src=imgs[i];
+  }
+  // 병렬로 최대 6개씩 로드
+  var batch=Math.min(6,imgs.length);
+  for(var i=0;i<batch;i++)loadNext(i);
+  var next=batch;
+  function onDone(){
+    if(next<imgs.length)loadNext(next++);
+  }
+  imgs.slice(0,batch).forEach(function(src){
+    var img=new Image();
+    img.onload=img.onerror=function(){
+      loaded++;
+      if(msgEl)msgEl.textContent='작품 불러오는 중... ('+loaded+'/'+total+')';
+      if(loaded>=total){clearTimeout(deadline);hideLoader();}
+      else onDone();
+    };
+    img.crossOrigin='anonymous';
     img.src=src;
   });
 }
@@ -1405,7 +1424,7 @@ function render(){
   }
   el.innerHTML=html2;
   renderPgn(tp,total);
-  requestAnimationFrame(initImgObserver);
+
 }
 
 function cHtml(w){
@@ -1419,7 +1438,7 @@ function cHtml(w){
   html+=soldOv;
   html+='<div class="chkbtn" data-cid="'+wid+'" onclick="event.stopPropagation();toggleSel(this.dataset.cid)"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
   html+='<div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg></div>';
-  html+='<div class="thumb" data-tid="'+wid+'" onclick="toggleSel(this.dataset.tid)">'+(w.img?'<img data-src="'+w.img+'" decoding="async" class="lazy" alt=""/>':ph)+'</div>';
+  html+='<div class="thumb" data-tid="'+wid+'" onclick="toggleSel(this.dataset.tid)">'+(w.img?'<img src="'+w.img+'" decoding="async" loading="lazy" alt="" onload="this.style.opacity=1" onerror="this.style.opacity=1" style="opacity:0;transition:opacity .3s;"/>':ph)+'</div>';
   html+='<div class="cbody" data-bid="'+wid+'" onclick="toggleSel(this.dataset.bid)">';
   html+='<div class="ctitle'+(w.sold?' sold-text':'')+'">'+w.title+'</div>';
   html+='<div class="cmeta">'+w.year+' · '+w.genre+'</div>';
@@ -2231,24 +2250,7 @@ function showToast(msg){var el=document.getElementById('toast');el.textContent=m
 // ===================== LAZY IMAGE LOADER =====================
 var _imgObserver=null;
 function initImgObserver(){
-  if(_imgObserver)_imgObserver.disconnect();
-  _imgObserver=new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      if(entry.isIntersecting){
-        var img=entry.target;
-        if(img.dataset.src){
-          img.src=img.dataset.src;
-          img.onload=function(){img.classList.add('loaded');};
-          img.onerror=function(){img.classList.add('loaded');};
-          delete img.dataset.src;
-          _imgObserver.unobserve(img);
-        }
-      }
-    });
-  },{rootMargin:'100px 0px',threshold:0.01});
-  document.querySelectorAll('img.lazy[data-src]').forEach(function(img){
-    _imgObserver.observe(img);
-  });
+  // lazy loading 대신 native loading="lazy" 사용
 }
 
 // ===================== SPLASH =====================
