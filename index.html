@@ -273,6 +273,18 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 .spinner{width:30px;height:30px;border:2.5px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .loadwrap{text-align:center;padding:2rem;}
+.cv-type-btn{font-size:11px;padding:4px 12px;border-radius:20px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .15s;}
+.cv-type-btn.active{background:var(--charcoal);color:#F1EFE8;border-color:var(--charcoal);}
+.cv-item{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:0.5px solid var(--border);}
+.cv-item:last-child{border-bottom:none;}
+.cv-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border2);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .15s;cursor:pointer;}
+.cv-check.on{background:var(--charcoal);border-color:var(--charcoal);}
+.cv-badge{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--bg2);color:var(--text3);border:0.5px solid var(--border2);}
+.note-card{background:var(--bg2);border-radius:12px;padding:16px;margin-bottom:10px;border:0.5px solid var(--border);cursor:pointer;transition:all .15s;}
+.note-card:hover{border-color:var(--text3);}
+.note-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.note-period{font-size:11px;color:var(--text3);margin-bottom:8px;}
+.note-preview{font-size:12px;color:var(--text2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--charcoal);color:var(--warm);font-size:13px;padding:9px 20px;border-radius:8px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;}
 .toast.on{opacity:1;}
 @media(max-width:520px){.howgrid{grid-template-columns:1fr;}.expgrid{grid-template-columns:1fr;}.frow{grid-template-columns:1fr;}.dmodal,.ppanel,.modal,.rmodal{border-radius:var(--rlg) var(--rlg) 0 0;margin:auto 0 0;}.ov{padding:0;align-items:flex-end;}}
@@ -384,6 +396,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
     </div>
     <button class="btn btn-sm" id="editModeBtn" onclick="toggleEditMode()">편집</button>
     <button class="btn btn-sm" id="navUpload" onclick="showTab('upload')">간편 업로드</button>
+    <button class="btn btn-sm" onclick="showTab('cv')">CV</button>
+    <button class="btn btn-sm" onclick="showTab('notes')">작업노트</button>
     <button class="btn btn-sm" id="navList" onclick="openPreview()">리스트</button>
     <button class="btn btn-sm btn-dark" id="navAdd" onclick="portfolioType==='design'?openDesignAdd():openAdd()">+ 추가</button>
   </div>
@@ -430,6 +444,43 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
       <div class="howgrid"><div class="howcard"><div class="hown">방법 1 — 이미지</div><div class="howt">파일명 자동 파싱</div><div class="howd">제목_연도_재료_크기 순서로 저장하면 자동 인식해요.</div></div><div class="howcard"><div class="hown">방법 2 — CSV</div><div class="howt">목록 일괄 등록</div><div class="howd">엑셀을 CSV로 저장해서 올리면 컬럼 자동 매핑해요.</div></div><div class="howcard"><div class="hown">방법 3 — 함께</div><div class="howt">이미지 + CSV 매칭</div><div class="howd">둘 다 올리면 제목 기준으로 이미지를 자동 연결해요.</div></div></div>
       <div id="impSec"></div>
     </div>
+  </div>
+</div>
+
+<!-- CV 탭 -->
+<div id="tabCV" style="display:none;">
+  <div style="max-width:780px;margin:0 auto;padding:68px 16px 120px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div><div style="font-size:18px;font-weight:700;">CV</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">이력을 관리하고 선택해서 내보내요</div></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-sm" onclick="document.getElementById('cvFileInput').click()" style="color:var(--text2);">📄 파일 업로드</button>
+        <input type="file" id="cvFileInput" accept=".docx,.txt" style="display:none;" onchange="handleCVFile(this)"/>
+        <button class="btn btn-sm" onclick="exportCVSelected()" style="color:var(--text2);">선택 내보내기</button>
+        <button class="btn btn-sm btn-dark" onclick="openCVAdd()">+ 추가</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+      <button class="cv-type-btn active" data-type="all" onclick="setCVType('all')">전체</button>
+      <button class="cv-type-btn" data-type="solo" onclick="setCVType('solo')">개인전</button>
+      <button class="cv-type-btn" data-type="group" onclick="setCVType('group')">단체전</button>
+      <button class="cv-type-btn" data-type="award" onclick="setCVType('award')">수상</button>
+      <button class="cv-type-btn" data-type="residency" onclick="setCVType('residency')">레지던시</button>
+      <button class="cv-type-btn" data-type="publication" onclick="setCVType('publication')">출판/도록</button>
+      <button class="cv-type-btn" data-type="education" onclick="setCVType('education')">학력</button>
+      <button class="cv-type-btn" data-type="etc" onclick="setCVType('etc')">기타</button>
+    </div>
+    <div id="cvList"></div>
+  </div>
+</div>
+
+<!-- 작업노트 탭 -->
+<div id="tabNotes" style="display:none;">
+  <div style="max-width:780px;margin:0 auto;padding:68px 16px 120px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div><div style="font-size:18px;font-weight:700;">작업노트</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">시리즈별 작업 기록을 관리해요</div></div>
+      <button class="btn btn-sm btn-dark" onclick="openNoteAdd()">+ 새 시리즈</button>
+    </div>
+    <div id="notesList"></div>
   </div>
 </div>
 
@@ -912,10 +963,13 @@ async function importSel(){
 
 // TAB / OVERLAY / TOAST
 function showTab(t2){
+  ['tabP','tabU','tabCV','tabNotes'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
   var fb=document.querySelector('.filter-bar');
-  document.getElementById('tabP').style.display=t2==='portfolio'?'block':'none';
-  document.getElementById('tabU').style.display=t2==='upload'?'block':'none';
-  if(fb)fb.style.display=t2==='portfolio'?'':' none';
+  window.scrollTo(0,0);
+  if(t2==='portfolio'){document.getElementById('tabP').style.display='block';if(fb)fb.style.display='';}
+  else if(t2==='upload'){document.getElementById('tabU').style.display='block';if(fb)fb.style.display='none';}
+  else if(t2==='cv'){document.getElementById('tabCV').style.display='block';if(fb)fb.style.display='none';loadCV();}
+  else if(t2==='notes'){document.getElementById('tabNotes').style.display='block';if(fb)fb.style.display='none';loadNotes();}
 }
 function closeOv(id){document.getElementById(id).classList.remove('on');}
 function ovClick(e,id){if(e.target.id===id)closeOv(id);}
@@ -959,6 +1013,173 @@ function showToast(msg){var el=document.getElementById('toast');el.textContent=m
   }
   setTimeout(tick,250);
 })();
+
+// ===================== CV =====================
+var cvItems=[],cvSelSet=new Set(),cvTypeFilter='all',editingCVId=null;
+var CV_LABELS={solo:'개인전',group:'단체전',award:'수상',residency:'레지던시',publication:'출판/도록',education:'학력',etc:'기타'};
+
+async function loadCV(){
+  if(!currentUser)return;
+  var res=await supa.from('cv_items').select('*').eq('user_id',currentUser.id).order('year',{ascending:false});
+  if(!res.error)cvItems=res.data||[];
+  renderCV();
+}
+
+function setCVType(type){
+  cvTypeFilter=type;
+  document.querySelectorAll('.cv-type-btn').forEach(function(b){b.classList.toggle('active',b.dataset.type===type);});
+  renderCV();
+}
+
+function renderCV(){
+  var el=document.getElementById('cvList');if(!el)return;
+  var filtered=cvTypeFilter==='all'?cvItems:cvItems.filter(function(c){return c.type===cvTypeFilter;});
+  if(!filtered.length){el.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text3);font-size:14px;">이력이 없어요.<br/>+ 추가 버튼으로 시작해보세요.</div>';return;}
+  el.innerHTML='';
+  filtered.forEach(function(c){
+    var row=document.createElement('div');row.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:0.5px solid var(--border);';
+    var yr=document.createElement('div');yr.style.cssText='font-size:13px;font-weight:600;color:var(--text2);min-width:40px;flex-shrink:0;';yr.textContent=c.year||'';
+    var info=document.createElement('div');info.style.flex='1';
+    var badge=document.createElement('span');badge.className='cv-badge';badge.textContent=CV_LABELS[c.type]||c.type;
+    var name=document.createElement('div');name.style.cssText='font-size:13px;font-weight:500;color:var(--text);margin-top:3px;';name.textContent=c.title;
+    var topRow=document.createElement('div');topRow.style.cssText='display:flex;align-items:center;gap:6px;';
+    topRow.appendChild(badge);info.appendChild(topRow);info.appendChild(name);
+    if(c.venue||c.location){var sub=document.createElement('div');sub.style.cssText='font-size:11px;color:var(--text3);margin-top:2px;';sub.textContent=(c.venue||'')+(c.venue&&c.location?' · ':'')+( c.location||'');info.appendChild(sub);}
+    var editBtn=document.createElement('button');editBtn.textContent='수정';editBtn.style.cssText='font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:none;color:var(--text3);cursor:pointer;flex-shrink:0;';
+    editBtn.dataset.id=c.id;editBtn.onclick=function(e){e.stopPropagation();editCVItem(this.dataset.id);};
+    var delBtn=document.createElement('button');delBtn.textContent='삭제';delBtn.style.cssText='font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid rgba(163,45,45,.3);background:none;color:var(--red);cursor:pointer;flex-shrink:0;';
+    delBtn.dataset.id=c.id;delBtn.onclick=function(e){e.stopPropagation();deleteCVItem(this.dataset.id);};
+    row.appendChild(yr);row.appendChild(info);row.appendChild(editBtn);row.appendChild(delBtn);
+    el.appendChild(row);
+  });
+}
+
+function openCVAdd(){
+  editingCVId=null;
+  showToast('+ 추가 기능 준비중');
+}
+
+function editCVItem(id){showToast('수정 기능 준비중');}
+
+async function deleteCVItem(id){
+  if(!confirm('이 이력을 삭제할까요?'))return;
+  await supa.from('cv_items').delete().eq('id',id);
+  await loadCV();showToast('삭제됐어요');
+}
+
+function exportCVSelected(){
+  var sel=cvItems;
+  var byType={};
+  sel.forEach(function(c){if(!byType[c.type])byType[c.type]=[];byType[c.type].push(c);});
+  var lines=[];
+  Object.keys(byType).forEach(function(t){
+    lines.push('[ '+(CV_LABELS[t]||t)+' ]');
+    byType[t].sort(function(a,b){return (b.year||0)-(a.year||0);}).forEach(function(c){
+      lines.push((c.year||'')+'  '+c.title+(c.venue?'  '+c.venue:'')+(c.location?', '+c.location:''));
+    });
+    lines.push('');
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(function(){showToast('CV가 복사됐어요');});
+}
+
+async function handleCVFile(input){
+  var file=input.files[0];if(!file)return;
+  input.value='';
+  showToast('파일 분석 중...');
+  var text='';
+  try{
+    if(file.name.endsWith('.txt')){text=await file.text();}
+    else if(file.name.endsWith('.docx')){
+      if(!window.mammoth){
+        await new Promise(function(res,rej){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+      }
+      var ab=await file.arrayBuffer();
+      var result=await mammoth.extractRawText({arrayBuffer:ab});
+      text=result.value;
+    }
+  }catch(e){showToast('파일 읽기 실패');return;}
+  if(!text.trim()){showToast('파일 내용이 없어요');return;}
+  var items=parseCVText(text);
+  if(!items.length){showToast('이력을 찾지 못했어요');return;}
+  if(!confirm(items.length+'개 이력을 저장할까요?'))return;
+  for(var i=0;i<items.length;i++){
+    await supa.from('cv_items').insert({user_id:currentUser.id,type:items[i].type||'etc',year:items[i].year||new Date().getFullYear(),title:items[i].title||'',venue:items[i].venue||'',location:items[i].location||'',description:''});
+  }
+  await loadCV();showToast(items.length+'개 이력이 저장됐어요');
+}
+
+function parseCVText(text){
+  var lines=text.split(/[\r\n]+/).map(function(l){return l.trim();}).filter(Boolean);
+  var items=[],currentType='etc';
+  var sectionMap=[
+    {keys:['개인전','solo exhibition','solo show'],type:'solo'},
+    {keys:['단체전','그룹전','기획전','group exhibition'],type:'group'},
+    {keys:['수상','award','prize','수혜','grant'],type:'award'},
+    {keys:['레지던시','residency','입주작가'],type:'residency'},
+    {keys:['출판','도록','publication','catalog'],type:'publication'},
+    {keys:['학력','education','university','college'],type:'education'}
+  ];
+  lines.forEach(function(line){
+    var lower=line.toLowerCase();
+    var hasYear=/\d{4}/.test(line);
+    if(!hasYear&&line.length<=40){
+      var matched=false;
+      sectionMap.forEach(function(s){if(!matched)s.keys.forEach(function(k){if(!matched&&lower.includes(k)){currentType=s.type;matched=true;}});});
+      if(matched)return;
+    }
+    var yearMatch=line.match(/(\d{4})/);
+    if(!yearMatch)return;
+    var year=parseInt(yearMatch[1]);
+    if(year<1950||year>2100)return;
+    var yearPos=line.indexOf(yearMatch[1]);
+    var rest=line.slice(yearPos+4).replace(/^[\s\.,\-:·|]+/,'').trim();
+    if(!rest||rest.length<2)return;
+    var venue='',location='',title=rest;
+    var commaIdx=rest.indexOf(',');
+    if(commaIdx>2){title=rest.slice(0,commaIdx).trim();var venueRest=rest.slice(commaIdx+1).trim();var comma2=venueRest.indexOf(',');if(comma2>0){venue=venueRest.slice(0,comma2).trim();location=venueRest.slice(comma2+1).trim();}else{venue=venueRest.trim();}}
+    var detectedType=currentType;
+    if(title.includes('개인전'))detectedType='solo';
+    else if(title.includes('단체전')||title.includes('그룹전'))detectedType='group';
+    else if(title.includes('레지던시'))detectedType='residency';
+    items.push({type:detectedType,year:year,title:title,venue:venue,location:location});
+  });
+  return items;
+}
+
+// ===================== 작업노트 =====================
+var seriesNotes=[],editingNoteId=null,viewingNoteId=null;
+
+async function loadNotes(){
+  if(!currentUser)return;
+  var res=await supa.from('series_notes').select('*').eq('user_id',currentUser.id).order('sort_order',{ascending:true});
+  if(!res.error)seriesNotes=res.data||[];
+  renderNotes();
+}
+
+function renderNotes(){
+  var el=document.getElementById('notesList');if(!el)return;
+  if(!seriesNotes.length){el.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text3);font-size:14px;">작업노트가 없어요.<br/>+ 새 시리즈 버튼으로 시작해보세요.</div>';return;}
+  el.innerHTML='';
+  seriesNotes.forEach(function(n){
+    var card=document.createElement('div');card.className='note-card';card.dataset.id=n.id;card.onclick=function(){viewNote(this.dataset.id);};
+    var header=document.createElement('div');header.style.cssText='display:flex;justify-content:space-between;align-items:start;';
+    var title=document.createElement('div');title.className='note-title';title.textContent=n.title;
+    var btns=document.createElement('div');btns.style.cssText='display:flex;gap:6px;';
+    var editBtn=document.createElement('button');editBtn.textContent='수정';editBtn.style.cssText='font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:none;color:var(--text3);cursor:pointer;';
+    editBtn.dataset.id=n.id;editBtn.onclick=function(e){e.stopPropagation();editNote(this.dataset.id);};
+    var delBtn=document.createElement('button');delBtn.textContent='삭제';delBtn.style.cssText='font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid rgba(163,45,45,.3);background:none;color:var(--red);cursor:pointer;';
+    delBtn.dataset.id=n.id;delBtn.onclick=function(e){e.stopPropagation();deleteNote(this.dataset.id);};
+    btns.appendChild(editBtn);btns.appendChild(delBtn);header.appendChild(title);header.appendChild(btns);card.appendChild(header);
+    if(n.period){var p=document.createElement('div');p.className='note-period';p.textContent=n.period;card.appendChild(p);}
+    if(n.note){var prev=document.createElement('div');prev.className='note-preview';prev.textContent=n.note.slice(0,100);card.appendChild(prev);}
+    el.appendChild(card);
+  });
+}
+
+function openNoteAdd(){showToast('노트 추가 준비중');}
+function editNote(id){showToast('수정 준비중');}
+async function deleteNote(id){if(!confirm('삭제할까요?'))return;await supa.from('series_notes').delete().eq('id',id);await loadNotes();showToast('삭제됐어요');}
+function viewNote(id){var n=seriesNotes.find(function(x){return x.id===id;});if(!n)return;alert(n.title+'\n\n'+n.note);}
 
 fetchRates();
 </script>
