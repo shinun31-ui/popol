@@ -586,9 +586,13 @@ const supa=supabase.createClient(SURL,SKEY);
 let currentUser=null;
 
 function showScreen(name){
-  ['splash','loginScreen','mainNav','appScreen'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
+  ['splash','portfolioHome','loginScreen','mainNav','appScreen'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
   if(name==='login'){var l=document.getElementById('loginScreen');l.style.display='flex';l.style.opacity='1';var box=document.getElementById('loginBox');if(box){box.classList.remove('lin-anim');setTimeout(function(){box.classList.add('lin-anim');},50);}}
-  else if(name==='app'){document.getElementById('mainNav').style.display='flex';document.getElementById('appScreen').style.display='';}
+  else if(name==='app'||name==='home'){
+    document.getElementById('mainNav').style.display='flex';
+    document.getElementById('appScreen').style.display='block';
+    showTab('portfolio');
+  }
 }
 
 supa.auth.onAuthStateChange(async function(event,session){
