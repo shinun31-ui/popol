@@ -578,135 +578,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 
 
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <script>
 const SURL='https://jriljajqtseoedeqlxag.supabase.co';
 const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpyaWxqYWpxdHNlb2VkZXFseGFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDAzOTgsImV4cCI6MjA5MzI3NjM5OH0.GXiLpw6Qlg4_FAX0Z5Tcc-s1bc1G6RlJUs_XfUBW0ec';
-
-// Supabase 직접 구현 (eval 없음 - CSP 호환)
-var _supaSession=null,_supaListeners=[];
-function _supaHeaders(extra){
-  var h={'apikey':SKEY,'Authorization':'Bearer '+((_supaSession&&_supaSession.access_token)||SKEY),'Content-Type':'application/json'};
-  if(extra)Object.assign(h,extra);return h;
-}
-var supa={
-  from:function(table){
-    var filters=[],orders=[];
-    var q={
-      _cols:'*',
-      select:function(c){this._cols=c||'*';return this;},
-      eq:function(col,val){filters.push(col+'=eq.'+encodeURIComponent(val));return this;},
-      order:function(col,opts){orders.push('order='+col+'.'+(opts&&opts.ascending===false?'desc':'asc'));return this;},
-      then:function(cb){
-        var url=SURL+'/rest/v1/'+table+'?select='+this._cols;
-        if(filters.length)url+='&'+filters.join('&');
-        if(orders.length)url+='&'+orders.join('&');
-        fetch(url,{headers:_supaHeaders()})
-          .then(function(r){return r.json().then(function(d){return{data:Array.isArray(d)?d:[],error:r.ok?null:d};})})
-          .then(cb).catch(function(e){cb({data:null,error:e});});
-        return this;
-      },
-      insert:function(data){
-        var r={
-          select:function(){return this;},
-          single:function(){return this;},
-          then:function(cb){
-            fetch(SURL+'/rest/v1/'+table,{method:'POST',headers:_supaHeaders({'Prefer':'return=representation'}),body:JSON.stringify(data)})
-              .then(function(r){return r.json().then(function(d){return{data:Array.isArray(d)?d[0]:d,error:r.ok?null:d};})})
-              .then(cb).catch(function(e){cb({data:null,error:e});});
-          }
-        };return r;
-      },
-      update:function(data){
-        var r={
-          eq:function(col,val){filters.push(col+'=eq.'+encodeURIComponent(val));return this;},
-          then:function(cb){
-            fetch(SURL+'/rest/v1/'+table+'?'+filters.join('&'),{method:'PATCH',headers:_supaHeaders({'Prefer':'return=representation'}),body:JSON.stringify(data)})
-              .then(function(r){return r.json().then(function(d){return{data:d,error:r.ok?null:d};})})
-              .then(cb).catch(function(e){cb({data:null,error:e});});
-          }
-        };return r;
-      },
-      delete:function(){
-        var r={
-          eq:function(col,val){filters.push(col+'=eq.'+encodeURIComponent(val));return this;},
-          then:function(cb){
-            fetch(SURL+'/rest/v1/'+table+'?'+filters.join('&'),{method:'DELETE',headers:_supaHeaders()})
-              .then(function(r){return{data:null,error:r.ok?null:r.status};})
-              .then(cb).catch(function(e){cb({data:null,error:e});});
-          }
-        };return r;
-      },
-      upsert:function(data){
-        var r={
-          then:function(cb){
-            fetch(SURL+'/rest/v1/'+table,{method:'POST',headers:_supaHeaders({'Prefer':'resolution=merge-duplicates,return=representation'}),body:JSON.stringify(data)})
-              .then(function(r){return r.json().then(function(d){return{data:d,error:r.ok?null:d};})})
-              .then(cb).catch(function(e){cb({data:null,error:e});});
-          }
-        };return r;
-      }
-    };return q;
-  },
-  auth:{
-    onAuthStateChange:function(cb){_supaListeners.push(cb);},
-    signInWithPassword:async function(opts){
-      try{var r=await fetch(SURL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SKEY,'Content-Type':'application/json'},body:JSON.stringify(opts)});var d=await r.json();if(r.ok){_supaSession=d;_supaListeners.forEach(function(cb){cb('SIGNED_IN',d);});}return r.ok?{data:d,error:null}:{data:null,error:d};}catch(e){return{data:null,error:e};}
-    },
-    signUp:async function(opts){
-      try{var r=await fetch(SURL+'/auth/v1/signup',{method:'POST',headers:{'apikey':SKEY,'Content-Type':'application/json'},body:JSON.stringify({email:opts.email,password:opts.password,data:opts.options&&opts.options.data})});var d=await r.json();if(r.ok){_supaSession=d;_supaListeners.forEach(function(cb){cb('SIGNED_IN',d);});}return r.ok?{data:d,error:null}:{data:null,error:d};}catch(e){return{data:null,error:e};}
-    },
-    signInWithOAuth:async function(opts){
-      var r=await fetch(SURL+'/auth/v1/authorize?provider='+opts.provider+'&redirect_to='+encodeURIComponent((opts.options&&opts.options.redirectTo)||location.origin),{headers:{'apikey':SKEY},redirect:'manual'});
-      if(r.headers.get('location'))location.href=r.headers.get('location');
-    },
-    signOut:async function(){
-      if(_supaSession){try{await fetch(SURL+'/auth/v1/logout',{method:'POST',headers:_supaHeaders()});}catch(e){}}
-      _supaSession=null;_supaListeners.forEach(function(cb){cb('SIGNED_OUT',null);});
-    }
-  },
-  storage:{
-    from:function(bucket){
-      return{
-        upload:async function(path,file){
-          try{var r=await fetch(SURL+'/storage/v1/object/'+bucket+'/'+path,{method:'POST',headers:{'apikey':SKEY,'Authorization':'Bearer '+((_supaSession&&_supaSession.access_token)||SKEY)},body:file});var d=await r.json();return r.ok?{data:d,error:null}:{data:null,error:d};}catch(e){return{data:null,error:e};}
-        },
-        getPublicUrl:function(path){return{data:{publicUrl:SURL+'/storage/v1/object/public/'+bucket+'/'+path}};}
-      };
-    }
-  }
-};
-
-// 페이지 로드시 기존 세션 복원
-(async function(){
-  var saved=localStorage.getItem('popol_session');
-  if(saved){
-    try{
-      var s=JSON.parse(saved);
-      if(s&&s.access_token){
-        // 토큰 검증
-        var r=await fetch(SURL+'/auth/v1/user',{headers:{'apikey':SKEY,'Authorization':'Bearer '+s.access_token}});
-        if(r.ok){
-          _supaSession=s;
-          var user=await r.json();
-          _supaSession.user=user;
-          _supaListeners.forEach(function(cb){cb('SIGNED_IN',_supaSession);});
-          return;
-        } else if(s.refresh_token){
-          var rr=await fetch(SURL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':SKEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:s.refresh_token})});
-          if(rr.ok){
-            var nd=await rr.json();
-            _supaSession=nd;
-            localStorage.setItem('popol_session',JSON.stringify(nd));
-            _supaListeners.forEach(function(cb){cb('SIGNED_IN',_supaSession);});
-            return;
-          }
-        }
-        localStorage.removeItem('popol_session');
-      }
-    }catch(e){localStorage.removeItem('popol_session');}
-  }
-  _supaListeners.forEach(function(cb){cb('SIGNED_OUT',null);});
-})();
+const supa=supabase.createClient(SURL,SKEY);
 let currentUser=null;
 
 function showScreen(name){
@@ -720,7 +596,7 @@ function showScreen(name){
 }
 
 supa.auth.onAuthStateChange(async function(event,session){
-  currentUser=session?(session.user||session):null;
+  currentUser=session?session.user:null;
   if(currentUser){
     if(window.location.hash&&window.location.hash.includes('access_token'))window.history.replaceState(null,'',window.location.pathname);
     var em=document.getElementById('userEmail');
@@ -765,7 +641,7 @@ async function signupWithEmail(){
   if(res.error){err.textContent=res.error.message;btn.textContent='\uac00\uc785 \uc644\ub8cc';btn.disabled=false;}
   else{artist.name=name;if(res.data&&res.data.user)await supa.from('profiles').upsert({id:res.data.user.id,artist_name:name,email:email,updated_at:new Date().toISOString()});err.style.color='#9FE1CB';err.textContent='\uac00\uc785 \uc644\ub8cc!';}
 }
-function logout(){try{supa.auth.signOut();}catch(e){}localStorage.removeItem('popol_session');currentUser=null;works=[];artist={name:'',phone:'',email:''};sel.clear();showScreen('login');}
+function logout(){try{supa.auth.signOut();}catch(e){}currentUser=null;works=[];artist={name:'',phone:'',email:''};sel.clear();showScreen('login');}
 
 async function loadWorksFromDB(){
   var res=await supa.from('works').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false});
