@@ -594,7 +594,7 @@ function showScreen(name){
 supa.auth.onAuthStateChange(async function(event,session){
   currentUser=session?session.user:null;
   var sp=document.getElementById('splash');
-  var splashShowing=sp&&sp.style.display!=='none';
+  var splashShowing=sp&&sp.style.display!=='none'&&sp.style.opacity!=='0';
   if(currentUser){
     if(window.location.hash&&window.location.hash.includes('access_token'))window.history.replaceState(null,'',window.location.pathname);
     var em=document.getElementById('userEmail');
@@ -1006,7 +1006,7 @@ function showToast(msg){var el=document.getElementById('toast');el.textContent=m
       setTimeout(function(){
         sp.style.transition='opacity .5s ease';sp.style.opacity='0';
         if(!currentUser&&loginEl){loginEl.style.transition='opacity .5s ease';loginEl.style.opacity='1';var box=document.getElementById('loginBox');if(box){box.classList.remove('lin-anim');setTimeout(function(){box.classList.add('lin-anim');},50);}}
-        if(currentUser)showScreen('app');
+        if(currentUser){showScreen('app');}else if(!document.getElementById('loginScreen')||document.getElementById('loginScreen').style.display==='none'){showScreen('login');}
         setTimeout(function(){sp.style.display='none';if(logo){logo.style.transition='';logo.style.transform='';}},520);
       },350);
     },100);
