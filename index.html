@@ -579,11 +579,139 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <script>
 const SURL='https://jriljajqtseoedeqlxag.supabase.co';
 const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpyaWxqYWpxdHNlb2VkZXFseGFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDAzOTgsImV4cCI6MjA5MzI3NjM5OH0.GXiLpw6Qlg4_FAX0Z5Tcc-s1bc1G6RlJUs_XfUBW0ec';
-const supa=supabase.createClient(SURL,SKEY);
+// Supabase 직접 구현 (eval 없음)
+function _getToken(){var s=null;try{s=JSON.parse(localStorage.getItem('popol_session'));}catch(e){}return(s&&s.access_token)?s.access_token:SKEY;}
+function _h(extra){var h={'apikey':SKEY,'Authorization':'Bearer '+_getToken(),'Content-Type':'application/json'};if(extra)Object.assign(h,extra);return h;}
+var supa={
+  from:function(table){
+    var _f=[],_o=[],self=this;
+    var obj={
+      _c:'*',
+      select:function(c){this._c=c||'*';return this;},
+      eq:function(k,v){_f.push(k+'=eq.'+encodeURIComponent(v));return this;},
+      order:function(k,o){_o.push('order='+k+'.'+(o&&o.ascending===false?'desc':'asc'));return this;},
+      then:function(cb){
+        var url=SURL+'/rest/v1/'+table+'?select='+this._c+(_f.length?'&'+_f.join('&'):'')+(_o.length?'&'+_o.join('&'):'');
+        fetch(url,{headers:_h()}).then(function(r){return r.json().then(function(d){return{data:Array.isArray(d)?d:[],error:r.ok?null:d};})}).then(cb).catch(function(e){cb({data:[],error:e});});
+        return this;
+      },
+      insert:function(data){
+        return{
+          select:function(){return this;},
+          single:function(){return this;},
+          then:function(cb){
+            fetch(SURL+'/rest/v1/'+table,{method:'POST',headers:_h({'Prefer':'return=representation'}),body:JSON.stringify(data)}).then(function(r){return r.json().then(function(d){return{data:Array.isArray(d)?d[0]:d,error:r.ok?null:d};})}).then(cb).catch(function(e){cb({data:null,error:e});});
+          }
+        };
+      },
+      update:function(data){
+        return{
+          eq:function(k,v){_f.push(k+'=eq.'+encodeURIComponent(v));return this;},
+          then:function(cb){
+            fetch(SURL+'/rest/v1/'+table+'?'+_f.join('&'),{method:'PATCH',headers:_h({'Prefer':'return=representation'}),body:JSON.stringify(data)}).then(function(r){return r.json().then(function(d){return{data:d,error:r.ok?null:d};})}).then(cb).catch(function(e){cb({data:null,error:e});});
+          }
+        };
+      },
+      delete:function(){
+        return{
+          eq:function(k,v){_f.push(k+'=eq.'+encodeURIComponent(v));return this;},
+          then:function(cb){
+            fetch(SURL+'/rest/v1/'+table+'?'+_f.join('&'),{method:'DELETE',headers:_h()}).then(function(r){return{data:null,error:r.ok?null:r.status};}).then(cb).catch(function(e){cb({data:null,error:e});});
+          }
+        };
+      },
+      upsert:function(data){
+        return{
+          then:function(cb){
+            fetch(SURL+'/rest/v1/'+table,{method:'POST',headers:_h({'Prefer':'resolution=merge-duplicates,return=representation'}),body:JSON.stringify(data)}).then(function(r){return r.json().then(function(d){return{data:d,error:r.ok?null:d};})}).then(cb).catch(function(e){cb({data:null,error:e});});
+          }
+        };
+      }
+    };
+    return obj;
+  },
+  auth:{
+    _cbs:[],
+    onAuthStateChange:function(cb){this._cbs.push(cb);},
+    _notify:function(e,s){var cbs=this._cbs;cbs.forEach(function(cb){cb(e,s);});},
+    signInWithPassword:async function(o){
+      try{
+        var r=await fetch(SURL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SKEY,'Content-Type':'application/json'},body:JSON.stringify(o)});
+        var d=await r.json();
+        if(r.ok){localStorage.setItem('popol_session',JSON.stringify(d));supa.auth._notify('SIGNED_IN',d);}
+        return r.ok?{data:d,error:null}:{data:null,error:d};
+      }catch(e){return{data:null,error:e};}
+    },
+    signUp:async function(o){
+      try{
+        var r=await fetch(SURL+'/auth/v1/signup',{method:'POST',headers:{'apikey':SKEY,'Content-Type':'application/json'},body:JSON.stringify({email:o.email,password:o.password,data:o.options&&o.options.data})});
+        var d=await r.json();
+        if(r.ok){localStorage.setItem('popol_session',JSON.stringify(d));supa.auth._notify('SIGNED_IN',d);}
+        return r.ok?{data:d,error:null}:{data:null,error:d};
+      }catch(e){return{data:null,error:e};}
+    },
+    signInWithOAuth:function(o){
+      location.href=SURL+'/auth/v1/authorize?provider='+o.provider+'&redirect_to='+encodeURIComponent(o.options&&o.options.redirectTo||location.origin);
+    },
+    signOut:async function(){
+      var s=null;try{s=JSON.parse(localStorage.getItem('popol_session'));}catch(e){}
+      if(s&&s.access_token)try{await fetch(SURL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SKEY,'Authorization':'Bearer '+s.access_token}});}catch(e){}
+      localStorage.removeItem('popol_session');
+      supa.auth._notify('SIGNED_OUT',null);
+    }
+  },
+  storage:{
+    from:function(bucket){
+      return{
+        upload:async function(path,file){
+          try{
+            var r=await fetch(SURL+'/storage/v1/object/'+bucket+'/'+path,{method:'POST',headers:{'apikey':SKEY,'Authorization':'Bearer '+_getToken()},body:file});
+            var d=await r.json();
+            return r.ok?{data:d,error:null}:{data:null,error:d};
+          }catch(e){return{data:null,error:e};}
+        },
+        getPublicUrl:function(path){
+          return{data:{publicUrl:SURL+'/storage/v1/object/public/'+bucket+'/'+path}};
+        }
+      };
+    }
+  }
+};
+// 페이지 로드시 세션 복원
+(async function(){
+  var hash=location.hash;
+  if(hash&&hash.includes('access_token')){
+    var p={};
+    hash.slice(1).split('&').forEach(function(x){var kv=x.split('=');p[kv[0]]=decodeURIComponent(kv[1]||'');});
+    if(p.access_token){
+      var s={access_token:p.access_token,refresh_token:p.refresh_token||''};
+      try{var ur=await fetch(SURL+'/auth/v1/user',{headers:{'apikey':SKEY,'Authorization':'Bearer '+p.access_token}});if(ur.ok){s.user=await ur.json();localStorage.setItem('popol_session',JSON.stringify(s));}}catch(e){}
+      history.replaceState(null,'',location.pathname);
+      supa.auth._notify('SIGNED_IN',s);
+      return;
+    }
+  }
+  var saved=localStorage.getItem('popol_session');
+  if(saved){
+    try{
+      var s=JSON.parse(saved);
+      if(s&&s.access_token){
+        var r=await fetch(SURL+'/auth/v1/user',{headers:{'apikey':SKEY,'Authorization':'Bearer '+s.access_token}});
+        if(r.ok){s.user=await r.json();supa.auth._notify('SIGNED_IN',s);return;}
+        if(s.refresh_token){
+          var rr=await fetch(SURL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':SKEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:s.refresh_token})});
+          if(rr.ok){var nd=await rr.json();localStorage.setItem('popol_session',JSON.stringify(nd));supa.auth._notify('SIGNED_IN',nd);return;}
+        }
+        localStorage.removeItem('popol_session');
+      }
+    }catch(e){localStorage.removeItem('popol_session');}
+  }
+  supa.auth._notify('SIGNED_OUT',null);
+})();
+
 let currentUser=null;
 
 function showScreen(name){
@@ -597,7 +725,7 @@ function showScreen(name){
 }
 
 supa.auth.onAuthStateChange(async function(event,session){
-  currentUser=session?session.user:null;
+  currentUser=session?(session.user||null):null;
   var sp=document.getElementById('splash');
   var splashDone=!sp||sp.style.display==='none';
   if(currentUser){
