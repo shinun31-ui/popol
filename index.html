@@ -578,11 +578,98 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Apple 
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <script>
 const SURL='https://jriljajqtseoedeqlxag.supabase.co';
 const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpyaWxqYWpxdHNlb2VkZXFseGFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MDAzOTgsImV4cCI6MjA5MzI3NjM5OH0.GXiLpw6Qlg4_FAX0Z5Tcc-s1bc1G6RlJUs_XfUBW0ec';
-const supa=supabase.createClient(SURL,SKEY);
+// Supabase REST API 직접 호출
+var supa = {
+  from: function(table){
+    var _table=table, _filters=[], _orders=[];
+    var q={
+      _cols:'*',
+      select:function(c){this._cols=c||'*';return this;},
+      eq:function(col,val){_filters.push(col+'=eq.'+encodeURIComponent(val));return this;},
+      order:function(col,opts){
+        var dir=opts&&opts.ascending===false?'desc':'asc';
+        _orders.push('order='+col+'.'+dir);
+        return this;
+      },
+      then:function(cb){
+        var s=null;try{s=JSON.parse(localStorage.getItem('popol_session'));}catch(e){}
+        var token=s&&s.access_token?s.access_token:SKEY;
+        var url=SURL+'/rest/v1/'+_table+'?select='+this._cols;
+        if(_filters.length)url+='&'+_filters.join('&');
+        if(_orders.length)url+='&'+_orders.join('&');
+        fetch(url,{headers:{'apikey':SKEY,'Authorization':'Bearer '+token}})
+          .then(function(r){return r.json().then(function(d){return{data:Array.isArray(d)?d:[],error:r.ok?null:d};})})
+          .then(cb).catch(function(e){cb({data:null,error:e});});
+        return this;
+      },
+      insert:function(data){
+        var self=this;
+        return{
+          select:function(){return this;},
+          single:function(){return this;},
+          then:function(cb){
+            var s=null;try{s=JSON.parse(localStorage.getItem('popol_session'));}catch(e){}
+            var token=s&&s.access_token?s.access_token:SKEY;
+            fetch(SURL+'/rest/v1/'+_table,{method:'POST',headers:{'apikey':SKEY,'Authorization':'Bearer '+token,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(data)})
+              .then(function(r){return r.json().then(function(d){return{data:Array.isArray(d)?d[0]:d,error:r.ok?null:d};})})
+              .then(cb).catch(function(e){cb({data:null,error:e});});
+          }
+        };
+      },
+      update:function(data){
+        return{
+          eq:function(col,val){_filters.push(col+'=eq.'+encodeURIComponent(val));return this;},
+          then:function(cb){
+            var s=null;try{s=JSON.parse(localStorage.getItem('popol_session'));}catch(e){}
+            var token=s&&s.access_token?s.access_token:SKEY;
+            fetch(SURL+'/rest/v1/'+_table+'?'+_filters.join('&'),{method:'PATCH',headers:{'apikey':SKEY,'Authorization':'Bearer '+token,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(data)})
+              .then(function(r){return r.json().then(function(d){return{data:d,error:r.ok?null:d};})})
+              .then(cb).catch(function(e){cb({data:null,error:e});});
+          }
+        };
+      },
+      delete:function(){
+        return{
+          eq:function(col,val){_filters.push(col+'=eq.'+encodeURIComponent(val));return this;},
+          then:function(cb){
+            var s=null;try{s=JSON.parse(localStorage.getItem('popol_session'));}catch(e){}
+            var token=s&&s.access_token?s.access_token:SKEY;
+            fetch(SURL+'/rest/v1/'+_table+'?'+_filters.join('&'),{method:'DELETE',headers:{'apikey':SKEY,'Authorization':'Bearer '+token}})
+              .then(function(r){return{data:null,error:r.ok?null:r.status};})
+              .then(cb).catch(function(e){cb({data:null,error:e});});
+          }
+        };
+      },
+      upsert:function(data){
+        return{
+          then:function(cb){
+            var s=null;try{s=JSON.parse(localStorage.getItem('popol_session'));}catch(e){}
+            var token=s&&s.access_token?s.access_token:SKEY;
+            fetch(SURL+'/rest/v1/'+_table,{method:'POST',headers:{'apikey':SKEY,'Authorization':'Bearer '+token,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=representation'},body:JSON.stringify(data)})
+              .then(function(r){return r.json().then(function(d){return{data:d,error:r.ok?null:d};})})
+              .then(cb).catch(function(e){cb({data:null,error:e});});
+          }
+        };
+      }
+    };
+    return q;
+  },
+  storage:{
+    from:function(bucket){
+      return{
+        upload:async function(path,file){
+          var s=null;try{s=JSON.parse(localStorage.getItem('popol_session'));}catch(e){}
+          var token=s&&s.access_token?s.access_token:SKEY;
+          try{var r=await fetch(SURL+'/storage/v1/object/'+bucket+'/'+path,{method:'POST',headers:{'apikey':SKEY,'Authorization':'Bearer '+token},body:file});var d=await r.json();return r.ok?{data:d,error:null}:{data:null,error:d};}catch(e){return{data:null,error:e};}
+        },
+        getPublicUrl:function(path){return{data:{publicUrl:SURL+'/storage/v1/object/public/'+bucket+'/'+path}};}
+      };
+    }
+  }
+};
 let currentUser=null;
 
 function showScreen(name){
@@ -595,53 +682,115 @@ function showScreen(name){
   }
 }
 
-supa.auth.onAuthStateChange(async function(event,session){
-  currentUser=session?session.user:null;
-  if(currentUser){
-    if(window.location.hash&&window.location.hash.includes('access_token'))window.history.replaceState(null,'',window.location.pathname);
-    var em=document.getElementById('userEmail');
-    if(em)em.textContent=currentUser.user_metadata&&currentUser.user_metadata.full_name?currentUser.user_metadata.full_name:(currentUser.email||'');
-    await loadProfileFromDB();
-    if(!artist.name&&currentUser.user_metadata&&currentUser.user_metadata.full_name){artist.name=currentUser.user_metadata.full_name;await saveProfileToDB();}
-    await loadWorksFromDB();
-    var sp=document.getElementById('splash');
-    if(!sp||sp.style.display==='none')showScreen('app');
-  } else {
-    var sp=document.getElementById('splash');
-    if(!sp||sp.style.display==='none')showScreen('login');
+// 세션 복원 (localStorage 기반)
+(async function initAuth(){
+  // URL hash에서 access_token 확인 (OAuth redirect)
+  var hash=window.location.hash;
+  if(hash&&hash.includes('access_token')){
+    var params={};
+    hash.slice(1).split('&').forEach(function(p){var kv=p.split('=');params[kv[0]]=decodeURIComponent(kv[1]||'');});
+    if(params.access_token){
+      var session={access_token:params.access_token,refresh_token:params.refresh_token,token_type:params.token_type};
+      try{
+        var ur=await fetch(SURL+'/auth/v1/user',{headers:{'apikey':SKEY,'Authorization':'Bearer '+params.access_token}});
+        if(ur.ok){session.user=await ur.json();localStorage.setItem('popol_session',JSON.stringify(session));}
+      }catch(e){}
+      window.history.replaceState(null,'',window.location.pathname);
+    }
   }
-});
-
+  
+  var saved=localStorage.getItem('popol_session');
+  if(saved){
+    try{
+      var s=JSON.parse(saved);
+      if(s&&s.access_token){
+        var r=await fetch(SURL+'/auth/v1/user',{headers:{'apikey':SKEY,'Authorization':'Bearer '+s.access_token}});
+        if(r.ok){
+          s.user=await r.json();
+          currentUser=s.user;
+          var em=document.getElementById('userEmail');
+          if(em)em.textContent=currentUser.user_metadata&&currentUser.user_metadata.full_name?currentUser.user_metadata.full_name:(currentUser.email||'');
+          await loadProfileFromDB();
+          if(!artist.name&&currentUser.user_metadata&&currentUser.user_metadata.full_name){artist.name=currentUser.user_metadata.full_name;await saveProfileToDB();}
+          await loadWorksFromDB();
+          var sp=document.getElementById('splash');
+          if(!sp||sp.style.display==='none')showScreen('app');
+          return;
+        } else if(s.refresh_token){
+          var rr=await fetch(SURL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':SKEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:s.refresh_token})});
+          if(rr.ok){
+            var nd=await rr.json();
+            localStorage.setItem('popol_session',JSON.stringify(nd));
+            currentUser=nd.user;
+            await loadWorksFromDB();
+            var sp=document.getElementById('splash');
+            if(!sp||sp.style.display==='none')showScreen('app');
+            return;
+          }
+        }
+        localStorage.removeItem('popol_session');
+      }
+    }catch(e){localStorage.removeItem('popol_session');}
+  }
+  var sp=document.getElementById('splash');
+  if(!sp||sp.style.display==='none')showScreen('login');
+})();
 async function loginWithGoogle(){await supa.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://popol-six.vercel.app'}});}
 async function loginWithEmail(){
   var email=document.getElementById('loginEmail').value.trim();
   var pw=document.getElementById('loginPassword').value;
   var err=document.getElementById('loginError');err.textContent='';
-  if(!email||!pw){err.textContent='\uc774\uba54\uc77c\uacfc \ube44\ubc00\ubc88\ud638\ub97c \uc785\ub825\ud574\uc8fc\uc138\uc694';return;}
-  var btn=document.getElementById('loginEmailBtn');btn.textContent='\ub85c\uadf8\uc778 \uc911...';btn.disabled=true;
-  var res=await supa.auth.signInWithPassword({email:email,password:pw});
-  if(res.error){err.textContent=res.error.message==='Invalid login credentials'?'\uc774\uba54\uc77c \ub610\ub294 \ube44\ubc00\ubc88\ud638\uac00 \ud2c0\ub838\uc5b4\uc694':res.error.message;btn.textContent='\ub85c\uadf8\uc778';btn.disabled=false;}
+  if(!email||!pw){err.textContent='이메일과 비밀번호를 입력해주세요';return;}
+  var btn=document.getElementById('loginEmailBtn');btn.textContent='로그인 중...';btn.disabled=true;
+  try{
+    var r=await fetch(SURL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SKEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pw})});
+    var d=await r.json();
+    if(r.ok){
+      localStorage.setItem('popol_session',JSON.stringify(d));
+      location.reload();
+    } else {
+      err.textContent=d.error_description||d.message||'로그인 실패';
+      btn.textContent='로그인';btn.disabled=false;
+    }
+  }catch(e){err.textContent='네트워크 오류';btn.textContent='로그인';btn.disabled=false;}
+}
+async function loginWithGoogle(){
+  location.href=SURL+'/auth/v1/authorize?provider=google&redirect_to='+encodeURIComponent('https://popol-six.vercel.app');
 }
 var signupMode=false;
 function toggleSignupMode(){
   signupMode=!signupMode;
   var nameEl=document.getElementById('loginArtistName'),lbl=document.getElementById('loginCardLabel'),lBtn=document.getElementById('loginEmailBtn'),sBtn=document.getElementById('signupToggleBtn');
-  if(signupMode){nameEl.style.display='';lbl.textContent='\uc0c8 \uacc4\uc815 \ub9cc\ub4e4\uae30';lBtn.textContent='\uac00\uc785 \uc644\ub8cc';lBtn.onclick=signupWithEmail;sBtn.textContent='\ub85c\uadf8\uc778\uc73c\ub85c';sBtn.onclick=toggleSignupMode;}
-  else{nameEl.style.display='none';lbl.textContent='\uc774\uba54\uc77c\ub85c \uacc4\uc18d\ud558\uae30';lBtn.textContent='\ub85c\uadf8\uc778';lBtn.onclick=loginWithEmail;sBtn.textContent='\ud68c\uc6d0\uac00\uc785';sBtn.onclick=toggleSignupMode;}
+  if(signupMode){nameEl.style.display='';lbl.textContent='새 계정 만들기';lBtn.textContent='가입 완료';lBtn.onclick=signupWithEmail;sBtn.textContent='로그인으로';sBtn.onclick=toggleSignupMode;}
+  else{nameEl.style.display='none';lbl.textContent='이메일로 계속하기';lBtn.textContent='로그인';lBtn.onclick=loginWithEmail;sBtn.textContent='회원가입';sBtn.onclick=toggleSignupMode;}
   document.getElementById('loginError').textContent='';
 }
 async function signupWithEmail(){
   var name=document.getElementById('loginArtistName').value.trim(),email=document.getElementById('loginEmail').value.trim(),pw=document.getElementById('loginPassword').value;
   var err=document.getElementById('loginError');err.textContent='';
-  if(!name){err.textContent='\uc791\uac00 \uc774\ub984\uc744 \uc785\ub825\ud574\uc8fc\uc138\uc694';return;}
-  if(!email||!pw){err.textContent='\uc774\uba54\uc77c\uacfc \ube44\ubc00\ubc88\ud638\ub97c \uc785\ub825\ud574\uc8fc\uc138\uc694';return;}
-  if(pw.length<6){err.textContent='\ube44\ubc00\ubc88\ud638\ub294 6\uc790 \uc774\uc0c1\uc774\uc5b4\uc57c \ud574\uc694';return;}
-  var btn=document.getElementById('loginEmailBtn');btn.textContent='\uac00\uc785 \uc911...';btn.disabled=true;
-  var res=await supa.auth.signUp({email:email,password:pw,options:{data:{full_name:name}}});
-  if(res.error){err.textContent=res.error.message;btn.textContent='\uac00\uc785 \uc644\ub8cc';btn.disabled=false;}
-  else{artist.name=name;if(res.data&&res.data.user)await supa.from('profiles').upsert({id:res.data.user.id,artist_name:name,email:email,updated_at:new Date().toISOString()});err.style.color='#9FE1CB';err.textContent='\uac00\uc785 \uc644\ub8cc!';}
+  if(!name){err.textContent='작가 이름을 입력해주세요';return;}
+  if(!email||!pw){err.textContent='이메일과 비밀번호를 입력해주세요';return;}
+  if(pw.length<6){err.textContent='비밀번호는 6자 이상이어야 해요';return;}
+  var btn=document.getElementById('loginEmailBtn');btn.textContent='가입 중...';btn.disabled=true;
+  try{
+    var r=await fetch(SURL+'/auth/v1/signup',{method:'POST',headers:{'apikey':SKEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pw,data:{full_name:name}})});
+    var d=await r.json();
+    if(r.ok){
+      artist.name=name;
+      localStorage.setItem('popol_session',JSON.stringify(d));
+      location.reload();
+    } else {
+      err.textContent=d.error_description||d.message||'가입 실패';
+      btn.textContent='가입 완료';btn.disabled=false;
+    }
+  }catch(e){err.textContent='네트워크 오류';btn.textContent='가입 완료';btn.disabled=false;}
 }
-function logout(){try{supa.auth.signOut();}catch(e){}currentUser=null;works=[];artist={name:'',phone:'',email:''};sel.clear();showScreen('login');}
+function logout(){
+  var s=null;try{s=JSON.parse(localStorage.getItem('popol_session'));}catch(e){}
+  if(s&&s.access_token){fetch(SURL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SKEY,'Authorization':'Bearer '+s.access_token}}).catch(function(){});}
+  localStorage.removeItem('popol_session');
+  currentUser=null;works=[];artist={name:'',phone:'',email:''};sel.clear();showScreen('login');
+}
 
 async function loadWorksFromDB(){
   var res=await supa.from('works').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false});
