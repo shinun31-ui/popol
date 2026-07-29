@@ -378,7 +378,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
           <div style="font-size:12px;color:var(--text3);margin-top:2px;">이력을 관리하고 선택해서 내보내요</div>
         </div>
         <div style="display:flex;gap:8px;">
-          <button class="btn btn-sm" onclick="document.getElementById('cvFileInput').click()" style="color:var(--text2);">📄 파일 업로드</button>
+          <button class="btn btn-sm" onclick="document.getElementById('cvGuideOv').classList.add('on')" style="color:var(--text2);">📄 파일 업로드</button>
           <input type="file" id="cvFileInput" accept=".docx,.txt" style="display:none;" onchange="handleCVFile(this)"/>
           <button class="btn btn-sm" onclick="exportCVText()" style="color:var(--text2);">내보내기</button>
           <button class="btn btn-sm btn-dark" onclick="openCVAdd()">+ 추가</button>
@@ -527,6 +527,58 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
       <div class="ff"><label>지역</label><input id="cvLocation2" placeholder="서울, 뉴욕 등"/></div>
     </div>
     <div class="mact"><button class="btn" onclick="closeOv('cvAddOv')">취소</button><button class="btn btn-dark" onclick="saveCVItem()">저장</button></div>
+  </div>
+</div>
+
+<!-- NOTE VIEW MODAL -->
+<div class="ov" id="noteViewOv" onclick="ovClick(event,'noteViewOv')">
+  <div class="modal" style="max-width:560px;max-height:85vh;display:flex;flex-direction:column;">
+    <div class="modal-header" style="flex-shrink:0;">
+      <h2 id="noteViewTitle" style="font-size:15px;"></h2>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-sm" onclick="editNote(viewingNoteId);closeOv('noteViewOv')">수정</button>
+        <button class="modal-close" onclick="closeOv('noteViewOv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>
+    <div id="noteViewBody" style="flex:1;overflow-y:auto;font-size:14px;line-height:1.8;color:var(--text2);white-space:pre-wrap;word-break:break-all;padding:4px 0 12px;user-select:text;-webkit-user-select:text;"></div>
+  </div>
+</div>
+
+<!-- CV GUIDE MODAL -->
+<div class="ov" id="cvGuideOv" onclick="ovClick(event,'cvGuideOv')">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header"><h2>CV 파일 업로드 가이드</h2><button class="modal-close" onclick="closeOv('cvGuideOv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.8;">
+      <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:14px;">
+        <div style="font-weight:700;color:var(--text);margin-bottom:8px;">📋 권장 형식 (.txt 또는 .docx)</div>
+        <div style="font-family:monospace;font-size:12px;color:var(--text2);line-height:2;white-space:pre;">개인전
+2024  제목, 갤러리명, 서울
+2022  제목, 갤러리명, 뉴욕
+
+단체전
+2023  전시제목, 미술관명, 도시
+2021  전시제목, 갤러리명, 도시
+
+수상
+2023  수상명, 기관명
+2020  수상명, 기관명
+
+학력
+2018  대학원 졸업, 학교명
+2016  학사 졸업, 학교명</div>
+      </div>
+      <div style="font-weight:600;color:var(--text);margin-bottom:6px;">✅ 핵심 규칙</div>
+      <ul style="padding-left:16px;line-height:2;">
+        <li>섹션 헤더(개인전, 단체전, 수상, 레지던시, 출판/도록, 학력)를 반드시 작성</li>
+        <li>각 줄 앞에 연도(4자리) 포함</li>
+        <li>항목은 쉼표(,)로 구분: <b>제목, 장소, 지역</b></li>
+        <li>섹션 헤더 아래 항목들은 자동으로 해당 분류에 저장</li>
+      </ul>
+    </div>
+    <div class="mact">
+      <button class="btn" onclick="closeOv('cvGuideOv')">닫기</button>
+      <button class="btn btn-dark" onclick="closeOv('cvGuideOv');document.getElementById('cvFileInput').click()">파일 업로드</button>
+    </div>
   </div>
 </div>
 
@@ -701,7 +753,7 @@ function logout(){
 // DB
 async function loadWorksFromDB(){
   if(!currentUser)return;
-  var res=await supa.from('works').select('*').order('sort_order',{ascending:true}).order('updated_at',{ascending:false});
+  var res=await supa.from('works').select('id,title,year,genre,medium,size,description,award,price,sold,img_url,color_bg,color_fg,sort_order').eq('user_id',currentUser.id).order('sort_order',{ascending:true});
   if(res.error){console.error('loadWorks error:',res.error);return;}
   works=(res.data||[]).map(function(w){
     return{id:w.id,title:w.title||'',year:w.year||2024,genre:w.genre||'회화',medium:w.medium||'',size:w.size||'',desc:w.description||'',award:w.award||'',price:w.price||0,sold:w.sold,img:w.img_url||null,c:[w.color_bg||PAL[0][0],w.color_fg||PAL[0][1]],dbId:w.id};
@@ -794,11 +846,16 @@ function allFiltered(){
     return true;
   });
 }
+function soldOrder(w){return isSold(w)?2:isReserve(w)?1:0;}
 function sortW(list){
   var s=document.getElementById('sortBy')?document.getElementById('sortBy').value:'year_desc';
   return list.slice().sort(function(a,b){
-    if(s==='year_asc')return a.year-b.year;
-    if(s==='year_desc')return b.year-a.year;
+    // 2번: 같은 연도 내 판매가능→예약중→판매완료 순
+    if(s==='year_asc'||s==='year_desc'){
+      var yd=s==='year_asc'?a.year-b.year:b.year-a.year;
+      if(yd!==0)return yd;
+      return soldOrder(a)-soldOrder(b);
+    }
     if(s==='hnum_asc')return getHNV(a)-getHNV(b);
     if(s==='title_asc')return a.title.localeCompare(b.title,'ko');
     return b.year-a.year;
@@ -849,6 +906,8 @@ function render(){
   renderPgn(tp,total);
 }
 
+// 9. 이미지 캐시 - 이미 로드된 이미지는 다시 로드 안 함
+var _imgCache={};
 function cHtml(w){
   var s=sel.has(w.id);
   var h=getHN(w);
@@ -857,12 +916,14 @@ function cHtml(w){
   var wid=String(w.id);
   var sold=isSold(w);var reserve=isReserve(w);
   var drag=editMode?' draggable="true" ondragstart="onDragStart(event,\''+wid+'\')" ondragover="onDragOver(event,\''+wid+'\')" ondrop="onDrop(event,\''+wid+'\')" ondragend="onDragEnd()"':'';
-  var thumbSrc=w.img?(w.img.includes('supabase.co/storage')?w.img+'?width=120&quality=35&format=webp':w.img):'';
+  var thumbSrc=w.img?(w.img.includes('supabase.co/storage')?w.img+'?width=200&quality=50&format=webp':w.img):'';
+  // 이미 로드된 이미지면 opacity=1로 시작
+  var loaded=thumbSrc&&_imgCache[thumbSrc];
   return '<div class="card'+(s?' sel':'')+(sold?' sold-card':'')+(reserve?' reserve-card':'')+'" data-id="'+wid+'"'+drag+'>'+
     (sold?'<div class="sold-ov"></div><div class="sold-badge">판매 완료</div>':'')+(reserve?'<div class="sold-badge" style="background:#8B6914;">예약중</div>':'')+
     '<div class="chkbtn" onclick="event.stopPropagation();toggleSelById(\''+wid+'\')"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+
     '<div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg></div>'+
-    '<div class="thumb" onclick="toggleSelById(\''+wid+'\')">'+(thumbSrc?'<img src="'+thumbSrc+'" loading="lazy" onload="this.style.opacity=1" onerror="this.style.opacity=0">':ph)+'</div>'+
+    '<div class="thumb" onclick="toggleSelById(\''+wid+'\')">'+(thumbSrc?'<img src="'+thumbSrc+'" loading="lazy" style="opacity:'+(loaded?'1':'0')+';transition:opacity .25s;" onload="_imgCache[\''+thumbSrc+'\']=1;this.style.opacity=1" onerror="this.style.opacity=0">':ph)+'</div>'+
     '<div class="cbody" onclick="toggleSelById(\''+wid+'\')">'+
     '<div class="ctitle'+(sold?' sold-text':'')+'">'+w.title+'</div>'+
     '<div class="cmeta">'+w.year+' · '+w.genre+'</div>'+
@@ -990,11 +1051,12 @@ function copyCaptionFromDetail(){
 function openArtist(){document.getElementById('aName').value=artist.name;document.getElementById('aPhone').value=artist.phone;document.getElementById('aEmail').value=artist.email;document.getElementById('artistOv').classList.add('on');}
 async function saveArtist(){artist.name=document.getElementById('aName').value.trim();artist.phone=document.getElementById('aPhone').value.trim();artist.email=document.getElementById('aEmail').value.trim();if(currentUser)await saveProfileToDB();closeOv('artistOv');openPreview();}
 function openPreview(){
+  // 7. 선택된 것이 없으면 전체 표시하되, 선택된 것 우선
   var ids=sel.size>0?[...sel]:works.map(function(w){return w.id;});
   selSizeForPreview=ids;
   document.getElementById('pArtistName').textContent=artist.name||'작가 이름 미설정';
   document.getElementById('pArtistContact').textContent=[artist.phone,artist.email].filter(Boolean).join(' · ');
-  document.getElementById('prevPanelTitle').textContent=artist.name?artist.name+' 작가의 작품 목록':'작품 리스트 미리보기';
+  document.getElementById('prevPanelTitle').textContent=sel.size>0?(sel.size+'개 선택 작품 리스트'):(artist.name?artist.name+' 전체 작품':'전체 작품 리스트');
   fetchRates().then(function(){renderPreviewList(ids);});
   document.getElementById('prevOv').classList.add('on');
 }
@@ -1021,10 +1083,15 @@ function doExport(type){
     var blob=new Blob(['\uFEFF'+'번호,제목,연도,장르,호수,매체,크기,가격,판매여부,이미지URL\n'+rows.join('\n')],{type:'text/csv;charset=utf-8'});
     var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='POPOL_'+(artist.name||'포트폴리오')+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();showToast('CSV 다운로드됐어요');
   } else if(type==='pdf'){
+    // 8. PDF에 이미지 첨부
     var pw=window.open('','_blank');
-    var rows2=tw.map(function(w,i){var h=getHN(w);return'<tr'+(isSold(w)?' style="background:#fff5f5;"':'')+'><td>'+(i+1)+'</td><td><b>'+w.title+'</b>'+(isSold(w)?'<br/><small style="color:#A32D2D">판매완료</small>':'')+'</td><td>'+w.year+'</td><td>'+w.genre+'</td><td>'+(h||'-')+'</td><td>'+(w.medium||'-')+'</td><td>'+(w.size||'-')+'</td><td>'+(w.price?fmtKRW(w.price):'-')+'</td></tr>';}).join('');
-    pw.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>@page{size:A4 landscape;margin:15mm;}body{font-family:"Apple SD Gothic Neo",sans-serif;font-size:10pt;}table{width:100%;border-collapse:collapse;}th{padding:6px;text-align:left;border-bottom:1.5px solid #222;}td{padding:7px;border-bottom:0.5px solid #ddd;}</style></head><body><h2 style="margin-bottom:4px;">'+(artist.name||'')+'</h2><p style="font-size:9pt;color:#666;margin-bottom:14px;">'+(artist.phone?artist.phone+' · ':'')+( artist.email||'')+'</p><table><thead><tr><th>No.</th><th>제목</th><th>연도</th><th>장르</th><th>호수</th><th>매체</th><th>크기</th><th>가격</th></tr></thead><tbody>'+rows2+'</tbody></table></body></html>');
-    pw.document.close();setTimeout(function(){pw.print();},500);showToast('PDF 인쇄창이 열렸어요');
+    var rows2=tw.map(function(w,i){
+      var h=getHN(w);
+      var imgHtml=w.img?'<img src="'+w.img+'" style="width:60px;height:60px;object-fit:cover;border-radius:4px;vertical-align:middle;" crossorigin="anonymous"/>':'<div style="width:60px;height:60px;background:#eee;border-radius:4px;display:inline-block;"></div>';
+      return'<tr'+(isSold(w)?' style="background:#fff5f5;"':'')+'><td style="width:32px;">'+(i+1)+'</td><td style="width:70px;">'+imgHtml+'</td><td><b>'+w.title+'</b>'+(isSold(w)?'<br/><small style="color:#A32D2D">판매완료</small>':isReserve(w)?'<br/><small style="color:#8B6914">예약중</small>':'')+'</td><td>'+w.year+'</td><td>'+w.genre+'</td><td>'+(h||'-')+'</td><td>'+(w.medium||'-')+'</td><td>'+(w.size||'-')+'</td><td>'+(w.price?fmtKRW(w.price):'-')+'</td></tr>';
+    }).join('');
+    pw.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>@page{size:A4 landscape;margin:12mm;}body{font-family:"Apple SD Gothic Neo",sans-serif;font-size:9pt;}table{width:100%;border-collapse:collapse;}th{padding:6px;text-align:left;border-bottom:1.5px solid #222;font-size:8pt;}td{padding:6px;border-bottom:0.5px solid #ddd;vertical-align:middle;}img{display:block;}</style></head><body><h2 style="margin-bottom:4px;">'+(artist.name||'')+'</h2><p style="font-size:8pt;color:#666;margin-bottom:12px;">'+(artist.phone?artist.phone+' · ':'')+( artist.email||'')+'</p><table><thead><tr><th>No.</th><th>이미지</th><th>제목</th><th>연도</th><th>장르</th><th>호수</th><th>매체</th><th>크기</th><th>가격</th></tr></thead><tbody>'+rows2+'</tbody></table></body></html>');
+    pw.document.close();setTimeout(function(){pw.print();},800);showToast('PDF 인쇄창이 열렸어요');
   } else if(type==='img'){
     var imgs=tw.filter(function(w){return w.img;});if(!imgs.length){showToast('이미지가 없어요');return;}
     imgs.forEach(function(w,i){setTimeout(function(){var a=document.createElement('a');a.href=w.img;a.download=w.year+'_'+w.title+'.jpg';a.click();},i*400);});showToast(imgs.length+'개 다운로드 중...');
@@ -1098,7 +1165,8 @@ var cvItems=[],cvTypeFilter='all',editingCVId=null;
 var CV_LABELS={solo:'개인전',group:'단체전',award:'수상',residency:'레지던시',publication:'출판/도록',education:'학력',etc:'기타'};
 async function loadCV(){
   if(!currentUser)return;
-  var res=await supa.from('cv_items').select('*').eq('id',currentUser.id).order('year',{ascending:false});
+  // 3. user_id로 필터링 (버그 수정)
+  var res=await supa.from('cv_items').select('*').eq('user_id',currentUser.id).order('year',{ascending:false});
   if(!res.error)cvItems=res.data||[];
   renderCV();
 }
@@ -1164,21 +1232,51 @@ async function handleCVFile(input){
 function parseCVText(text){
   var lines=text.split(/[\r\n]+/).map(function(l){return l.trim();}).filter(Boolean);
   var items=[],currentType='etc';
-  var sectionMap=[{keys:['개인전','solo exhibition','solo show'],type:'solo'},{keys:['단체전','그룹전','group exhibition'],type:'group'},{keys:['수상','award','prize'],type:'award'},{keys:['레지던시','residency'],type:'residency'},{keys:['출판','도록','publication'],type:'publication'},{keys:['학력','education'],type:'education'}];
+  // 3. 섹션 헤더 인식 강화 - 더 많은 키워드, 줄 전체가 헤더인 경우
+  var sectionMap=[
+    {keys:['개인전','solo exhibition','solo show','개인전'],type:'solo'},
+    {keys:['단체전','그룹전','기획전','초대전','group exhibition','group show'],type:'group'},
+    {keys:['수상','award','prize','수혜','grant','장학'],type:'award'},
+    {keys:['레지던시','residency','입주작가','입주'],type:'residency'},
+    {keys:['출판','도록','publication','catalog','카탈로그','책'],type:'publication'},
+    {keys:['학력','education','대학','university','college','졸업'],type:'education'}
+  ];
+  function detectSection(line){
+    var lower=line.toLowerCase().replace(/[\s\[\]<>《》「」【】:：\-_]/g,'');
+    for(var i=0;i<sectionMap.length;i++){
+      for(var j=0;j<sectionMap[i].keys.length;j++){
+        if(lower.includes(sectionMap[i].keys[j].replace(/\s/g,''))){return sectionMap[i].type;}
+      }
+    }
+    return null;
+  }
   lines.forEach(function(line){
-    var lower=line.toLowerCase();
     var hasYear=/\d{4}/.test(line);
-    if(!hasYear&&line.length<=40){var matched=false;sectionMap.forEach(function(s){if(!matched)s.keys.forEach(function(k){if(!matched&&lower.includes(k)){currentType=s.type;matched=true;}});});if(matched)return;}
+    // 연도 없는 줄은 섹션 헤더로 판단
+    if(!hasYear){
+      var sec=detectSection(line);
+      if(sec)currentType=sec;
+      return;
+    }
+    // 연도는 있지만 섹션명만 있는 경우 (예: "2020 개인전")도 섹션으로
     var yearMatch=line.match(/(\d{4})/);if(!yearMatch)return;
     var year=parseInt(yearMatch[1]);if(year<1950||year>2100)return;
     var yearPos=line.indexOf(yearMatch[1]);
     var rest=line.slice(yearPos+4).replace(/^[\s\.,\-:·|]+/,'').trim();
     if(!rest||rest.length<2)return;
     var venue='',location='',title=rest;
-    var commaIdx=rest.indexOf(',');
-    if(commaIdx>2){title=rest.slice(0,commaIdx).trim();var vr=rest.slice(commaIdx+1).trim();var c2=vr.indexOf(',');if(c2>0){venue=vr.slice(0,c2).trim();location=vr.slice(c2+1).trim();}else venue=vr.trim();}
+    var commaIdx=rest.search(/[,，]/);
+    if(commaIdx>2){
+      title=rest.slice(0,commaIdx).trim();
+      var vr=rest.slice(commaIdx+1).trim();
+      var c2=vr.search(/[,，]/);
+      if(c2>0){venue=vr.slice(0,c2).trim();location=vr.slice(c2+1).trim();}
+      else venue=vr.trim();
+    }
+    // 제목에서 타입 재감지
     var detectedType=currentType;
-    if(title.includes('개인전'))detectedType='solo';else if(title.includes('단체전')||title.includes('그룹전'))detectedType='group';else if(title.includes('레지던시'))detectedType='residency';
+    var sec2=detectSection(title);
+    if(sec2)detectedType=sec2;
     items.push({type:detectedType,year:year,title:title,venue:venue,location:location});
   });
   return items;
@@ -1188,7 +1286,8 @@ function parseCVText(text){
 var seriesNotes=[],editingNoteId=null,viewingNoteId=null;
 async function loadNotes(){
   if(!currentUser)return;
-  var res=await supa.from('series_notes').select('*').eq('user_id',currentUser.id).order('sort_order',{ascending:true});
+  // 6. 최신순(created_at 내림차순)으로 정렬
+  var res=await supa.from('series_notes').select('*').eq('user_id',currentUser.id).order('sort_order',{ascending:false});
   if(!res.error)seriesNotes=res.data||[];
   renderNotes();
 }
@@ -1198,17 +1297,27 @@ function renderNotes(){
   el.innerHTML='';
   seriesNotes.forEach(function(n){
     var card=document.createElement('div');card.className='note-card';card.dataset.id=n.id;
+    // 5. 카드 클릭 제거 - 보기 버튼으로만 열기
     var header=document.createElement('div');header.style.cssText='display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;';
     var title=document.createElement('div');title.className='note-title';title.textContent=n.title;
     var btns=document.createElement('div');btns.style.cssText='display:flex;gap:6px;';
+    var viewBtn=document.createElement('button');viewBtn.textContent='보기';viewBtn.style.cssText='font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid #185FA5;background:none;color:#185FA5;cursor:pointer;';
+    viewBtn.onclick=function(e){e.stopPropagation();viewNote(n.id);};
     var editBtn=document.createElement('button');editBtn.textContent='수정';editBtn.style.cssText='font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:none;color:var(--text3);cursor:pointer;';
     editBtn.onclick=function(e){e.stopPropagation();editNote(n.id);};
     var delBtn=document.createElement('button');delBtn.textContent='삭제';delBtn.style.cssText='font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid rgba(163,45,45,.3);background:none;color:var(--red);cursor:pointer;';
     delBtn.onclick=function(e){e.stopPropagation();deleteNote(n.id);};
-    btns.appendChild(editBtn);btns.appendChild(delBtn);header.appendChild(title);header.appendChild(btns);card.appendChild(header);
+    btns.appendChild(viewBtn);btns.appendChild(editBtn);btns.appendChild(delBtn);
+    header.appendChild(title);header.appendChild(btns);card.appendChild(header);
     if(n.period){var p=document.createElement('div');p.className='note-period';p.textContent=n.period;card.appendChild(p);}
-    if(n.note){var prev=document.createElement('div');prev.className='note-preview';prev.textContent=n.note.slice(0,120)+(n.note.length>120?'...':'');card.appendChild(prev);}
-    card.onclick=function(){viewNote(n.id);};
+    // 5. 글자수 무제한 - 전체 내용 표시 (접기/펼치기)
+    if(n.note){
+      var prev=document.createElement('div');
+      prev.className='note-preview';
+      prev.style.cssText='font-size:12px;color:var(--text2);line-height:1.7;white-space:pre-wrap;word-break:break-all;';
+      prev.textContent=n.note;
+      card.appendChild(prev);
+    }
     el.appendChild(card);
   });
 }
@@ -1222,7 +1331,13 @@ async function saveNote(){
   closeOv('noteAddOv');await loadNotes();showToast('저장됐어요');
 }
 async function deleteNote(id){if(!confirm('이 작업노트를 삭제할까요?'))return;await supa.from('series_notes').delete().eq('id',id);await loadNotes();showToast('삭제됐어요');}
-function viewNote(id){var n=seriesNotes.find(function(x){return x.id===id;});if(!n)return;viewingNoteId=id;alert(n.title+(n.period?'\n'+n.period:'')+'\n\n'+(n.note||''));}
+function viewNote(id){
+  var n=seriesNotes.find(function(x){return x.id===id;});if(!n)return;
+  viewingNoteId=id;
+  document.getElementById('noteViewTitle').textContent=n.title+(n.period?' · '+n.period:'');
+  document.getElementById('noteViewBody').textContent=n.note||'';
+  document.getElementById('noteViewOv').classList.add('on');
+}
 
 // SPLASH & INIT
 (function(){
