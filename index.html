@@ -47,7 +47,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 #appScreen{display:none;width:100%;padding-top:52px;}
 .main{max-width:780px;margin:0 auto;padding:100px 16px 120px;}
 /* GRID */
-.ygroup{margin-bottom:28px;}
+.ygroup{margin-bottom:48px;padding-top:8px;border-top:1.5px solid var(--border);}.ygroup:first-child{border-top:none;padding-top:0;}
 .ylabel{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
 .ylabel-sub{font-size:11px;font-weight:400;color:var(--text3);}
 .grid{display:grid;gap:12px;}
@@ -380,7 +380,9 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
         <div style="display:flex;gap:8px;">
           <button class="btn btn-sm" onclick="document.getElementById('cvGuideOv').classList.add('on')" style="color:var(--text2);">📄 파일 업로드</button>
           <input type="file" id="cvFileInput" accept=".docx,.txt" style="display:none;" onchange="handleCVFile(this)"/>
-          <button class="btn btn-sm" onclick="exportCVText()" style="color:var(--text2);">내보내기</button>
+          <span id="cvSelCount" style="font-size:12px;color:#185FA5;font-weight:500;"></span>
+          <button class="btn btn-sm" onclick="cvSelSet.size===cvItems.length?cvSelSet.clear():cvItems.forEach(function(c){cvSelSet.add(c.id);});renderCV();" style="color:var(--text2);">전체선택</button>
+          <button class="btn btn-sm btn-blue" onclick="exportCVText()">선택 내보내기</button>
           <button class="btn btn-sm btn-dark" onclick="openCVAdd()">+ 추가</button>
         </div>
       </div>
@@ -904,10 +906,22 @@ function render(){
     el.innerHTML='<div class="grid '+gc+'">'+page.map(cHtml).join('')+'</div>';
   }
   renderPgn(tp,total);
+  // 1. 뷰포트 진입 시 이미지 로드
+  document.querySelectorAll('.thumb img[data-src]').forEach(function(img){_imgObserver.observe(img);});
 }
 
-// 9. 이미지 캐시 - 이미 로드된 이미지는 다시 로드 안 함
+// 1+9. 이미지 캐시 + IntersectionObserver로 뷰포트 진입 시에만 로드
 var _imgCache={};
+var _imgObserver=window.IntersectionObserver?new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){
+      var img=e.target;
+      var src=img.dataset.src;
+      if(src&&!img.src){img.src=src;}
+      _imgObserver.unobserve(img);
+    }
+  });
+},{rootMargin:'200px'}):{observe:function(){},unobserve:function(){}};
 function cHtml(w){
   var s=sel.has(w.id);
   var h=getHN(w);
@@ -916,14 +930,15 @@ function cHtml(w){
   var wid=String(w.id);
   var sold=isSold(w);var reserve=isReserve(w);
   var drag=editMode?' draggable="true" ondragstart="onDragStart(event,\''+wid+'\')" ondragover="onDragOver(event,\''+wid+'\')" ondrop="onDrop(event,\''+wid+'\')" ondragend="onDragEnd()"':'';
-  var thumbSrc=w.img?(w.img.includes('supabase.co/storage')?w.img+'?width=200&quality=50&format=webp':w.img):'';
+  var thumbSrc=w.img?(w.img.includes('supabase.co/storage')?w.img+'?width=120&quality=30&format=webp':w.img):'';
   // 이미 로드된 이미지면 opacity=1로 시작
   var loaded=thumbSrc&&_imgCache[thumbSrc];
+  var imgTag=thumbSrc?(loaded?'<img src="'+thumbSrc+'" style="opacity:1;">':'<img data-src="'+thumbSrc+'" style="opacity:0;transition:opacity .25s;" onload="_imgCache[\''+thumbSrc+'\']=1;this.style.opacity=1" onerror="this.style.opacity=0">'):ph;
   return '<div class="card'+(s?' sel':'')+(sold?' sold-card':'')+(reserve?' reserve-card':'')+'" data-id="'+wid+'"'+drag+'>'+
     (sold?'<div class="sold-ov"></div><div class="sold-badge">판매 완료</div>':'')+(reserve?'<div class="sold-badge" style="background:#8B6914;">예약중</div>':'')+
     '<div class="chkbtn" onclick="event.stopPropagation();toggleSelById(\''+wid+'\')"><svg viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'+
     '<div class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg></div>'+
-    '<div class="thumb" onclick="toggleSelById(\''+wid+'\')">'+(thumbSrc?'<img src="'+thumbSrc+'" loading="lazy" style="opacity:'+(loaded?'1':'0')+';transition:opacity .25s;" onload="_imgCache[\''+thumbSrc+'\']=1;this.style.opacity=1" onerror="this.style.opacity=0">':ph)+'</div>'+
+    '<div class="thumb" onclick="toggleSelById(\''+wid+'\'">'+imgTag+'</div>'+
     '<div class="cbody" onclick="toggleSelById(\''+wid+'\')">'+
     '<div class="ctitle'+(sold?' sold-text':'')+'">'+w.title+'</div>'+
     '<div class="cmeta">'+w.year+' · '+w.genre+'</div>'+
@@ -1161,7 +1176,7 @@ async function importSel(){
 }
 
 // CV
-var cvItems=[],cvTypeFilter='all',editingCVId=null;
+var cvItems=[],cvTypeFilter='all',editingCVId=null,cvSelSet=new Set();
 var CV_LABELS={solo:'개인전',group:'단체전',award:'수상',residency:'레지던시',publication:'출판/도록',education:'학력',etc:'기타'};
 async function loadCV(){
   if(!currentUser)return;
@@ -1175,20 +1190,30 @@ function renderCV(){
   var el=document.getElementById('cvList');if(!el)return;
   var filtered=cvTypeFilter==='all'?cvItems:cvItems.filter(function(c){return c.type===cvTypeFilter;});
   if(!filtered.length){el.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text3);font-size:14px;">이력이 없어요.<br/>+ 추가 버튼으로 시작해보세요.</div>';return;}
+  // 선택 카운트 표시 업데이트
+  var selCountEl=document.getElementById('cvSelCount');
+  if(selCountEl)selCountEl.textContent=cvSelSet.size>0?cvSelSet.size+'개 선택':'';
   el.innerHTML='';
   filtered.forEach(function(c){
-    var row=document.createElement('div');row.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:0.5px solid var(--border);';
+    var isChecked=cvSelSet.has(c.id);
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:0.5px solid var(--border);'+(isChecked?'background:rgba(24,95,165,.04);border-radius:8px;padding-left:8px;':'');
+    // 2. 체크박스
+    var chk=document.createElement('div');
+    chk.style.cssText='width:18px;height:18px;border-radius:4px;border:1.5px solid '+(isChecked?'#185FA5':'var(--border2)')+';background:'+(isChecked?'#185FA5':'none')+';flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;';
+    if(isChecked)chk.innerHTML='<svg width="10" height="10" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    chk.onclick=function(){if(cvSelSet.has(c.id))cvSelSet.delete(c.id);else cvSelSet.add(c.id);renderCV();};
     var yr=document.createElement('div');yr.style.cssText='font-size:13px;font-weight:600;color:var(--text2);min-width:40px;flex-shrink:0;';yr.textContent=c.year||'';
     var info=document.createElement('div');info.style.flex='1';
     var badge=document.createElement('span');badge.className='cv-badge';badge.style.marginBottom='4px';badge.textContent=CV_LABELS[c.type]||c.type;
     var name=document.createElement('div');name.style.cssText='font-size:13px;font-weight:500;color:var(--text);margin-top:3px;';name.textContent=c.title;
     info.appendChild(badge);info.appendChild(name);
     if(c.venue||c.location){var sub=document.createElement('div');sub.style.cssText='font-size:11px;color:var(--text3);margin-top:2px;';sub.textContent=(c.venue||'')+(c.venue&&c.location?' · ':'')+( c.location||'');info.appendChild(sub);}
-    var editBtn=document.createElement('button');editBtn.textContent='수정';editBtn.style.cssText='font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:none;color:var(--text3);cursor:pointer;';
+    var editBtn=document.createElement('button');editBtn.textContent='수정';editBtn.style.cssText='font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:none;color:var(--text3);cursor:pointer;flex-shrink:0;';
     editBtn.onclick=function(){editCVItem(c.id);};
-    var delBtn=document.createElement('button');delBtn.textContent='삭제';delBtn.style.cssText='font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid rgba(163,45,45,.3);background:none;color:var(--red);cursor:pointer;';
+    var delBtn=document.createElement('button');delBtn.textContent='삭제';delBtn.style.cssText='font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid rgba(163,45,45,.3);background:none;color:var(--red);cursor:pointer;flex-shrink:0;';
     delBtn.onclick=function(){deleteCVItem(c.id);};
-    row.appendChild(yr);row.appendChild(info);row.appendChild(editBtn);row.appendChild(delBtn);
+    row.appendChild(chk);row.appendChild(yr);row.appendChild(info);row.appendChild(editBtn);row.appendChild(delBtn);
     el.appendChild(row);
   });
 }
@@ -1203,14 +1228,18 @@ async function saveCVItem(){
 }
 async function deleteCVItem(id){if(!confirm('이 이력을 삭제할까요?'))return;await supa.from('cv_items').delete().eq('id',id);await loadCV();showToast('삭제됐어요');}
 function exportCVText(){
-  var byType={};cvItems.forEach(function(c){if(!byType[c.type])byType[c.type]=[];byType[c.type].push(c);});
+  // 2. 선택된 것만, 없으면 전체
+  var toExport=cvSelSet.size>0?cvItems.filter(function(c){return cvSelSet.has(c.id);}):cvItems;
+  var byType={};
+  toExport.forEach(function(c){if(!byType[c.type])byType[c.type]=[];byType[c.type].push(c);});
   var lines=[];if(artist.name)lines.push(artist.name,'');
   Object.keys(byType).forEach(function(t){
     lines.push('[ '+(CV_LABELS[t]||t)+' ]');
     byType[t].sort(function(a,b){return(b.year||0)-(a.year||0);}).forEach(function(c){lines.push((c.year||'')+'  '+c.title+(c.venue?'  '+c.venue:'')+(c.location?', '+c.location:''));});
     lines.push('');
   });
-  navigator.clipboard.writeText(lines.join('\n')).then(function(){showToast('CV가 복사됐어요');});
+  var msg=cvSelSet.size>0?cvSelSet.size+'개 선택 CV가 복사됐어요':'전체 CV가 복사됐어요';
+  navigator.clipboard.writeText(lines.join('\n')).then(function(){showToast(msg);});
 }
 async function handleCVFile(input){
   var file=input.files[0];if(!file)return;input.value='';
