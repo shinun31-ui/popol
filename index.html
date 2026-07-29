@@ -194,6 +194,8 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 /* CV 탭 */
 #tabCV{display:none;}
 .cv-tab-main{max-width:780px;margin:0 auto;padding:68px 16px 120px;}
+.cv-export-opt{font-size:13px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--text);}
+.cv-export-opt:hover{background:var(--bg2);}
 .cv-type-btn{font-size:11px;padding:4px 12px;border-radius:20px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .15s;}
 .cv-type-btn.active{background:var(--charcoal);color:#F1EFE8;border-color:var(--charcoal);}
 .cv-badge{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--bg2);color:var(--text3);border:0.5px solid var(--border2);}
@@ -382,7 +384,16 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
           <input type="file" id="cvFileInput" accept=".docx,.txt" style="display:none;" onchange="handleCVFile(this)"/>
           <span id="cvSelCount" style="font-size:12px;color:#185FA5;font-weight:500;"></span>
           <button class="btn btn-sm" onclick="cvSelSet.size===cvItems.length?cvSelSet.clear():cvItems.forEach(function(c){cvSelSet.add(c.id);});renderCV();" style="color:var(--text2);">전체선택</button>
-          <button class="btn btn-sm btn-blue" onclick="exportCVText()">선택 내보내기</button>
+          <div style="position:relative;">
+            <button class="btn btn-sm btn-blue" onclick="document.getElementById('cvExportMenu').classList.toggle('hide')">선택 내보내기 ▾</button>
+            <div id="cvExportMenu" class="hide" style="position:absolute;right:0;top:100%;margin-top:4px;background:var(--bg);border:0.5px solid var(--border2);border-radius:10px;padding:4px;min-width:140px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:100;">
+              <div class="cv-export-opt" onclick="exportCV('pdf')">📄 PDF</div>
+              <div class="cv-export-opt" onclick="exportCV('excel')">📊 엑셀 (CSV)</div>
+              <div class="cv-export-opt" onclick="exportCV('word')">📝 워드 (TXT)</div>
+              <div class="cv-export-opt" onclick="exportCV('copy')">📋 클립보드 복사</div>
+              <div class="cv-export-opt" onclick="exportCV('sms')">💬 문자 공유</div>
+            </div>
+          </div>
           <button class="btn btn-sm btn-dark" onclick="openCVAdd()">+ 추가</button>
         </div>
       </div>
@@ -900,7 +911,7 @@ function render(){
       var soldCnt=yw.filter(isSold).length;
       var salesAmt=salesMode?yw.filter(isSold).reduce(function(s,w){return s+(w.price||0);},0):0;
       var ylbl='<div class="ylabel">'+yr+' <span class="ylabel-sub">총 '+yw.length+'점 · 판매완료 '+soldCnt+'점'+(salesMode&&salesAmt?' · <span style="color:#27500A;font-weight:600;">'+fmtKRW(salesAmt)+'</span>':'')+'</span></div>';
-      return ylbl+'<div class="grid '+gc+'">'+yw.map(cHtml).join('')+'<div class="addcard" onclick="openAdd()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</div></div>';
+      return '<div class="ygroup">'+ylbl+'<div class="grid '+gc+'">'+yw.map(cHtml).join('')+'<div class="addcard" onclick="openAdd()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</div></div></div>';
     }).join('');
   } else {
     el.innerHTML='<div class="grid '+gc+'">'+page.map(cHtml).join('')+'</div>';
@@ -930,7 +941,7 @@ function cHtml(w){
   var wid=String(w.id);
   var sold=isSold(w);var reserve=isReserve(w);
   var drag=editMode?' draggable="true" ondragstart="onDragStart(event,\''+wid+'\')" ondragover="onDragOver(event,\''+wid+'\')" ondrop="onDrop(event,\''+wid+'\')" ondragend="onDragEnd()"':'';
-  var thumbSrc=w.img?(w.img.includes('supabase.co/storage')?w.img+'?width=120&quality=30&format=webp':w.img):'';
+  var thumbSrc=w.img?(w.img.includes('supabase.co/storage')?w.img+'?width=80&quality=20&format=webp':w.img):'';
   // 이미 로드된 이미지면 opacity=1로 시작
   var loaded=thumbSrc&&_imgCache[thumbSrc];
   var imgTag=thumbSrc?(loaded?'<img src="'+thumbSrc+'" style="opacity:1;">':'<img data-src="'+thumbSrc+'" style="opacity:0;transition:opacity .25s;" onload="_imgCache[\''+thumbSrc+'\']=1;this.style.opacity=1" onerror="this.style.opacity=0">'):ph;
@@ -1227,20 +1238,69 @@ async function saveCVItem(){
   closeOv('cvAddOv');await loadCV();showToast('저장됐어요');
 }
 async function deleteCVItem(id){if(!confirm('이 이력을 삭제할까요?'))return;await supa.from('cv_items').delete().eq('id',id);await loadCV();showToast('삭제됐어요');}
-function exportCVText(){
-  // 2. 선택된 것만, 없으면 전체
+function exportCV(type){
+  document.getElementById('cvExportMenu').classList.add('hide');
   var toExport=cvSelSet.size>0?cvItems.filter(function(c){return cvSelSet.has(c.id);}):cvItems;
+  if(!toExport.length){showToast('내보낼 이력이 없어요');return;}
+  // 텍스트 생성
   var byType={};
   toExport.forEach(function(c){if(!byType[c.type])byType[c.type]=[];byType[c.type].push(c);});
-  var lines=[];if(artist.name)lines.push(artist.name,'');
-  Object.keys(byType).forEach(function(t){
-    lines.push('[ '+(CV_LABELS[t]||t)+' ]');
-    byType[t].sort(function(a,b){return(b.year||0)-(a.year||0);}).forEach(function(c){lines.push((c.year||'')+'  '+c.title+(c.venue?'  '+c.venue:'')+(c.location?', '+c.location:''));});
-    lines.push('');
-  });
-  var msg=cvSelSet.size>0?cvSelSet.size+'개 선택 CV가 복사됐어요':'전체 CV가 복사됐어요';
-  navigator.clipboard.writeText(lines.join('\n')).then(function(){showToast(msg);});
+  function makeLines(){
+    var lines=[];if(artist.name)lines.push(artist.name,'');
+    Object.keys(byType).forEach(function(t){
+      lines.push('[ '+(CV_LABELS[t]||t)+' ]');
+      byType[t].sort(function(a,b){return(b.year||0)-(a.year||0);}).forEach(function(c){
+        lines.push((c.year||'')+'  '+c.title+(c.venue?'  '+c.venue:'')+(c.location?', '+c.location:''));
+      });
+      lines.push('');
+    });
+    return lines.join('\n');
+  }
+  var txt=makeLines();
+  var label=cvSelSet.size>0?cvSelSet.size+'개 선택':'전체';
+
+  if(type==='copy'){
+    navigator.clipboard.writeText(txt).then(function(){showToast(label+' CV가 복사됐어요');});
+
+  } else if(type==='sms'){
+    window.open('sms:?body='+encodeURIComponent(txt));
+
+  } else if(type==='word'){
+    // TXT 파일 다운로드 (워드에서 열 수 있음)
+    var blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=(artist.name||'CV')+'_'+(cvSelSet.size>0?cvSelSet.size+'selected':'all')+'.txt';
+    a.click();showToast(label+' CV 다운로드됐어요');
+
+  } else if(type==='excel'){
+    // CSV 파일
+    var rows=['\uFEFF분류,연도,제목,장소,지역'];
+    toExport.sort(function(a,b){return(b.year||0)-(a.year||0);}).forEach(function(c){
+      rows.push([(CV_LABELS[c.type]||c.type),(c.year||''),'"'+(c.title||'').replace(/"/g,'""')+'"','"'+(c.venue||'').replace(/"/g,'""')+'"','"'+(c.location||'').replace(/"/g,'""')+'"'].join(','));
+    });
+    var blob=new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=(artist.name||'CV')+'_'+(cvSelSet.size>0?cvSelSet.size+'selected':'all')+'.csv';
+    a.click();showToast(label+' CV 엑셀 다운로드됐어요');
+
+  } else if(type==='pdf'){
+    var pw=window.open('','_blank');
+    var rows2=toExport.sort(function(a,b){return(b.year||0)-(a.year||0);}).map(function(c){
+      return'<tr><td>'+(c.year||'')+'</td><td><b>'+(CV_LABELS[c.type]||c.type)+'</b></td><td>'+c.title+'</td><td>'+(c.venue||'-')+'</td><td>'+(c.location||'-')+'</td></tr>';
+    }).join('');
+    pw.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>@page{size:A4;margin:18mm;}body{font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:10pt;color:#111;}h2{font-size:16pt;margin-bottom:4px;}p{font-size:9pt;color:#666;margin-bottom:16px;}table{width:100%;border-collapse:collapse;}th{padding:7px 6px;text-align:left;border-bottom:1.5px solid #222;font-size:9pt;}td{padding:7px 6px;border-bottom:0.5px solid #ddd;font-size:10pt;}</style></head><body>'+'<h2>'+(artist.name||'')+'</h2><p>'+(artist.phone||'')+(artist.phone&&artist.email?' · ':'')+( artist.email||'')+'</p>'+'<table><thead><tr><th>연도</th><th>분류</th><th>제목</th><th>장소</th><th>지역</th></tr></thead><tbody>'+rows2+'</tbody></table></body></html>');
+    pw.document.close();setTimeout(function(){pw.print();},500);showToast(label+' CV PDF 창이 열렸어요');
+  }
 }
+// 드롭다운 외부 클릭 시 닫기
+document.addEventListener('click',function(e){
+  var menu=document.getElementById('cvExportMenu');
+  if(menu&&!menu.classList.contains('hide')&&!menu.parentElement.contains(e.target)){
+    menu.classList.add('hide');
+  }
+});
 async function handleCVFile(input){
   var file=input.files[0];if(!file)return;input.value='';
   var text='';
