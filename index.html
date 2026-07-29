@@ -385,7 +385,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
           <span id="cvSelCount" style="font-size:12px;color:#185FA5;font-weight:500;"></span>
           <button class="btn btn-sm" onclick="cvSelSet.size===cvItems.length?cvSelSet.clear():cvItems.forEach(function(c){cvSelSet.add(c.id);});renderCV();" style="color:var(--text2);">전체선택</button>
           <div style="position:relative;">
-            <button class="btn btn-sm btn-blue" onclick="document.getElementById('cvExportMenu').classList.toggle('hide')">선택 내보내기 ▾</button>
+            <button class="btn btn-sm btn-blue" onclick="event.stopPropagation();document.getElementById('cvExportMenu').classList.toggle('hide')">선택 내보내기 ▾</button>
             <div id="cvExportMenu" class="hide" style="position:absolute;right:0;top:100%;margin-top:4px;background:var(--bg);border:0.5px solid var(--border2);border-radius:10px;padding:4px;min-width:140px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:100;">
               <div class="cv-export-opt" onclick="exportCV('pdf')">📄 PDF</div>
               <div class="cv-export-opt" onclick="exportCV('excel')">📊 엑셀 (CSV)</div>
@@ -911,7 +911,10 @@ function render(){
       var soldCnt=yw.filter(isSold).length;
       var salesAmt=salesMode?yw.filter(isSold).reduce(function(s,w){return s+(w.price||0);},0):0;
       var ylbl='<div class="ylabel">'+yr+' <span class="ylabel-sub">총 '+yw.length+'점 · 판매완료 '+soldCnt+'점'+(salesMode&&salesAmt?' · <span style="color:#27500A;font-weight:600;">'+fmtKRW(salesAmt)+'</span>':'')+'</span></div>';
-      return '<div class="ygroup">'+ylbl+'<div class="grid '+gc+'">'+yw.map(cHtml).join('')+'<div class="addcard" onclick="openAdd()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</div></div></div>';
+      var isFirst=yrs.indexOf(yr)===0;
+      return '<div style="margin-bottom:40px;'+(isFirst?'':'margin-top:8px;padding-top:24px;border-top:2px solid var(--border);')+'">'
+        +ylbl+'<div class="grid '+gc+'">'+yw.map(cHtml).join('')
+        +'<div class="addcard" onclick="openAdd()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>추가</div></div></div>';
     }).join('');
   } else {
     el.innerHTML='<div class="grid '+gc+'">'+page.map(cHtml).join('')+'</div>';
