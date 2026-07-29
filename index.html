@@ -88,14 +88,12 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 #selbar{display:none;position:fixed;bottom:0;left:0;right:0;background:#E8650A;padding:12px 16px;z-index:60;align-items:center;gap:8px;flex-wrap:wrap;animation:slideUp .2s cubic-bezier(.25,.46,.45,.94);}
 @keyframes slideUp{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}}
 /* BUTTONS */
-.btn{font-size:13px;padding:7px 14px;border-radius:10px;border:0.5px solid var(--border2);background:none;color:var(--text);cursor:pointer;transition:background .15s ease,opacity .15s ease;white-space:nowrap;}
-.btn:hover{background:var(--bg2);}
-.btn-dark{background:var(--charcoal);color:#F1EFE8;border-color:var(--charcoal);}
-.btn-dark:hover{opacity:.85;}
-.btn-blue{background:#185FA5;color:#fff;border-color:#185FA5;}
-.btn-blue:hover{opacity:.9;}
-.btn-sm{font-size:12px;padding:5px 11px;border-radius:8px;}
-.btn-white{background:#F1EFE8;color:#1a1a18;border-color:#F1EFE8;}
+.btn{font-size:13px;padding:6px 14px;border-radius:8px;border:none;background:var(--bg2);color:var(--text);cursor:pointer;transition:opacity .15s;white-space:nowrap;}
+.btn:hover{opacity:.7;}
+.btn-dark{background:var(--charcoal);color:#F1EFE8;}
+.btn-blue{background:#185FA5;color:#fff;}
+.btn-sm{font-size:12px;padding:5px 12px;border-radius:8px;}
+.btn-white{background:rgba(255,255,255,.15);color:#F1EFE8;}
 /* LANG */
 .lang-btn{font-size:12px;padding:4px 8px;border-radius:7px;border:0.5px solid var(--border2);background:none;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:3px;}
 .lang-menu{position:absolute;top:100%;right:0;background:var(--bg);border:0.5px solid var(--border2);border-radius:10px;padding:4px;min-width:120px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:100;}
@@ -133,7 +131,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 .modal{background:var(--bg);border-radius:18px;padding:22px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.2);}
 .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
 .modal-header h2{font-size:16px;font-weight:700;}
-.modal-close{width:28px;height:28px;border-radius:50%;border:0.5px solid var(--border2);background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);}
+.modal-close{width:28px;height:28px;border-radius:50%;border:none;background:var(--bg2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);}
 .ff{margin-bottom:12px;}
 .ff label{display:block;font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px;letter-spacing:.04em;}
 .ff input,.ff select,.ff textarea{width:100%;border:0.5px solid var(--border2);border-radius:10px;padding:9px 12px;font-size:14px;background:var(--bg);color:var(--text);outline:none;}
@@ -288,6 +286,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
         <div class="lang-opt" onclick="setLang('zh')">🇨🇳 中文</div>
       </div>
     </div>
+    <button class="btn btn-sm" onclick="showTab('portfolio')">홈</button>
     <button class="btn btn-sm" id="editModeBtn" onclick="toggleEditMode()">편집</button>
     <button class="btn btn-sm" onclick="showTab('upload')">간편 업로드</button>
     <button class="btn btn-sm" onclick="showTab('cv')">CV</button>
