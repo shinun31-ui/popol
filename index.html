@@ -201,6 +201,8 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 /* CV 탭 */
 #tabCV{display:none;}
 .cv-tab-main{max-width:780px;margin:0 auto;padding:68px 16px 120px;}
+.cv-move-btn{font-size:13px;padding:10px 16px;border-radius:8px;border:0.5px solid var(--border2);background:none;color:var(--text);cursor:pointer;text-align:left;transition:background .1s;}
+.cv-move-btn:hover{background:var(--bg2);}
 .cv-export-opt{font-size:13px;padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--text);}
 .cv-export-opt:hover{background:var(--bg2);}
 .cv-type-btn{font-size:11px;padding:4px 12px;border-radius:20px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .15s;}
@@ -392,6 +394,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
           <input type="file" id="cvFileInput" accept=".docx,.txt" style="display:none;" onchange="handleCVFile(this)"/>
           <span id="cvSelCount" style="font-size:12px;color:#185FA5;font-weight:500;"></span>
           <button class="btn btn-sm" onclick="cvSelSet.size===cvItems.length?cvSelSet.clear():cvItems.forEach(function(c){cvSelSet.add(c.id);});renderCV();" style="color:var(--text2);">전체선택</button>
+          <button class="btn btn-sm" onclick="openCVMove()" style="color:var(--text2);" id="cvMoveBtn">섹션 이동</button>
           <button class="btn btn-sm btn-blue" onclick="document.getElementById('cvExportSubtitle').textContent=cvSelSet.size>0?cvSelSet.size+'개 선택된 이력을 내보냅니다':'전체 이력을 내보냅니다 (선택하면 선택만 내보내기)';document.getElementById('cvExportOv').classList.add('on')">내보내기</button>
           <button class="btn btn-sm btn-dark" onclick="openCVAdd()">+ 추가</button>
         </div>
@@ -406,6 +409,8 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
         <button class="cv-type-btn" data-type="education" onclick="setCVType('education')">학력</button>
         <button class="cv-type-btn" data-type="media" onclick="setCVType('media')">미디어</button>
         <button class="cv-type-btn" data-type="collection" onclick="setCVType('collection')">소장</button>
+        <button class="cv-type-btn" data-type="project" onclick="setCVType('project')">프로젝트</button>
+        <button class="cv-type-btn" data-type="international" onclick="setCVType('international')">해외전시</button>
         <button class="cv-type-btn" data-type="etc" onclick="setCVType('etc')">기타</button>
       </div>
       <div id="cvList"></div>
@@ -543,7 +548,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 <div class="ov" id="cvAddOv" onclick="ovClick(event,'cvAddOv')">
   <div class="modal" style="max-width:400px;">
     <div class="modal-header"><h2 id="cvModalTitle">이력 추가</h2><button class="modal-close" onclick="closeOv('cvAddOv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="ff"><label>분류</label><select id="cvType"><option value="solo">개인전</option><option value="group">단체전</option><option value="award">수상</option><option value="residency">레지던시</option><option value="publication">출판/도록</option><option value="education">학력</option><option value="media">미디어</option><option value="collection">소장</option><option value="etc">기타</option></select></div>
+    <div class="ff"><label>분류</label><select id="cvType"><option value="solo">개인전</option><option value="group">단체전</option><option value="award">수상</option><option value="residency">레지던시</option><option value="publication">출판/도록</option><option value="education">학력</option><option value="media">미디어</option><option value="collection">소장</option><option value="project">프로젝트</option><option value="international">해외전시</option><option value="etc">기타</option></select></div>
     <div class="frow">
       <div class="ff"><label>연도</label><input id="cvYear" type="number" placeholder="2024"/></div>
       <div class="ff"><label>제목/전시명</label><input id="cvTitle2" placeholder="전시명 또는 수상명"/></div>
@@ -567,6 +572,32 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
       </div>
     </div>
     <div id="noteViewBody" style="flex:1;overflow-y:auto;font-size:14px;line-height:1.8;color:var(--text2);white-space:pre-wrap;word-break:break-all;padding:4px 0 12px;user-select:text;-webkit-user-select:text;"></div>
+  </div>
+</div>
+
+<!-- CV 섹션 이동 모달 -->
+<div class="ov" id="cvMoveOv" onclick="ovClick(event,'cvMoveOv')">
+  <div class="modal" style="max-width:320px;">
+    <div class="modal-header">
+      <div>
+        <h2>섹션 이동</h2>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px;" id="cvMoveSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeOv('cvMoveOv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <button class="cv-move-btn" onclick="moveCVTo('solo')">개인전</button>
+      <button class="cv-move-btn" onclick="moveCVTo('international')">해외전시</button>
+      <button class="cv-move-btn" onclick="moveCVTo('group')">단체전</button>
+      <button class="cv-move-btn" onclick="moveCVTo('award')">수상</button>
+      <button class="cv-move-btn" onclick="moveCVTo('residency')">레지던시</button>
+      <button class="cv-move-btn" onclick="moveCVTo('publication')">출판/도록</button>
+      <button class="cv-move-btn" onclick="moveCVTo('project')">프로젝트</button>
+      <button class="cv-move-btn" onclick="moveCVTo('media')">미디어</button>
+      <button class="cv-move-btn" onclick="moveCVTo('collection')">소장</button>
+      <button class="cv-move-btn" onclick="moveCVTo('education')">학력</button>
+      <button class="cv-move-btn" onclick="moveCVTo('etc')">기타</button>
+    </div>
   </div>
 </div>
 
@@ -606,27 +637,47 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
       <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:14px;">
         <div style="font-weight:700;color:var(--text);margin-bottom:8px;">📋 권장 형식 (.txt 또는 .docx)</div>
         <div style="font-family:monospace;font-size:12px;color:var(--text2);line-height:2;white-space:pre;">개인전
-2024  제목, 갤러리명, 서울
-2022  제목, 갤러리명, 뉴욕
+2024  전시제목, 갤러리명, 서울
+2022  전시제목, 갤러리명, 뉴욕
+
+해외전시
+2023  전시제목, 미술관명, 파리
+      전시제목2  ← 연도 없으면 위 2023년으로 자동 분류
 
 단체전
 2023  전시제목, 미술관명, 도시
-2021  전시제목, 갤러리명, 도시
 
 수상
 2023  수상명, 기관명
-2020  수상명, 기관명
+
+레지던시
+2022  레지던시명, 기관명, 지역
+
+출판/도록
+2021  도록명, 출판사
+
+프로젝트
+2024  협업명/콜라보명, 브랜드명
+2023  디자인 프로젝트명, 클라이언트
+
+미디어
+2024  방송/인터뷰 제목, 매체명
+2023  유튜브 채널명, 콘텐츠명
+
+소장
+2022  소장처명, 도시
+2021  컬렉션명, 기관
 
 학력
 2018  대학원 졸업, 학교명
 2016  학사 졸업, 학교명</div>
       </div>
       <div style="font-weight:600;color:var(--text);margin-bottom:6px;">✅ 핵심 규칙</div>
-      <ul style="padding-left:16px;line-height:2;">
-        <li>섹션 헤더(개인전, 단체전, 수상, 레지던시, 출판/도록, 학력)를 반드시 작성</li>
-        <li>각 줄 앞에 연도(4자리) 포함</li>
+      <ul style="padding-left:16px;line-height:2.2;">
+        <li>섹션 헤더를 먼저 작성 (개인전 / 해외전시 / 단체전 / 수상 / 레지던시 / 출판·도록 / 프로젝트 / 미디어 / 소장 / 학력)</li>
+        <li>각 항목 앞에 연도(4자리) 작성</li>
+        <li>연도 없이 작성하면 바로 위 연도로 자동 분류</li>
         <li>항목은 쉼표(,)로 구분: <b>제목, 장소, 지역</b></li>
-        <li>섹션 헤더 아래 항목들은 자동으로 해당 분류에 저장</li>
       </ul>
     </div>
     <div class="mact">
@@ -1244,7 +1295,7 @@ async function importSel(){
 
 // CV
 var cvItems=[],cvTypeFilter='all',editingCVId=null,cvSelSet=new Set();
-var CV_LABELS={solo:'개인전',group:'단체전',award:'수상',residency:'레지던시',publication:'출판/도록',education:'학력',media:'미디어',collection:'소장',etc:'기타'};
+var CV_LABELS={solo:'개인전',group:'단체전',award:'수상',residency:'레지던시',publication:'출판/도록',education:'학력',media:'미디어',collection:'소장',project:'프로젝트',international:'해외전시',etc:'기타'};
 async function loadCV(){
   if(!currentUser)return;
   // 3. user_id로 필터링 (버그 수정)
@@ -1283,6 +1334,23 @@ function renderCV(){
     row.appendChild(chk);row.appendChild(yr);row.appendChild(info);row.appendChild(editBtn);row.appendChild(delBtn);
     el.appendChild(row);
   });
+}
+function openCVMove(){
+  if(cvSelSet.size===0){showToast('이동할 이력을 먼저 선택해주세요');return;}
+  document.getElementById('cvMoveSubtitle').textContent=cvSelSet.size+'개 선택됨 → 이동할 섹션 선택';
+  document.getElementById('cvMoveOv').classList.add('on');
+}
+async function moveCVTo(newType){
+  if(cvSelSet.size===0)return;
+  var ids=[...cvSelSet];
+  showToast('이동 중...');
+  for(var i=0;i<ids.length;i++){
+    await supa.from('cv_items').update({type:newType}).eq('id',ids[i]);
+  }
+  cvSelSet.clear();
+  closeOv('cvMoveOv');
+  await loadCV();
+  showToast(ids.length+'개 항목을 '+CV_LABELS[newType]+'으로 이동했어요');
 }
 function openCVAdd(){editingCVId=null;document.getElementById('cvModalTitle').textContent='이력 추가';['cvYear','cvTitle2','cvVenue','cvLocation2'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});document.getElementById('cvYear').value=new Date().getFullYear();document.getElementById('cvAddOv').classList.add('on');}
 function editCVItem(id){var c=cvItems.find(function(x){return x.id===id;});if(!c)return;editingCVId=id;document.getElementById('cvModalTitle').textContent='이력 수정';document.getElementById('cvType').value=c.type||'solo';document.getElementById('cvYear').value=c.year||'';document.getElementById('cvTitle2').value=c.title||'';document.getElementById('cvVenue').value=c.venue||'';document.getElementById('cvLocation2').value=c.location||'';document.getElementById('cvAddOv').classList.add('on');}
@@ -1378,7 +1446,9 @@ function parseCVText(text){
     {keys:['출판','도록','publication','catalog','카탈로그','책'],type:'publication'},
     {keys:['학력','education','대학','university','college','졸업'],type:'education'},
     {keys:['미디어','media','방송','유튜브','youtube','인터뷰','interview','언론'],type:'media'},
-    {keys:['소장','collection','컬렉션','소장처'],type:'collection'}
+    {keys:['소장','collection','컬렉션','소장처'],type:'collection'},
+    {keys:['프로젝트','project','협업','콜라보','collab','디자인','design','collaboration'],type:'project'},
+    {keys:['해외전시','해외','international','overseas','abroad'],type:'international'}
   ];
   function detectSection(line){
     var lower=line.toLowerCase().replace(/[\s\[\]<>《》「」【】:：\-_]/g,'');
