@@ -1437,19 +1437,42 @@ function exportCV(type){
 async function handleCVFile(input){
   var file=input.files[0];if(!file)return;input.value='';
   var text='';
+  showToast('파일 읽는 중...');
   try{
-    if(file.name.endsWith('.txt'))text=await file.text();
-    else if(file.name.endsWith('.docx')){
-      if(!window.mammoth){await new Promise(function(res,rej){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
-      var ab=await file.arrayBuffer();var result=await mammoth.extractRawText({arrayBuffer:ab});text=result.value;
+    if(file.name.endsWith('.txt')||file.name.endsWith('.text')){
+      text=await file.text();
+    } else if(file.name.endsWith('.docx')){
+      if(!window.mammoth){
+        await new Promise(function(res,rej){
+          var s=document.createElement('script');
+          s.src='https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+          s.onload=res;s.onerror=rej;document.head.appendChild(s);
+        });
+      }
+      var ab=await file.arrayBuffer();
+      var result=await mammoth.extractRawText({arrayBuffer:ab});
+      text=result.value;
     }
-  }catch(e){showToast('파일 읽기 실패');return;}
+  }catch(e){showToast('파일 읽기 실패: '+e.message);return;}
   if(!text.trim()){showToast('파일 내용이 없어요');return;}
   var items=parseCVText(text);
-  if(!items.length){showToast('이력을 찾지 못했어요');return;}
+  if(!items.length){showToast('이력을 찾지 못했어요. 가이드라인을 확인해주세요');return;}
   if(!confirm(items.length+'개 이력을 저장할까요?'))return;
-  for(var i=0;i<items.length;i++){await supa.from('cv_items').insert({user_id:currentUser.id,type:items[i].type||'etc',year:items[i].year||new Date().getFullYear(),title:items[i].title||'',venue:items[i].venue||'',location:items[i].location||'',description:''});}
-  await loadCV();showToast(items.length+'개 이력이 저장됐어요');
+  showToast('저장 중... (0/'+items.length+')');
+  var rows=items.map(function(it){
+    return{user_id:currentUser.id,type:it.type||'etc',year:it.year||new Date().getFullYear(),title:it.title||'',venue:it.venue||'',location:it.location||'',description:''};
+  });
+  // 50개씩 묶어서 저장 (제한 없이 전체)
+  var chunkSize=50;
+  for(var i=0;i<rows.length;i+=chunkSize){
+    var chunk=rows.slice(i,i+chunkSize);
+    await new Promise(function(resolve){
+      supa.from('cv_items').insert(chunk).then(resolve);
+    });
+    showToast('저장 중... ('+Math.min(i+chunkSize,rows.length)+'/'+rows.length+')');
+  }
+  await loadCV();
+  showToast(items.length+'개 이력이 저장됐어요 ✓');
 }
 function parseCVText(text){
   var lines=text.split(/[\r\n]+/).map(function(l){return l.trim();}).filter(Boolean);
