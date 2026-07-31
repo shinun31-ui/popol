@@ -1462,15 +1462,11 @@ async function handleCVFile(input){
   var rows=items.map(function(it){
     return{user_id:currentUser.id,type:it.type||'etc',year:it.year||new Date().getFullYear(),title:it.title||'',venue:it.venue||'',location:it.location||'',description:''};
   });
-  // 50개씩 묶어서 저장 (제한 없이 전체)
-  var chunkSize=50;
-  for(var i=0;i<rows.length;i+=chunkSize){
-    var chunk=rows.slice(i,i+chunkSize);
-    await new Promise(function(resolve){
-      supa.from('cv_items').insert(chunk).then(resolve);
-    });
-    showToast('저장 중... ('+Math.min(i+chunkSize,rows.length)+'/'+rows.length+')');
-  }
+  showToast('저장 중... ('+rows.length+'개)');
+  // 전체 한 번에 insert (Supabase는 대량 배열 지원)
+  await new Promise(function(resolve){
+    supa.from('cv_items').insert(rows).then(resolve);
+  });
   await loadCV();
   showToast(items.length+'개 이력이 저장됐어요 ✓');
 }
@@ -1478,60 +1474,80 @@ function parseCVText(text){
   var lines=text.split(/[\r\n]+/).map(function(l){return l.trim();}).filter(Boolean);
   var items=[],currentType='etc',lastYear=new Date().getFullYear();
   var sectionMap=[
-    {keys:['개인전','solo exhibition','solo show'],type:'solo'},
-    {keys:['단체전','그룹전','기획전','초대전','group exhibition','group show'],type:'group'},
+    {keys:['주요개인전','개인전','solo exhibition','solo show'],type:'solo'},
+    {keys:['해외전시','해외','international','overseas','abroad'],type:'international'},
+    {keys:['주요단체전','단체전','그룹전','기획전','초대전','group exhibition','group show'],type:'group'},
     {keys:['수상','award','prize','수혜','grant','장학'],type:'award'},
     {keys:['레지던시','residency','입주작가','입주'],type:'residency'},
     {keys:['출판','도록','publication','catalog','카탈로그','책'],type:'publication'},
     {keys:['학력','education','대학','university','college','졸업'],type:'education'},
+    {keys:['재직','경력','career','work experience'],type:'etc'},
     {keys:['미디어','media','방송','유튜브','youtube','인터뷰','interview','언론'],type:'media'},
     {keys:['소장','collection','컬렉션','소장처'],type:'collection'},
-    {keys:['프로젝트','project','협업','콜라보','collab','디자인','design','collaboration'],type:'project'},
-    {keys:['해외전시','해외','international','overseas','abroad'],type:'international'}
+    {keys:['프로젝트','project','협업','콜라보','collab','디자인','design','collaboration'],type:'project'}
   ];
   function detectSection(line){
-    var lower=line.toLowerCase().replace(/[\s\[\]<>《》「」【】:：\-_]/g,'');
+    // 공백, 특수문자, '주요' 접두어 제거 후 비교
+    var lower=line.toLowerCase().replace(/주요\s*/,'').replace(/[\s\[\]<>《》「」【】:：\-_]/g,'');
     for(var i=0;i<sectionMap.length;i++){
       for(var j=0;j<sectionMap[i].keys.length;j++){
-        if(lower.includes(sectionMap[i].keys[j].replace(/\s/g,''))){return sectionMap[i].type;}
+        var key=sectionMap[i].keys[j].replace(/\s/g,'');
+        if(lower===key||lower.startsWith(key)||lower.endsWith(key)){return sectionMap[i].type;}
       }
     }
     return null;
+  }
+  function parseLine(line, year, type){
+    // 제목, 장소, 지역 파싱
+    var title=line, venue='', location='';
+    // 쌍점(:) 앞은 제목으로 보는 경우 처리
+    var clean=line.replace(/^[\s\-·|]+/,'').trim();
+    var commaIdx=clean.search(/[,，]/);
+    if(commaIdx>1){
+      title=clean.slice(0,commaIdx).trim();
+      var rest=clean.slice(commaIdx+1).trim();
+      var c2=rest.search(/[,，]/);
+      if(c2>0){venue=rest.slice(0,c2).trim();location=rest.slice(c2+1).trim();}
+      else{
+        // 마지막 부분이 짧으면 지역, 아니면 장소
+        if(rest.length<=6&&/[가-힣]/.test(rest))location=rest;
+        else venue=rest;
+      }
+    } else {
+      title=clean;
+    }
+    if(title.length<1)return null;
+    return{type:type,year:year,title:title,venue:venue,location:location};
   }
   lines.forEach(function(line){
     var hasYear=/\d{4}/.test(line);
     if(!hasYear){
       var sec=detectSection(line);
-      if(sec)currentType=sec;
-      // 연도 없는 항목 - 이전 연도 그대로 사용
-      else if(line.length>1&&line.length<100){
-        // 섹션 헤더도 아니고 짧지도 않으면 이전 연도로 항목 추가
-        var title=line.replace(/^[\s\-·|]+/,'').trim();
-        if(title.length>1){
-          items.push({type:currentType,year:lastYear,title:title,venue:'',location:''});
-        }
+      if(sec){currentType=sec;return;}
+      // 연도 없는 항목 - 이전 연도로, 제목/장소/지역 파싱
+      var clean=line.replace(/^[\s\-·|]+/,'').trim();
+      if(clean.length>1){
+        var item=parseLine(clean,lastYear,currentType);
+        if(item)items.push(item);
       }
       return;
     }
     var yearMatch=line.match(/(\d{4})/);if(!yearMatch)return;
     var year=parseInt(yearMatch[1]);if(year<1950||year>2100)return;
-    lastYear=year; // 마지막 연도 기억
+    lastYear=year;
     var yearPos=line.indexOf(yearMatch[1]);
     var rest=line.slice(yearPos+4).replace(/^[\s\.,\-:·|]+/,'').trim();
-    if(!rest||rest.length<2)return;
-    var venue='',location='',title=rest;
-    var commaIdx=rest.search(/[,，]/);
-    if(commaIdx>2){
-      title=rest.slice(0,commaIdx).trim();
-      var vr=rest.slice(commaIdx+1).trim();
-      var c2=vr.search(/[,，]/);
-      if(c2>0){venue=vr.slice(0,c2).trim();location=vr.slice(c2+1).trim();}
-      else venue=vr.trim();
+    if(!rest||rest.length<1)return;
+    // 섹션 헤더인지 확인
+    var sec2=detectSection(rest);
+    if(sec2){currentType=sec2;return;}
+    var item=parseLine(rest,year,currentType);
+    // 제목에서도 섹션 감지
+    if(item){
+      var sec3=detectSection(item.title);
+      if(sec3)item.type=sec3;
+      items.push(item);
     }
-    var detectedType=currentType;
-    var sec2=detectSection(title);
-    if(sec2)detectedType=sec2;
-    items.push({type:detectedType,year:year,title:title,venue:venue,location:location});
   });
   return items;
 }
