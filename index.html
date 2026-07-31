@@ -1105,7 +1105,7 @@ async function deleteSelected(){
   if(!confirm(ids.length+'개 작품을 삭제할까요?'))return;
   for(var i=0;i<ids.length;i++){
     var w=works.find(function(x){return x.id===ids[i];});
-    if(w)await supa.from('works').delete().eq('id',w.dbId||w.id);
+    if(w)await new Promise(function(resolve){supa.from('works').delete().eq('id',w.dbId||w.id).then(resolve);});
   }
   sel.clear();await loadWorksFromDB();showToast('삭제했어요');
 }
@@ -1341,7 +1341,7 @@ async function deleteCVSelected(){
   if(!confirm(cvSelSet.size+'개 이력을 삭제할까요?'))return;
   var ids=[...cvSelSet];
   for(var i=0;i<ids.length;i++){
-    await supa.from('cv_items').delete().eq('id',ids[i]);
+    await new Promise(function(resolve){supa.from('cv_items').delete().eq('id',ids[i]).then(resolve);});
   }
   cvSelSet.clear();
   await loadCV();
@@ -1373,7 +1373,11 @@ async function saveCVItem(){
   else await supa.from('cv_items').insert(data);
   closeOv('cvAddOv');await loadCV();showToast('저장됐어요');
 }
-async function deleteCVItem(id){if(!confirm('이 이력을 삭제할까요?'))return;await supa.from('cv_items').delete().eq('id',id);await loadCV();showToast('삭제됐어요');}
+async function deleteCVItem(id){
+  if(!confirm('이 이력을 삭제할까요?'))return;
+  await new Promise(function(resolve){supa.from('cv_items').delete().eq('id',id).then(resolve);});
+  await loadCV();showToast('삭제됐어요');
+}
 function exportCV(type){
   var toExport=cvSelSet.size>0?cvItems.filter(function(c){return cvSelSet.has(c.id);}):cvItems;
   if(!toExport.length){showToast('내보낼 이력이 없어요');return;}
@@ -1559,7 +1563,11 @@ async function saveNote(){
   else await supa.from('series_notes').insert(data);
   closeOv('noteAddOv');await loadNotes();showToast('저장됐어요');
 }
-async function deleteNote(id){if(!confirm('이 작업노트를 삭제할까요?'))return;await supa.from('series_notes').delete().eq('id',id);await loadNotes();showToast('삭제됐어요');}
+async function deleteNote(id){
+  if(!confirm('이 작업노트를 삭제할까요?'))return;
+  await new Promise(function(resolve){supa.from('series_notes').delete().eq('id',id).then(resolve);});
+  await loadNotes();showToast('삭제됐어요');
+}
 function viewNote(id){
   var n=seriesNotes.find(function(x){return x.id===id;});if(!n)return;
   viewingNoteId=id;
