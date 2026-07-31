@@ -467,13 +467,22 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 
 <!-- DETAIL MODAL -->
 <div class="ov" id="detailOv" onclick="ovClick(event,'detailOv')">
-  <div class="modal" style="max-width:500px;">
-    <div class="modal-header"><h2 id="dTitle"></h2><button class="modal-close" onclick="closeOv('detailOv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div id="dImg"></div>
-    <div id="dChips" style="margin-bottom:10px;"></div>
-    <div id="dDesc" style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:10px;white-space:pre-wrap;"></div>
-    <div id="dAward" style="display:none;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:14px;"><span>🏆</span><span id="dAwardTxt"></span></div>
-    <div class="mact"><button class="btn" id="dSelBtn" onclick="">선택에 추가</button><button class="btn" onclick="copyCaptionFromDetail()">캡션 복사</button><button class="btn btn-dark" id="dEditBtn">수정</button></div>
+  <div class="modal" style="max-width:480px;padding:0;overflow:hidden;">
+    <div id="dImg" style="position:relative;"></div>
+    <div style="padding:20px 20px 16px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+        <h2 id="dTitle" style="font-size:16px;font-weight:600;color:var(--text);line-height:1.4;flex:1;margin-right:12px;"></h2>
+        <button onclick="closeOv('detailOv')" style="background:none;border:none;cursor:pointer;color:var(--text3);padding:0;flex-shrink:0;line-height:1;">✕</button>
+      </div>
+      <div id="dChips" style="margin-bottom:12px;"></div>
+      <div id="dDesc" style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px;white-space:pre-wrap;"></div>
+      <div id="dAward" style="display:none;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:16px;"><span>🏆</span><span id="dAwardTxt"></span></div>
+      <div style="display:flex;gap:12px;padding-top:12px;border-top:0.5px solid var(--border);">
+        <button class="btn" id="dSelBtn" onclick="" style="flex:1;justify-content:center;text-align:center;color:var(--text2);">선택에 추가</button>
+        <button class="btn" onclick="copyCaptionFromDetail()" style="flex:1;justify-content:center;text-align:center;color:var(--text2);">캡션 복사</button>
+        <button class="btn btn-dark" id="dEditBtn" style="flex:1;justify-content:center;text-align:center;">수정</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1550,6 +1559,17 @@ function viewNote(id){
     }
   })();
 })();
+
+// ESC 키로 열린 모달 닫기
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    var ovs=['detailOv','addOv','prevOv','artistOv','cvAddOv','noteAddOv','noteViewOv','cvGuideOv','cvExportOv'];
+    for(var i=0;i<ovs.length;i++){
+      var el=document.getElementById(ovs[i]);
+      if(el&&el.classList.contains('on')){el.classList.remove('on');break;}
+    }
+  }
+});
 
 fetchRates();
 </script>
