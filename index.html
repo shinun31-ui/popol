@@ -88,14 +88,15 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 #selbar{display:none;position:fixed;bottom:0;left:0;right:0;background:#E8650A;padding:12px 16px;z-index:60;align-items:center;gap:8px;flex-wrap:wrap;animation:slideUp .2s cubic-bezier(.25,.46,.45,.94);}
 @keyframes slideUp{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}}
 /* BUTTONS */
-.btn{font-size:13px;padding:7px 14px;border-radius:10px;border:0.5px solid var(--border2);background:none;color:var(--text);cursor:pointer;transition:all .15s;white-space:nowrap;}
-.btn:hover{background:var(--bg2);}
-.btn-dark{background:var(--charcoal);color:#F1EFE8;border-color:var(--charcoal);}
-.btn-dark:hover{opacity:.85;}
-.btn-blue{background:#185FA5;color:#fff;border-color:#185FA5;}
-.btn-blue:hover{opacity:.9;}
-.btn-sm{font-size:12px;padding:5px 11px;border-radius:8px;}
-.btn-white{background:#F1EFE8;color:#1a1a18;border-color:#F1EFE8;}
+.btn{font-size:13px;padding:6px 14px;border-radius:8px;border:none;background:none;color:var(--text2);cursor:pointer;transition:color .1s;white-space:nowrap;-webkit-appearance:none;appearance:none;}
+.btn:hover{color:var(--text);}
+.btn-dark{background:var(--charcoal);color:#F1EFE8;padding:6px 16px;}
+.btn-dark:hover{opacity:.8;}
+.btn-blue{background:#185FA5;color:#fff;padding:6px 16px;}
+.btn-blue:hover{opacity:.8;}
+.btn-sm{font-size:12px;padding:4px 10px;border-radius:7px;}
+.btn-white{color:rgba(241,239,232,.8);}
+.btn-white:hover{color:#F1EFE8;}
 /* LANG */
 .lang-btn{font-size:12px;padding:4px 8px;border-radius:7px;border:0.5px solid var(--border2);background:none;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:3px;}
 .lang-menu{position:absolute;top:100%;right:0;background:var(--bg);border:0.5px solid var(--border2);border-radius:10px;padding:4px;min-width:120px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:100;}
@@ -133,7 +134,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 .modal{background:var(--bg);border-radius:18px;padding:22px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.2);}
 .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
 .modal-header h2{font-size:16px;font-weight:700;}
-.modal-close{width:28px;height:28px;border-radius:50%;border:none;background:var(--bg2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);}
+.modal-close{width:28px;height:28px;border-radius:50%;border:none;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);}
 .ff{margin-bottom:12px;}
 .ff label{display:block;font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px;letter-spacing:.04em;}
 .ff input,.ff select,.ff textarea{width:100%;border:0.5px solid var(--border2);border-radius:10px;padding:9px 12px;font-size:14px;background:var(--bg);color:var(--text);outline:none;}
@@ -1092,7 +1093,7 @@ function openDetail(id){
   var w=works.find(function(x){return x.id===id;});if(!w)return;
   var h=getHN(w),c0=w.c[0],c1=w.c[1];
   var ph='<div style="width:100%;height:240px;background:'+c0+';display:flex;align-items:center;justify-content:center;"><svg width="60" height="60" viewBox="0 0 60 60" fill="none"><rect width="60" height="60" rx="6" fill="'+c1+'" opacity=".15"/><circle cx="20" cy="20" r="8" fill="'+c1+'" opacity=".4"/><path d="M4 46l12-16 9 11 7-9 17 14H4z" fill="'+c1+'" opacity=".4"/></svg></div>';
-  var imgSrc=w.img?(w.img.includes('supabase.co')?w.img+'?width=800&quality=80&format=webp':w.img):'';
+  var imgSrc=w.img?(w.img.includes('supabase.co')?w.img+'?width=600&quality=60&format=webp':w.img):'';
   var sold=isSold(w);
   document.getElementById('dImg').innerHTML=(imgSrc?'<img src="'+imgSrc+'" style="width:100%;max-height:360px;object-fit:contain;border-radius:12px;"/>':ph)+(sold?'<div class="dsoldrib">판매 완료</div>':'');
   document.getElementById('dTitle').textContent=w.title;
@@ -1137,7 +1138,7 @@ function renderPreviewList(ids){
     var c0=w.c[0];
     var ph='<div style="width:46px;height:46px;border-radius:7px;background:'+c0+';"></div>';
     var sold=isSold(w);
-    return '<div class="pitem'+(sold?' psold':'')+'">'+(sold?'<div class="psoldb"></div>':'')+'<div class="pnum">'+(i+1)+'</div><div class="pthumb">'+(w.img?'<img src="'+w.img+'" style="width:100%;height:100%;object-fit:cover;"/>':ph)+'</div><div class="pinfo"><div class="ptrow">'+w.title+(h?'<span class="phn">'+h+'</span>':'')+(priceStr?'<span class="phn" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97;">'+priceStr+'</span>':'')+(sold?'<span class="pstag">판매 완료</span>':'')+'</div><div class="pmeta">'+w.year+' · '+w.genre+(w.medium?' · '+w.medium:'')+(w.size?' · '+w.size:'')+'</div></div></div>';
+    return '<div class="pitem'+(sold?' psold':'')+'">'+(sold?'<div class="psoldb"></div>':'')+'<div class="pnum">'+(i+1)+'</div><div class="pthumb">'+(w.img?'<img src="'+(w.img.includes('supabase.co')?w.img+'?width=80&quality=20&format=webp':w.img)+'" style="width:100%;height:100%;object-fit:cover;"/>':ph)+'</div><div class="pinfo"><div class="ptrow">'+w.title+(h?'<span class="phn">'+h+'</span>':'')+(priceStr?'<span class="phn" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97;">'+priceStr+'</span>':'')+(sold?'<span class="pstag">판매 완료</span>':'')+'</div><div class="pmeta">'+w.year+' · '+w.genre+(w.medium?' · '+w.medium:'')+(w.size?' · '+w.size:'')+'</div></div></div>';
   }).join('');
 }
 
