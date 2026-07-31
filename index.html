@@ -404,6 +404,8 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
         <button class="cv-type-btn" data-type="residency" onclick="setCVType('residency')">레지던시</button>
         <button class="cv-type-btn" data-type="publication" onclick="setCVType('publication')">출판/도록</button>
         <button class="cv-type-btn" data-type="education" onclick="setCVType('education')">학력</button>
+        <button class="cv-type-btn" data-type="media" onclick="setCVType('media')">미디어</button>
+        <button class="cv-type-btn" data-type="collection" onclick="setCVType('collection')">소장</button>
         <button class="cv-type-btn" data-type="etc" onclick="setCVType('etc')">기타</button>
       </div>
       <div id="cvList"></div>
@@ -428,12 +430,12 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 
 <!-- SEL BAR -->
 <div id="selbar">
-  <span class="btn-white btn btn-sm" onclick="clearSel()" style="padding:5px 11px;">해제</span>
-  <span id="selcnt" style="font-size:12px;color:rgba(241,239,232,.6);flex:1;"></span>
-  <button class="btn btn-sm btn-white" onclick="doExport('csv')">CSV</button>
-  <button class="btn btn-sm btn-white" onclick="doExport('pdf')">PDF</button>
-  <button class="btn btn-sm btn-white" onclick="doExport('txt')">캡션</button>
-  <button class="btn btn-sm btn-white" onclick="deleteSelected()">삭제</button>
+  <button onclick="clearSel()" style="font-size:12px;padding:5px 12px;border-radius:7px;border:none;background:rgba(255,255,255,.2);color:#fff;cursor:pointer;font-weight:500;">해제</button>
+  <span id="selcnt" style="font-size:12px;color:#fff;font-weight:500;flex:1;"></span>
+  <button onclick="doExport('csv')" style="font-size:12px;padding:5px 12px;border-radius:7px;border:none;background:#fff;color:#1a1a18;cursor:pointer;font-weight:500;">CSV</button>
+  <button onclick="doExport('pdf')" style="font-size:12px;padding:5px 12px;border-radius:7px;border:none;background:#fff;color:#1a1a18;cursor:pointer;font-weight:500;">PDF</button>
+  <button onclick="doExport('txt')" style="font-size:12px;padding:5px 12px;border-radius:7px;border:none;background:#fff;color:#1a1a18;cursor:pointer;font-weight:500;">캡션</button>
+  <button onclick="deleteSelected()" style="font-size:12px;padding:5px 12px;border-radius:7px;border:none;background:#fff;color:#A32D2D;cursor:pointer;font-weight:500;">삭제</button>
 </div>
 
 <!-- ADD/EDIT MODAL -->
@@ -541,7 +543,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 <div class="ov" id="cvAddOv" onclick="ovClick(event,'cvAddOv')">
   <div class="modal" style="max-width:400px;">
     <div class="modal-header"><h2 id="cvModalTitle">이력 추가</h2><button class="modal-close" onclick="closeOv('cvAddOv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="ff"><label>분류</label><select id="cvType"><option value="solo">개인전</option><option value="group">단체전</option><option value="award">수상</option><option value="residency">레지던시</option><option value="publication">출판/도록</option><option value="education">학력</option><option value="etc">기타</option></select></div>
+    <div class="ff"><label>분류</label><select id="cvType"><option value="solo">개인전</option><option value="group">단체전</option><option value="award">수상</option><option value="residency">레지던시</option><option value="publication">출판/도록</option><option value="education">학력</option><option value="media">미디어</option><option value="collection">소장</option><option value="etc">기타</option></select></div>
     <div class="frow">
       <div class="ff"><label>연도</label><input id="cvYear" type="number" placeholder="2024"/></div>
       <div class="ff"><label>제목/전시명</label><input id="cvTitle2" placeholder="전시명 또는 수상명"/></div>
@@ -1107,7 +1109,7 @@ function openDetail(id){
   var ph='<div style="width:100%;height:240px;background:'+c0+';display:flex;align-items:center;justify-content:center;"><svg width="60" height="60" viewBox="0 0 60 60" fill="none"><rect width="60" height="60" rx="6" fill="'+c1+'" opacity=".15"/><circle cx="20" cy="20" r="8" fill="'+c1+'" opacity=".4"/><path d="M4 46l12-16 9 11 7-9 17 14H4z" fill="'+c1+'" opacity=".4"/></svg></div>';
   var imgSrc=w.img?(w.img.includes('supabase.co')?w.img+'?width=600&quality=60&format=webp':w.img):'';
   var sold=isSold(w);
-  document.getElementById('dImg').innerHTML=(imgSrc?'<img src="'+imgSrc+'" style="width:100%;height:auto;display:block;object-fit:contain;">':ph)+(sold?'<div class="dsoldrib">판매 완료</div>':'');
+  document.getElementById('dImg').innerHTML=(imgSrc?'<img src="'+imgSrc+'" style="width:100%;height:auto;max-height:50vh;object-fit:contain;display:block;">':ph)+(sold?'<div class="dsoldrib">판매 완료</div>':'');
   document.getElementById('dTitle').textContent=w.title;
   document.getElementById('dChips').innerHTML=(h?'<span class="chip hn">'+h+'</span>':'')+(w.price?'<span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97;font-weight:500;">'+fmtKRW(w.price)+'</span>':'')+[w.year,w.genre,w.medium,w.size].filter(Boolean).map(function(v){return'<span class="chip">'+v+'</span>';}).join('')+(sold?'<span class="chip sold">판매 완료</span>':'');
   document.getElementById('dDesc').textContent=w.desc||'';
@@ -1242,7 +1244,7 @@ async function importSel(){
 
 // CV
 var cvItems=[],cvTypeFilter='all',editingCVId=null,cvSelSet=new Set();
-var CV_LABELS={solo:'개인전',group:'단체전',award:'수상',residency:'레지던시',publication:'출판/도록',education:'학력',etc:'기타'};
+var CV_LABELS={solo:'개인전',group:'단체전',award:'수상',residency:'레지던시',publication:'출판/도록',education:'학력',media:'미디어',collection:'소장',etc:'기타'};
 async function loadCV(){
   if(!currentUser)return;
   // 3. user_id로 필터링 (버그 수정)
@@ -1367,15 +1369,16 @@ async function handleCVFile(input){
 }
 function parseCVText(text){
   var lines=text.split(/[\r\n]+/).map(function(l){return l.trim();}).filter(Boolean);
-  var items=[],currentType='etc';
-  // 3. 섹션 헤더 인식 강화 - 더 많은 키워드, 줄 전체가 헤더인 경우
+  var items=[],currentType='etc',lastYear=new Date().getFullYear();
   var sectionMap=[
-    {keys:['개인전','solo exhibition','solo show','개인전'],type:'solo'},
+    {keys:['개인전','solo exhibition','solo show'],type:'solo'},
     {keys:['단체전','그룹전','기획전','초대전','group exhibition','group show'],type:'group'},
     {keys:['수상','award','prize','수혜','grant','장학'],type:'award'},
     {keys:['레지던시','residency','입주작가','입주'],type:'residency'},
     {keys:['출판','도록','publication','catalog','카탈로그','책'],type:'publication'},
-    {keys:['학력','education','대학','university','college','졸업'],type:'education'}
+    {keys:['학력','education','대학','university','college','졸업'],type:'education'},
+    {keys:['미디어','media','방송','유튜브','youtube','인터뷰','interview','언론'],type:'media'},
+    {keys:['소장','collection','컬렉션','소장처'],type:'collection'}
   ];
   function detectSection(line){
     var lower=line.toLowerCase().replace(/[\s\[\]<>《》「」【】:：\-_]/g,'');
@@ -1388,15 +1391,22 @@ function parseCVText(text){
   }
   lines.forEach(function(line){
     var hasYear=/\d{4}/.test(line);
-    // 연도 없는 줄은 섹션 헤더로 판단
     if(!hasYear){
       var sec=detectSection(line);
       if(sec)currentType=sec;
+      // 연도 없는 항목 - 이전 연도 그대로 사용
+      else if(line.length>1&&line.length<100){
+        // 섹션 헤더도 아니고 짧지도 않으면 이전 연도로 항목 추가
+        var title=line.replace(/^[\s\-·|]+/,'').trim();
+        if(title.length>1){
+          items.push({type:currentType,year:lastYear,title:title,venue:'',location:''});
+        }
+      }
       return;
     }
-    // 연도는 있지만 섹션명만 있는 경우 (예: "2020 개인전")도 섹션으로
     var yearMatch=line.match(/(\d{4})/);if(!yearMatch)return;
     var year=parseInt(yearMatch[1]);if(year<1950||year>2100)return;
+    lastYear=year; // 마지막 연도 기억
     var yearPos=line.indexOf(yearMatch[1]);
     var rest=line.slice(yearPos+4).replace(/^[\s\.,\-:·|]+/,'').trim();
     if(!rest||rest.length<2)return;
@@ -1409,7 +1419,6 @@ function parseCVText(text){
       if(c2>0){venue=vr.slice(0,c2).trim();location=vr.slice(c2+1).trim();}
       else venue=vr.trim();
     }
-    // 제목에서 타입 재감지
     var detectedType=currentType;
     var sec2=detectSection(title);
     if(sec2)detectedType=sec2;
