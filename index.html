@@ -1267,24 +1267,38 @@ function doExport(type){
   } else if(type==='img'){
     var imgs=tw.filter(function(w){return w.img;});
     if(!imgs.length){showToast('이미지가 없어요');return;}
-    showLoading('이미지 다운로드 중... (0/'+imgs.length+')');
+    showLoading('ZIP 압축 중... (0/'+imgs.length+')');
     (async function(){
-      for(var i=0;i<imgs.length;i++){
-        var w=imgs[i];
-        try{
-          updateLoading('이미지 다운로드 중... ('+(i+1)+'/'+imgs.length+')');
-          var r=await fetch(w.img);
-          var blob=await r.blob();
-          var a=document.createElement('a');
-          a.href=URL.createObjectURL(blob);
-          a.download=w.year+'_'+w.title.replace(/[\/\\:*?"<>|]/g,'_')+'.jpg';
-          a.click();
-          URL.revokeObjectURL(a.href);
-          await new Promise(function(res){setTimeout(res,300);});
-        }catch(e){showToast((i+1)+'번째 이미지 실패');}
-      }
-      hideLoading();
-      showToast(imgs.length+'개 다운로드 완료');
+      try{
+        // JSZip 로드
+        if(!window.JSZip){
+          await new Promise(function(res,rej){
+            var s=document.createElement('script');
+            s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+            s.onload=res;s.onerror=rej;document.head.appendChild(s);
+          });
+        }
+        var zip=new JSZip();
+        for(var i=0;i<imgs.length;i++){
+          var w=imgs[i];
+          updateLoading('ZIP 압축 중... ('+(i+1)+'/'+imgs.length+')');
+          try{
+            var r=await fetch(w.img);
+            var blob=await r.blob();
+            var fname=w.year+'_'+w.title.replace(/[\/\\:*?"<>|]/g,'_')+'.jpg';
+            zip.file(fname,blob);
+          }catch(e){console.error('img fail:',w.title,e);}
+        }
+        updateLoading('ZIP 파일 생성 중...');
+        var zipBlob=await zip.generateAsync({type:'blob'});
+        var a=document.createElement('a');
+        a.href=URL.createObjectURL(zipBlob);
+        a.download=(artist.name||'POPOL')+'_images_'+new Date().toISOString().slice(0,10)+'.zip';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        hideLoading();
+        showToast(imgs.length+'개 이미지 ZIP 다운로드 완료');
+      }catch(e){hideLoading();showToast('다운로드 실패: '+e.message);}
     })();
   } else if(type==='txt'){
     var lines=tw.map(function(w,i){var h=getHN(w);return w.title+(h?' ['+h+']':'')+(w.medium?', '+w.medium:'')+(w.size?', '+w.size:'')+', '+w.year+(isSold(w)?' [판매완료]':'');});
