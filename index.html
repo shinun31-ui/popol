@@ -541,7 +541,16 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
       <div class="ff"><label>장르</label><select id="fGenre2"><option>회화</option><option>조각</option><option>사진</option><option>설치미술</option><option>판화</option><option>드로잉</option><option>디지털아트</option><option>혼합매체</option></select></div>
     </div>
     <div class="ff"><label>크기 <span id="hnprev" style="font-weight:400;"></span></label><input id="fSize" placeholder="예: 53x45.5" oninput="previewHN()"/></div>
-    <div class="ff"><label>재료</label><input id="fMedium2" placeholder="예: 캔버스에 아크릴"/></div>
+    <div class="ff">
+      <label>재료 <span id="mediumPreview" style="font-size:11px;font-weight:400;color:var(--text3);"></span></label>
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;margin-bottom:6px;">
+        <input id="fMaterial" placeholder="과슈, 유화, 아크릴..." oninput="updateMediumPreview()"/>
+        <span style="color:var(--text3);font-size:13px;">on</span>
+        <input id="fBase" placeholder="캔버스, 장지, 목판..." oninput="updateMediumPreview()"/>
+      </div>
+      <input id="fMedium2" placeholder="또는 직접 입력: 캔버스에 과슈" oninput="updateMediumPreview()" style="font-size:12px;color:var(--text3);"/>
+      <div style="font-size:10px;color:var(--text3);margin-top:3px;">위에서 선택하면 자동 완성 · 아래에 직접 입력도 가능</div>
+    </div>
     <div class="ff"><label>가격 (원)</label><input id="fPrice" type="number" placeholder="예: 3000000" oninput="updatePricePreview()"/><div id="pricePreview" style="font-size:11px;color:var(--text3);margin-top:4px;"></div></div>
     <div class="ff"><label>작가 노트</label><textarea id="fDesc" rows="3" placeholder="작가 노트, 작품 배경 등..."></textarea></div>
     <div class="ff"><label>수상/이력</label><input id="fAward" placeholder="예: 2024 서울 청년작가상"/></div>
@@ -978,6 +987,23 @@ var HT=[{n:0,F:[18,14],S:[18,12],P:[18,10]},{n:1,F:[22,16],S:[22,14],P:[22,12]},
 function detHN(sz){if(!sz)return null;var m=sz.replace(/,/g,'.').match(/(\d+(?:\.\d+)?)\s*[x×X]\s*(\d+(?:\.\d+)?)/i);if(!m)return null;var lo=Math.max(parseFloat(m[1]),parseFloat(m[2])),sh=Math.min(parseFloat(m[1]),parseFloat(m[2]));var best=null,bd=99999;for(var i=0;i<HT.length;i++){var row=HT[i];for(var j=0;j<3;j++){var tp=['F','S','P'][j],rl=Math.max(row[tp][0],row[tp][1]),rs=Math.min(row[tp][0],row[tp][1]),d=Math.abs(lo-rl)+Math.abs(sh-rs);if(d<bd){bd=d;best={n:row.n,t:tp,exact:d<1.5};}}}if(!best||bd>20)return null;return best.n+'호 ('+best.t+'형)'+(best.exact?'':' 변형');}
 function getHN(w){return detHN(w.size);}
 function getHNV(w){var h=getHN(w);return h?parseInt(h):9999;}
+function updateMediumPreview(){
+  var mat=document.getElementById('fMaterial').value.trim();
+  var base=document.getElementById('fBase').value.trim();
+  var direct=document.getElementById('fMedium2').value.trim();
+  var el=document.getElementById('mediumPreview');
+  if(mat&&base){
+    var combined=mat+' on '+base;
+    // 한국어 표기도 같이 만들기
+    var ko=base+'에 '+mat;
+    el.textContent='→ '+ko+' / '+combined;
+    document.getElementById('fMedium2').value=ko;
+  } else if(direct){
+    el.textContent='→ '+direct;
+  } else {
+    el.textContent='';
+  }
+}
 function previewHN(){var s=document.getElementById('fSize').value;var h=detHN(s);var el=document.getElementById('hnprev');if(!h){el.textContent=s?'호수 인식 불가':'';el.style.color='var(--text3)';return;}el.innerHTML='<span style="display:inline-block;padding:2px 10px;border-radius:20px;background:'+(h.includes('변형')?'#EEEDFE':'#E6F1FB')+';color:'+(h.includes('변형')?'#534AB7':'#0C447C')+';font-size:12px;">'+h+'</span>';}
 function fmtKRW(v){if(!v)return'';return v.toLocaleString()+'원';}
 function fmtPrice(v,cur){if(!v)return'';if(cur==='KRW')return fmtKRW(v);var r=rates[cur];if(!r)return fmtKRW(v);var c=v*r,s={USD:'$',EUR:'€',JPY:'¥',CNY:'¥'}[cur]||'';if(cur==='JPY')return s+Math.round(c).toLocaleString()+' JPY';return s+c.toFixed(2)+' '+cur;}
@@ -1235,6 +1261,9 @@ function openAdd(id){
   document.getElementById('fPrice').value=w&&w.price?w.price:'';
   document.getElementById('fSize').value=w?w.size:'';
   document.getElementById('fMedium2').value=w?w.medium:'';
+  document.getElementById('fMaterial').value='';
+  document.getElementById('fBase').value='';
+  document.getElementById('mediumPreview').textContent=w&&w.medium?'→ '+w.medium:'';
   document.getElementById('fDesc').value=w?w.desc:'';
   document.getElementById('fAward').value=w?w.award:'';
   if(w)document.getElementById('fGenre2').value=w.genre;
