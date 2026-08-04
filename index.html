@@ -1461,7 +1461,7 @@ function doExport(type){
       }catch(e){hideLoading();showToast('엑셀 생성 실패: '+e.message);}
     })();
   } else if(type==='pdf'){
-    var pw=window.open('','_blank');
+    var pw=window.open('','_blank','width=900,height=700,scrollbars=yes,resizable=yes');
     var rows2=tw.map(function(w,i){
       var h=getHN(w);
       var imgHtml=w.img
@@ -1746,7 +1746,7 @@ function exportCV(type){
     a.click();showToast(label+' CV 엑셀 다운로드됐어요');
 
   } else if(type==='pdf'){
-    var pw=window.open('','_blank');
+    var pw=window.open('','_blank','width=900,height=700,scrollbars=yes,resizable=yes');
     var rows2=toExport.sort(function(a,b){return(b.year||0)-(a.year||0);}).map(function(c){
       return'<tr><td>'+(c.year||'')+'</td><td><b>'+(CV_LABELS[c.type]||c.type)+'</b></td><td>'+c.title+'</td><td>'+(c.venue||'-')+'</td><td>'+(c.location||'-')+'</td></tr>';
     }).join('');
