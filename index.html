@@ -248,6 +248,77 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
   <div class="splash-word" id="splashWord">POPOL</div>
 </div>
 
+<!-- 설정 모달 -->
+<div class="ov" id="settingsOv" onclick="ovClick(event,'settingsOv')">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-header">
+      <h2>설정</h2>
+      <button class="modal-close" onclick="closeOv('settingsOv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+
+    <!-- 작가 정보 -->
+    <div style="margin-bottom:20px;">
+      <div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.06em;margin-bottom:10px;">작가 정보</div>
+      <div class="ff"><label>작가명</label><input id="settingName" placeholder="작가 이름"/></div>
+      <div class="ff"><label>연락처</label><input id="settingPhone" placeholder="010-0000-0000"/></div>
+      <div class="ff"><label>이메일</label><input id="settingEmail" placeholder="artist@email.com"/></div>
+      <button class="btn btn-dark btn-sm" onclick="saveSettings()" style="width:100%;justify-content:center;text-align:center;">저장</button>
+    </div>
+
+    <!-- 자동로그인 기기 -->
+    <div style="margin-bottom:20px;">
+      <div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.06em;margin-bottom:10px;">자동로그인</div>
+      <div style="background:var(--bg2);border-radius:10px;padding:12px 14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--text);" id="deviceName">이 기기</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px;" id="deviceStatus">자동로그인 등록됨</div>
+          </div>
+          <button onclick="toggleAutoLogin()" id="autoLoginBtn" style="font-size:12px;padding:4px 12px;border-radius:7px;border:0.5px solid var(--border2);background:none;color:var(--text2);cursor:pointer;">해제</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:8px;">자동로그인은 이 브라우저에서만 유지돼요. 다른 기기에서는 별도로 로그인이 필요해요.</div>
+    </div>
+
+    <!-- 계정 -->
+    <div style="margin-bottom:8px;">
+      <div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.06em;margin-bottom:10px;">계정</div>
+      <div style="font-size:13px;color:var(--text2);background:var(--bg2);border-radius:10px;padding:12px 14px;" id="settingAccountEmail"></div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:16px;padding-top:16px;border-top:0.5px solid var(--border);">
+      <button class="btn btn-sm" onclick="openInquiry()" style="flex:1;text-align:center;">💬 문의하기</button>
+      <button class="btn btn-sm" onclick="logout();closeOv('settingsOv')" style="flex:1;text-align:center;color:var(--red);">로그아웃</button>
+    </div>
+  </div>
+</div>
+
+<!-- 문의 모달 -->
+<div class="ov" id="inquiryOv" onclick="ovClick(event,'inquiryOv')">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h2>문의 남기기</h2>
+      <button class="modal-close" onclick="closeOv('inquiryOv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;">불편한 점이나 개선 제안을 남겨주세요. 빠르게 반영할게요.</div>
+    <div class="ff">
+      <label>분류</label>
+      <select id="inquiryType">
+        <option value="bug">🐛 오류/버그</option>
+        <option value="improve">💡 개선 제안</option>
+        <option value="feature">✨ 새 기능 요청</option>
+        <option value="other">💬 기타 문의</option>
+      </select>
+    </div>
+    <div class="ff"><label>내용</label><textarea id="inquiryText" rows="5" placeholder="문의 내용을 자세히 적어주세요..."></textarea></div>
+    <div class="ff"><label>연락받을 이메일 (선택)</label><input id="inquiryContact" placeholder="답변받을 이메일 주소"/></div>
+    <div class="mact">
+      <button class="btn" onclick="closeOv('inquiryOv')">취소</button>
+      <button class="btn btn-dark" onclick="submitInquiry()">문의 보내기</button>
+    </div>
+  </div>
+</div>
+
 <!-- LOADING OVERLAY -->
 <div id="loadingOv" style="display:none;position:fixed;inset:0;background:rgba(44,44,42,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:500;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
   <div class="splash-logo" style="width:36px;height:36px;">
@@ -290,7 +361,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
     <span class="nav-wordmark">POPOL</span>
   </div>
   <div class="nav-right">
-    <div class="user-bar"><span id="userEmail"></span><button class="logout-btn" onclick="logout()">로그아웃</button></div>
+    <div class="user-bar"><span id="userEmail"></span><button class="logout-btn" onclick="openSettings()">⚙️ 설정</button><button class="logout-btn" onclick="logout()">로그아웃</button></div>
     <div style="position:relative;">
       <button class="lang-btn" id="langBtn" onclick="toggleLangMenu()"><span id="langBtnLabel">한국어</span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
       <div class="lang-menu hide" id="langMenu">
@@ -1220,6 +1291,70 @@ function copyCaptionFromDetail(){
 }
 
 // ARTIST / PREVIEW
+// 설정
+function openSettings(){
+  document.getElementById('settingName').value=artist.name||'';
+  document.getElementById('settingPhone').value=artist.phone||'';
+  document.getElementById('settingEmail').value=artist.email||'';
+  var accEl=document.getElementById('settingAccountEmail');
+  if(accEl)accEl.textContent=currentUser?(currentUser.email||''):'';
+  var saved=localStorage.getItem('popol_session');
+  var autoBtn=document.getElementById('autoLoginBtn');
+  var devStatus=document.getElementById('deviceStatus');
+  if(saved){if(autoBtn)autoBtn.textContent='해제';if(devStatus)devStatus.textContent='자동로그인 등록됨 ✓';}
+  else{if(autoBtn)autoBtn.textContent='등록';if(devStatus)devStatus.textContent='자동로그인 미등록';}
+  var ua=navigator.userAgent;
+  var devName='이 기기';
+  if(/iPhone/.test(ua))devName='iPhone';
+  else if(/iPad/.test(ua))devName='iPad';
+  else if(/Macintosh/.test(ua))devName='Mac';
+  else if(/Android/.test(ua))devName='Android';
+  else if(/Windows/.test(ua))devName='Windows PC';
+  var nameEl=document.getElementById('deviceName');
+  if(nameEl)nameEl.textContent=devName;
+  document.getElementById('settingsOv').classList.add('on');
+}
+async function saveSettings(){
+  artist.name=document.getElementById('settingName').value.trim();
+  artist.phone=document.getElementById('settingPhone').value.trim();
+  artist.email=document.getElementById('settingEmail').value.trim();
+  if(currentUser)await saveProfileToDB();
+  var em=document.getElementById('userEmail');
+  if(em)em.textContent=artist.name||(currentUser?currentUser.email:'');
+  showToast('저장됐어요');
+}
+function toggleAutoLogin(){
+  var saved=localStorage.getItem('popol_session');
+  var autoBtn=document.getElementById('autoLoginBtn');
+  var devStatus=document.getElementById('deviceStatus');
+  if(saved){
+    localStorage.removeItem('popol_session');
+    if(autoBtn)autoBtn.textContent='등록';
+    if(devStatus)devStatus.textContent='자동로그인 미등록';
+    showToast('자동로그인이 해제됐어요. 다음 방문시 로그인이 필요해요.');
+  } else {
+    if(autoBtn)autoBtn.textContent='해제';
+    if(devStatus)devStatus.textContent='자동로그인 등록됨 ✓';
+    showToast('자동로그인이 등록됐어요');
+  }
+}
+function openInquiry(){
+  document.getElementById('inquiryText').value='';
+  var contact=document.getElementById('inquiryContact');
+  if(contact)contact.value=artist.email||(currentUser?currentUser.email:'');
+  closeOv('settingsOv');
+  document.getElementById('inquiryOv').classList.add('on');
+}
+async function submitInquiry(){
+  var text=document.getElementById('inquiryText').value.trim();
+  if(!text){showToast('문의 내용을 입력해주세요');return;}
+  var type=document.getElementById('inquiryType').value;
+  var contact=document.getElementById('inquiryContact').value.trim();
+  var data={user_id:currentUser?currentUser.id:null,type:type,content:text,contact:contact,created_at:new Date().toISOString()};
+  await new Promise(function(resolve){supa.from('inquiries').insert(data).then(resolve);});
+  closeOv('inquiryOv');
+  showToast('문의가 접수됐어요. 감사해요 😊');
+}
 function openArtist(){document.getElementById('aName').value=artist.name;document.getElementById('aPhone').value=artist.phone;document.getElementById('aEmail').value=artist.email;document.getElementById('artistOv').classList.add('on');}
 async function saveArtist(){artist.name=document.getElementById('aName').value.trim();artist.phone=document.getElementById('aPhone').value.trim();artist.email=document.getElementById('aEmail').value.trim();if(currentUser)await saveProfileToDB();closeOv('artistOv');openPreview();}
 function openPreview(){
@@ -1301,41 +1436,49 @@ function doExport(type){
     var rows2=tw.map(function(w,i){
       var h=getHN(w);
       var imgHtml=w.img
-        ?'<img src="'+w.img+'" style="width:70px;height:70px;object-fit:contain;border-radius:4px;background:#f5f5f5;" crossorigin="anonymous"/>'
+        ?'<img src="'+w.img+'" style="width:70px;height:70px;object-fit:contain;background:#f5f5f5;border-radius:4px;" crossorigin="anonymous"/>'
         :'<div style="width:70px;height:70px;background:#eee;border-radius:4px;"></div>';
       var priceStr=w.price?fmtKRW(w.price):'-';
       var soldStr=isSold(w)?'<span style="color:#A32D2D;font-weight:600;">판매완료</span>':isReserve(w)?'<span style="color:#8B6914;font-weight:600;">예약중</span>':'판매가능';
       return'<tr>'
-        +'<td style="text-align:center;">'+imgHtml+'</td>'
-        +'<td><b>'+w.title+'</b></td>'
-        +'<td style="text-align:center;">'+w.year+'</td>'
-        +'<td style="text-align:center;">'+(w.size||'-')+'</td>'
-        +'<td style="text-align:center;">'+(h||'-')+'</td>'
-        +'<td style="text-align:center;">'+(w.medium||'-')+'</td>'
-        +'<td style="text-align:right;">'+priceStr+'</td>'
-        +'<td style="text-align:center;">'+soldStr+'</td>'
+        +'<td class="num">'+(i+1)+'</td>'
+        +'<td class="img">'+imgHtml+'</td>'
+        +'<td class="title">'+w.title+'</td>'
+        +'<td class="center">'+(w.size||'-')+'</td>'
+        +'<td class="center">'+(h||'-')+'</td>'
+        +'<td class="center">'+(w.medium||'-')+'</td>'
+        +'<td class="center">'+w.year+'</td>'
+        +'<td class="right">'+priceStr+'</td>'
+        +'<td class="center">'+soldStr+'</td>'
         +'</tr>';
     }).join('');
     pw.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>'
       +'@page{size:A4 landscape;margin:12mm;}'
       +'body{font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:9pt;color:#111;}'
-      +'h2{font-size:15pt;margin-bottom:2px;}'
+      +'h2{font-size:14pt;font-weight:700;margin-bottom:2px;}'
       +'p{font-size:8pt;color:#666;margin-bottom:12px;}'
-      +'table{width:100%;border-collapse:collapse;}'
-      +'th{padding:7px 6px;text-align:left;border-bottom:2px solid #222;font-size:8pt;background:#f8f8f8;white-space:nowrap;}'
-      +'td{padding:8px 6px;border-bottom:0.5px solid #ddd;vertical-align:middle;}'
+      +'table{width:100%;border-collapse:collapse;table-layout:auto;}'
+      +'th{padding:7px 8px;border-top:2px solid #111;border-bottom:1px solid #111;font-size:8pt;font-weight:600;white-space:nowrap;background:#fafafa;}'
+      +'td{padding:7px 8px;border-bottom:0.5px solid #e0e0e0;vertical-align:middle;white-space:nowrap;}'
+      +'td.title{white-space:normal;min-width:120px;}'
+      +'td.num{color:#aaa;text-align:center;}'
+      +'td.img{text-align:center;}'
+      +'td.center{text-align:center;}'
+      +'td.right{text-align:right;}'
+      +'tr:last-child td{border-bottom:1.5px solid #111;}'
       +'</style></head><body>'
       +'<h2>'+(artist.name||'')+'</h2>'
       +'<p>'+(artist.phone||'')+(artist.phone&&artist.email?' · ':'')+( artist.email||'')+'</p>'
       +'<table><thead><tr>'
-      +'<th style="width:80px;">이미지</th>'
+      +'<th style="text-align:center;">No.</th>'
+      +'<th style="text-align:center;">이미지</th>'
       +'<th>제목</th>'
-      +'<th style="width:50px;">연도</th>'
-      +'<th style="width:90px;">크기</th>'
-      +'<th style="width:70px;">호수</th>'
-      +'<th style="width:100px;">재료</th>'
-      +'<th style="width:90px;text-align:right;">가격</th>'
-      +'<th style="width:70px;text-align:center;">판매여부</th>'
+      +'<th style="text-align:center;">크기</th>'
+      +'<th style="text-align:center;">호수</th>'
+      +'<th style="text-align:center;">재료</th>'
+      +'<th style="text-align:center;">연도</th>'
+      +'<th style="text-align:right;">가격</th>'
+      +'<th style="text-align:center;">판매여부</th>'
       +'</tr></thead><tbody>'+rows2+'</tbody></table>'
       +'</body></html>');
     pw.document.close();
@@ -1853,7 +1996,7 @@ function viewNote(id){
 // ESC 키로 열린 모달 닫기
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){
-    var ovs=['detailOv','addOv','prevOv','artistOv','cvAddOv','noteAddOv','noteViewOv','cvGuideOv','cvExportOv'];
+    var ovs=['detailOv','addOv','prevOv','artistOv','cvAddOv','noteAddOv','noteViewOv','cvGuideOv','cvExportOv','settingsOv','inquiryOv','cvMoveOv'];
     for(var i=0;i<ovs.length;i++){
       var el=document.getElementById(ovs[i]);
       if(el&&el.classList.contains('on')){el.classList.remove('on');break;}
