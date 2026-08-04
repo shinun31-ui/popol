@@ -1251,19 +1251,96 @@ function doExport(type){
   var ids=sel.size>0?[...sel]:works.map(function(w){return w.id;});
   var tw=sortW(works.filter(function(w){return ids.indexOf(w.id)>=0;}));
   if(type==='csv'){
-    var rows=tw.map(function(w,i){var h=getHN(w);return[i+1,'"'+w.title.replace(/"/g,'""')+'"',w.year,w.genre,h||'-','"'+(w.medium||'').replace(/"/g,'""')+'"','"'+(w.size||'').replace(/"/g,'""')+'"',w.price?fmtKRW(w.price):'-',isSold(w)?'판매완료':isReserve(w)?'예약중':'판매가능',w.img||''].join(',');});
-    var blob=new Blob(['\uFEFF'+'번호,제목,연도,장르,호수,매체,크기,가격,판매여부,이미지URL\n'+rows.join('\n')],{type:'text/csv;charset=utf-8'});
-    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='POPOL_'+(artist.name||'포트폴리오')+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();showToast('CSV 다운로드됐어요');
+    // 엑셀 다운로드 (SheetJS)
+    showLoading('엑셀 생성 중...');
+    (async function(){
+      try{
+        if(!window.XLSX){
+          await new Promise(function(res,rej){
+            var s=document.createElement('script');
+            s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+            s.onload=res;s.onerror=rej;document.head.appendChild(s);
+          });
+        }
+        var wb=XLSX.utils.book_new();
+        var headers=['작가','이미지URL','제목','크기','호수','재료','연도','가격','판매여부'];
+        var data=[headers];
+        tw.forEach(function(w){
+          var h=getHN(w);
+          data.push([
+            artist.name||'',
+            w.img||'',
+            w.title,
+            w.size||'-',
+            h||'-',
+            w.medium||'-',
+            w.year,
+            w.price?fmtKRW(w.price):'-',
+            isSold(w)?'판매완료':isReserve(w)?'예약중':'판매가능'
+          ]);
+        });
+        var ws=XLSX.utils.aoa_to_sheet(data);
+        // 칼럼 너비 자동 조정
+        var colWidths=headers.map(function(_,ci){
+          var max=headers[ci].length;
+          data.forEach(function(row){
+            var v=row[ci]?String(row[ci]):'';
+            if(v.length>max)max=v.length;
+          });
+          return{wch:Math.min(max+4,50)};
+        });
+        ws['!cols']=colWidths;
+        XLSX.utils.book_append_sheet(wb,ws,'작품목록');
+        var fname='POPOL_'+(artist.name||'포트폴리오')+'_'+new Date().toISOString().slice(0,10)+'.xlsx';
+        XLSX.writeFile(wb,fname);
+        hideLoading();showToast('엑셀 다운로드됐어요');
+      }catch(e){hideLoading();showToast('엑셀 생성 실패: '+e.message);}
+    })();
   } else if(type==='pdf'){
-    // 8. PDF에 이미지 첨부
     var pw=window.open('','_blank');
     var rows2=tw.map(function(w,i){
       var h=getHN(w);
-      var imgHtml=w.img?'<img src="'+w.img+'" style="width:60px;height:60px;object-fit:cover;border-radius:4px;vertical-align:middle;" crossorigin="anonymous"/>':'<div style="width:60px;height:60px;background:#eee;border-radius:4px;display:inline-block;"></div>';
-      return'<tr'+(isSold(w)?' style="background:#fff5f5;"':'')+'><td style="width:32px;">'+(i+1)+'</td><td style="width:70px;">'+imgHtml+'</td><td><b>'+w.title+'</b>'+(isSold(w)?'<br/><small style="color:#A32D2D">판매완료</small>':isReserve(w)?'<br/><small style="color:#8B6914">예약중</small>':'')+'</td><td>'+w.year+'</td><td>'+w.genre+'</td><td>'+(h||'-')+'</td><td>'+(w.medium||'-')+'</td><td>'+(w.size||'-')+'</td><td>'+(w.price?fmtKRW(w.price):'-')+'</td></tr>';
+      var imgHtml=w.img
+        ?'<img src="'+w.img+'" style="width:70px;height:70px;object-fit:contain;border-radius:4px;background:#f5f5f5;" crossorigin="anonymous"/>'
+        :'<div style="width:70px;height:70px;background:#eee;border-radius:4px;"></div>';
+      var priceStr=w.price?fmtKRW(w.price):'-';
+      var soldStr=isSold(w)?'<span style="color:#A32D2D;font-weight:600;">판매완료</span>':isReserve(w)?'<span style="color:#8B6914;font-weight:600;">예약중</span>':'판매가능';
+      return'<tr>'
+        +'<td style="text-align:center;">'+imgHtml+'</td>'
+        +'<td><b>'+w.title+'</b></td>'
+        +'<td style="text-align:center;">'+w.year+'</td>'
+        +'<td style="text-align:center;">'+(w.size||'-')+'</td>'
+        +'<td style="text-align:center;">'+(h||'-')+'</td>'
+        +'<td style="text-align:center;">'+(w.medium||'-')+'</td>'
+        +'<td style="text-align:right;">'+priceStr+'</td>'
+        +'<td style="text-align:center;">'+soldStr+'</td>'
+        +'</tr>';
     }).join('');
-    pw.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>@page{size:A4 landscape;margin:12mm;}body{font-family:"Apple SD Gothic Neo",sans-serif;font-size:9pt;}table{width:100%;border-collapse:collapse;}th{padding:6px;text-align:left;border-bottom:1.5px solid #222;font-size:8pt;}td{padding:6px;border-bottom:0.5px solid #ddd;vertical-align:middle;}img{display:block;}</style></head><body><h2 style="margin-bottom:4px;">'+(artist.name||'')+'</h2><p style="font-size:8pt;color:#666;margin-bottom:12px;">'+(artist.phone?artist.phone+' · ':'')+( artist.email||'')+'</p><table><thead><tr><th>No.</th><th>이미지</th><th>제목</th><th>연도</th><th>장르</th><th>호수</th><th>매체</th><th>크기</th><th>가격</th></tr></thead><tbody>'+rows2+'</tbody></table></body></html>');
-    pw.document.close();setTimeout(function(){pw.print();},800);showToast('PDF 인쇄창이 열렸어요');
+    pw.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>'
+      +'@page{size:A4 landscape;margin:12mm;}'
+      +'body{font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:9pt;color:#111;}'
+      +'h2{font-size:15pt;margin-bottom:2px;}'
+      +'p{font-size:8pt;color:#666;margin-bottom:12px;}'
+      +'table{width:100%;border-collapse:collapse;}'
+      +'th{padding:7px 6px;text-align:left;border-bottom:2px solid #222;font-size:8pt;background:#f8f8f8;white-space:nowrap;}'
+      +'td{padding:8px 6px;border-bottom:0.5px solid #ddd;vertical-align:middle;}'
+      +'</style></head><body>'
+      +'<h2>'+(artist.name||'')+'</h2>'
+      +'<p>'+(artist.phone||'')+(artist.phone&&artist.email?' · ':'')+( artist.email||'')+'</p>'
+      +'<table><thead><tr>'
+      +'<th style="width:80px;">이미지</th>'
+      +'<th>제목</th>'
+      +'<th style="width:50px;">연도</th>'
+      +'<th style="width:90px;">크기</th>'
+      +'<th style="width:70px;">호수</th>'
+      +'<th style="width:100px;">재료</th>'
+      +'<th style="width:90px;text-align:right;">가격</th>'
+      +'<th style="width:70px;text-align:center;">판매여부</th>'
+      +'</tr></thead><tbody>'+rows2+'</tbody></table>'
+      +'</body></html>');
+    pw.document.close();
+    setTimeout(function(){pw.print();},800);
+    showToast('PDF 인쇄창이 열렸어요');
   } else if(type==='img'){
     var imgs=tw.filter(function(w){return w.img;});
     if(!imgs.length){showToast('이미지가 없어요');return;}
