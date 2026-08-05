@@ -519,6 +519,11 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
         <button class="cv-type-btn" data-type="international" onclick="setCVType('international')">해외전시</button>
         <button class="cv-type-btn" data-type="etc" onclick="setCVType('etc')">기타</button>
       </div>
+      <!-- CV 검색 -->
+      <div style="position:relative;margin-bottom:14px;">
+        <input id="cvSearchInput" type="text" placeholder="🔍  이력 검색... (제목, 장소, 지역)" oninput="renderCV()" style="width:100%;border:0.5px solid var(--border2);border-radius:10px;padding:10px 36px 10px 14px;font-size:13px;background:var(--bg2);color:var(--text);outline:none;box-sizing:border-box;"/>
+        <span id="cvSearchCount" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);pointer-events:none;"></span>
+      </div>
       <div id="cvList"></div>
     </div>
   </div>
@@ -532,6 +537,10 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
           <div style="font-size:12px;color:var(--text3);margin-top:2px;">시리즈별 작업 기록을 관리해요</div>
         </div>
         <button class="btn btn-sm btn-dark" onclick="openNoteAdd()">+ 새 시리즈</button>
+      </div>
+      <div style="position:relative;margin-bottom:14px;">
+        <input id="noteSearchInput" type="text" placeholder="🔍  작업노트 검색... (제목, 내용 키워드)" oninput="renderNotes()" style="width:100%;border:0.5px solid var(--border2);border-radius:10px;padding:10px 36px 10px 14px;font-size:13px;background:var(--bg2);color:var(--text);outline:none;box-sizing:border-box;"/>
+        <span id="noteSearchCount" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);pointer-events:none;"></span>
       </div>
       <div id="notesList"></div>
     </div>
@@ -2184,7 +2193,19 @@ async function loadCV(){
 function setCVType(type){cvTypeFilter=type;document.querySelectorAll('.cv-type-btn').forEach(function(b){b.classList.toggle('active',b.dataset.type===type);});renderCV();}
 function renderCV(){
   var el=document.getElementById('cvList');if(!el)return;
+  var q=(document.getElementById('cvSearchInput')||{value:''}).value.toLowerCase().trim();
   var filtered=cvTypeFilter==='all'?cvItems:cvItems.filter(function(c){return c.type===cvTypeFilter;});
+  // 검색 필터
+  if(q){
+    filtered=filtered.filter(function(c){
+      return (c.title||'').toLowerCase().includes(q)
+        ||(c.venue||'').toLowerCase().includes(q)
+        ||(c.location||'').toLowerCase().includes(q)
+        ||String(c.year||'').includes(q);
+    });
+  }
+  var countEl=document.getElementById('cvSearchCount');
+  if(countEl)countEl.textContent=q?filtered.length+'개':'';
   if(!filtered.length){el.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text3);font-size:14px;">이력이 없어요.<br/>+ 추가 버튼으로 시작해보세요.</div>';return;}
   // 선택 카운트 표시 업데이트
   var selCountEl=document.getElementById('cvSelCount');
@@ -2202,7 +2223,10 @@ function renderCV(){
     var yr=document.createElement('div');yr.style.cssText='font-size:13px;font-weight:600;color:var(--text2);min-width:40px;flex-shrink:0;';yr.textContent=c.year||'';
     var info=document.createElement('div');info.style.flex='1';
     var badge=document.createElement('span');badge.className='cv-badge';badge.style.marginBottom='4px';badge.textContent=CV_LABELS[c.type]||c.type;
-    var name=document.createElement('div');name.style.cssText='font-size:13px;font-weight:500;color:var(--text);margin-top:3px;';name.textContent=c.title;
+    var name=document.createElement('div');name.style.cssText='font-size:13px;font-weight:500;color:var(--text);margin-top:3px;';
+    if(q&&c.title.toLowerCase().includes(q)){
+      name.innerHTML=c.title.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark style="background:#FFF3B0;border-radius:2px;padding:0 1px;">$1</mark>');
+    } else {name.textContent=c.title;}
     info.appendChild(badge);info.appendChild(name);
     if(c.venue||c.location){var sub=document.createElement('div');sub.style.cssText='font-size:11px;color:var(--text3);margin-top:2px;';sub.textContent=(c.venue||'')+(c.venue&&c.location?' · ':'')+( c.location||'');info.appendChild(sub);}
     var editBtn=document.createElement('button');editBtn.textContent='수정';editBtn.style.cssText='font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:none;color:var(--text3);cursor:pointer;flex-shrink:0;';
@@ -2441,9 +2465,23 @@ async function loadNotes(){
 }
 function renderNotes(){
   var el=document.getElementById('notesList');if(!el)return;
-  if(!seriesNotes.length){el.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text3);font-size:14px;">작업노트가 없어요.<br/>+ 새 시리즈 버튼으로 시작해보세요.</div>';return;}
+  var q=(document.getElementById('noteSearchInput')||{value:''}).value.toLowerCase().trim();
+  var filtered=seriesNotes;
+  if(q){
+    filtered=seriesNotes.filter(function(n){
+      return (n.title||'').toLowerCase().includes(q)
+        ||(n.note||'').toLowerCase().includes(q)
+        ||(n.period||'').toLowerCase().includes(q);
+    });
+  }
+  var countEl=document.getElementById('noteSearchCount');
+  if(countEl)countEl.textContent=q?filtered.length+'개':'';
+  if(!filtered.length){
+    el.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text3);font-size:14px);">'+(q?'"'+q+'" 검색 결과가 없어요':'작업노트가 없어요.<br/>+ 새 시리즈 버튼으로 시작해보세요.')+'</div>';
+    return;
+  }
   el.innerHTML='';
-  seriesNotes.forEach(function(n){
+  filtered.forEach(function(n){
     var card=document.createElement('div');card.className='note-card';card.dataset.id=n.id;
     // 5. 카드 클릭 제거 - 보기 버튼으로만 열기
     var header=document.createElement('div');header.style.cssText='display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;';
