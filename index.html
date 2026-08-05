@@ -151,7 +151,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 .sold-thumb{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .2s;}
 .sold-track.on .sold-thumb{transform:translateX(16px);}
 /* DETAIL */
-#dImg{width:100%;max-height:360px;overflow:hidden;border-radius:12px;margin-bottom:14px;background:var(--bg2);position:relative;}
+#dImg{width:100%;overflow:hidden;border-radius:12px;margin-bottom:14px;background:var(--bg2);position:relative;}
 #dImg img{width:100%;height:100%;object-fit:cover;}
 .dsoldrib{position:absolute;top:12px;left:12px;background:#A32D2D;color:#fff;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;}
 .chip{font-size:11px;padding:3px 9px;border-radius:20px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);display:inline-block;margin:2px;}
@@ -541,13 +541,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
       <div style="position:relative;margin-bottom:8px;">
         <input id="noteSearchInput" type="text" placeholder="🔍  작업노트 검색... (제목, 내용 키워드)" oninput="noteSearch()" style="width:100%;border:0.5px solid var(--border2);border-radius:10px;padding:10px 36px 10px 14px;font-size:13px;background:var(--bg2);color:var(--text);outline:none;box-sizing:border-box;"/>
       </div>
-      <!-- 검색 결과 네비게이션 -->
-      <div id="noteSearchNav" style="display:none;align-items:center;gap:10px;margin-bottom:14px;padding:8px 12px;background:var(--bg2);border-radius:8px;">
-        <span id="noteSearchCount" style="font-size:12px;color:var(--text2);flex:1;"></span>
-        <button onclick="moveNoteMatch(-1)" style="width:28px;height:28px;border-radius:6px;border:0.5px solid var(--border2);background:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">↑</button>
-        <button onclick="moveNoteMatch(1)" style="width:28px;height:28px;border-radius:6px;border:0.5px solid var(--border2);background:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">↓</button>
-        <button onclick="document.getElementById('noteSearchInput').value='';noteSearch();" style="font-size:11px;padding:3px 8px;border-radius:6px;border:0.5px solid var(--border2);background:none;cursor:pointer;color:var(--text3);">지우기</button>
-      </div>
+
       <div id="notesList"></div>
     </div>
   </div>
@@ -605,6 +599,14 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
   </div>
 
 </div><!-- /appScreen -->
+
+<!-- NOTE SEARCH NAV - 고정 하단 -->
+<div id="noteSearchNav" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:55;background:var(--bg);border-top:0.5px solid var(--border2);padding:10px 16px;align-items:center;gap:10px;box-shadow:0 -4px 16px rgba(0,0,0,.08);">
+  <span id="noteSearchCount" style="font-size:13px;color:var(--text2);flex:1;font-weight:500;"></span>
+  <button onclick="moveNoteMatch(-1)" style="width:36px;height:36px;border-radius:8px;border:0.5px solid var(--border2);background:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">↑</button>
+  <button onclick="moveNoteMatch(1)" style="width:36px;height:36px;border-radius:8px;border:0.5px solid var(--border2);background:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">↓</button>
+  <button onclick="document.getElementById('noteSearchInput').value='';noteSearch();" style="font-size:12px;padding:5px 12px;border-radius:7px;border:0.5px solid var(--border2);background:none;cursor:pointer;color:var(--text3);">지우기</button>
+</div>
 
 <!-- SEL BAR -->
 <div id="selbar">
@@ -1268,7 +1270,7 @@ function initCCTable(){
     var tr=document.createElement("tr");
     tr.style.borderBottom="0.5px solid var(--border)";
     var fmt=function(arr){return arr&&arr[0]?arr[0]+"×"+arr[1]:"-";};
-    tr.innerHTML="<td style='padding:8px 6px;text-align:center;font-weight:600;color:var(--text);'>"+row.n+"Ø</td>"
+    tr.innerHTML="<td style='padding:8px 6px;text-align:center;font-weight:600;color:var(--text);'>"+row.n+"호</td>"
       +"<td style='padding:8px 6px;text-align:center;color:var(--text2);'>"+fmt(row.F)+"</td>"
       +"<td style='padding:8px 6px;text-align:center;color:var(--text2);'>"+fmt(row.P)+"</td>"
       +"<td style='padding:8px 6px;text-align:center;color:var(--text2);'>"+fmt(row.M)+"</td>"
@@ -1298,7 +1300,7 @@ function calcCC(){
   });
   if(!best||bestDist>30){noResultEl.style.display="block";return;}
   var isExact=bestDist<1;
-  document.getElementById("ccMain").textContent=best.n+"Ø "+best.typeName+(isExact?"":"변형");
+  document.getElementById("ccMain").textContent=best.n+"호 "+best.typeName+(isExact?"":"변형");
   document.getElementById("ccMain").style.color=isExact?"var(--text)":bestDist<8?"#534AB7":"#8B4513";
   document.getElementById("ccSub").textContent="표준 "+best.rl+"×"+best.rs+"  ·  입력 "+lo+"×"+sh+(isExact?" ✓":" (오차 "+bestDist.toFixed(1)+"cm)");
   var altEl=document.getElementById("ccAlt");altEl.innerHTML="";
@@ -1575,7 +1577,7 @@ function openDetail(id){
   var imgSrc=w.img?(w.img.includes('supabase.co')?w.img+'?width=600&quality=60&format=webp':w.img):'';
   var sold=isSold(w);var stop=isStop(w);
   var ph='<div style="width:100%;height:120px;background:var(--bg2);border-radius:12px;display:flex;align-items:center;justify-content:center;"><svg width="32" height="32" viewBox="0 0 28 28" fill="none"><rect x="4" y="4" width="20" height="20" rx="3" stroke="var(--text3)" stroke-width="1.5" fill="none"/></svg></div>';
-  document.getElementById('dImg').innerHTML=(imgSrc?'<img src="'+imgSrc+'" style="width:100%;height:auto;max-height:65vh;display:block;object-fit:contain;background:#fff;">':ph)+(sold?'<div class="dsoldrib">판매 완료</div>':'');
+  document.getElementById('dImg').innerHTML=(imgSrc?'<img src="'+imgSrc+'" style="width:100%;height:auto;display:block;object-fit:contain;background:#fff;">':ph)+(sold?'<div class="dsoldrib">판매 완료</div>':'');
   document.getElementById('dTitle').textContent=w.title;
   var h=getHN(w);
   var chips='';
