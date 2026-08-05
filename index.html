@@ -1642,6 +1642,7 @@ function toggleEditMode(){
   document.getElementById('editBar').style.display=editMode?'flex':'none';
   if(!editMode){sel.clear();}
   render();
+  if(editMode)initTouchDrag();
 }
 
 // DETAIL
@@ -2057,8 +2058,90 @@ async function importSel(){
 }
 
 // DRAG
+// 터치 드래그 (아이패드 호환)
+var _dragId=null,_dragEl=null,_dragClone=null,_dragOffX=0,_dragOffY=0,_longPressTimer=null;
+
+function initTouchDrag(){
+  // 편집모드 시 카드에 터치 이벤트 등록
+  document.getElementById('list').addEventListener('touchstart',function(e){
+    if(!editMode)return;
+    var card=e.target.closest('.card');if(!card)return;
+    var id=card.dataset.id;
+    _longPressTimer=setTimeout(function(){
+      // 진동 피드백
+      if(navigator.vibrate)navigator.vibrate(30);
+      _dragId=id;_dragEl=card;
+      var rect=card.getBoundingClientRect();
+      var touch=e.touches[0];
+      _dragOffX=touch.clientX-rect.left;
+      _dragOffY=touch.clientY-rect.top;
+      // 클론 생성
+      _dragClone=card.cloneNode(true);
+      _dragClone.style.cssText='position:fixed;left:'+(touch.clientX-_dragOffX)+'px;top:'+(touch.clientY-_dragOffY)+'px;width:'+rect.width+'px;opacity:.85;z-index:999;pointer-events:none;transform:scale(1.04);box-shadow:0 12px 32px rgba(0,0,0,.25);border-radius:14px;transition:none;';
+      document.body.appendChild(_dragClone);
+      card.style.opacity='0.3';
+    },400);
+  },false);
+
+  document.getElementById('list').addEventListener('touchmove',function(e){
+    if(!_dragClone)return;
+    e.preventDefault();
+    var touch=e.touches[0];
+    _dragClone.style.left=(touch.clientX-_dragOffX)+'px';
+    _dragClone.style.top=(touch.clientY-_dragOffY)+'px';
+    // 드롭 타겟 하이라이트
+    _dragClone.style.display='none';
+    var el=document.elementFromPoint(touch.clientX,touch.clientY);
+    _dragClone.style.display='';
+    var targetCard=el?el.closest('.card'):null;
+    document.querySelectorAll('.card.drag-over').forEach(function(c){c.classList.remove('drag-over');});
+    if(targetCard&&targetCard.dataset.id!==_dragId)targetCard.classList.add('drag-over');
+  },{passive:false});
+
+  document.getElementById('list').addEventListener('touchend',function(e){
+    clearTimeout(_longPressTimer);_longPressTimer=null;
+    if(!_dragClone){return;}
+    var touch=e.changedTouches[0];
+    _dragClone.style.display='none';
+    var el=document.elementFromPoint(touch.clientX,touch.clientY);
+    _dragClone.style.display='';
+    var targetCard=el?el.closest('.card'):null;
+    // 클론 제거
+    document.body.removeChild(_dragClone);_dragClone=null;
+    if(_dragEl)_dragEl.style.opacity='';
+    document.querySelectorAll('.card.drag-over').forEach(function(c){c.classList.remove('drag-over');});
+    if(targetCard&&targetCard.dataset.id&&targetCard.dataset.id!==_dragId){
+      onDrop2(_dragId,targetCard.dataset.id);
+    }
+    _dragId=null;_dragEl=null;
+  },false);
+
+  document.getElementById('list').addEventListener('touchcancel',function(){
+    clearTimeout(_longPressTimer);_longPressTimer=null;
+    if(_dragClone){document.body.removeChild(_dragClone);_dragClone=null;}
+    if(_dragEl)_dragEl.style.opacity='';
+    document.querySelectorAll('.card.drag-over').forEach(function(c){c.classList.remove('drag-over');});
+    _dragId=null;_dragEl=null;
+  },false);
+}
+
+function onDrop2(srcId,targetId){
+  if(!srcId||!targetId||srcId===targetId)return;
+  var si=works.findIndex(function(w){return w.id===srcId;});
+  var ti=works.findIndex(function(w){return w.id===targetId;});
+  if(si<0||ti<0)return;
+  var moved=works.splice(si,1)[0];works.splice(ti,0,moved);
+  works.forEach(function(w,i){w.sort_order=i;});
+  render();saveOrder();
+  showToast('순서가 변경됐어요');
+}
+
 function onDragStart(e,id){dragSrcId=id;e.currentTarget.classList.add('dragging');}
 function onDragEnd(e){e.currentTarget.classList.remove('dragging');}
+function onDragOver(e,id){
+  document.querySelectorAll('.card.drag-over').forEach(function(c){c.classList.remove('drag-over');});
+  if(dragSrcId&&id!==dragSrcId){var c=document.querySelector('.card[data-id="'+id+'"]');if(c)c.classList.add('drag-over');}
+}
 function onDrop(e,targetId){
   e.preventDefault();if(!dragSrcId||dragSrcId===targetId)return;
   var si=works.findIndex(function(w){return w.id===dragSrcId;});
