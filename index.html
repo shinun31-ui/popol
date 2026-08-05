@@ -262,6 +262,15 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
       <div class="ff"><label>작가명</label><input id="settingName" placeholder="작가 이름"/></div>
       <div class="ff"><label>연락처</label><input id="settingPhone" placeholder="010-0000-0000"/></div>
       <div class="ff"><label>이메일</label><input id="settingEmail" placeholder="artist@email.com"/></div>
+      <!-- 호당가 설정 -->
+      <div class="ff">
+        <label>호당 가격 (원)</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input id="settingPricePerHo" type="number" placeholder="예: 100000 (10만원/호)" style="flex:1;"/>
+          <button class="btn btn-sm" onclick="applyPricePerHo()" style="white-space:nowrap;color:#185FA5;">일괄 적용</button>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;">설정 후 '일괄 적용' 누르면 사이즈가 있는 작품에 호수 × 호당가로 가격이 자동 계산돼요</div>
+      </div>
       <button class="btn btn-dark btn-sm" onclick="saveSettings()" style="width:100%;justify-content:center;text-align:center;">저장</button>
     </div>
 
@@ -634,7 +643,59 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
       <div class="ff"><label>연도</label><input id="fYear2" type="number" value="2024"/></div>
       <div class="ff"><label>장르</label><select id="fGenre2"><option>회화</option><option>조각</option><option>사진</option><option>설치미술</option><option>판화</option><option>드로잉</option><option>디지털아트</option><option>혼합매체</option></select></div>
     </div>
-    <div class="ff"><label>크기 <span id="hnprev" style="font-weight:400;"></span></label><input id="fSize" placeholder="예: 53x45.5" oninput="previewHN()"/></div>
+    <div class="ff">
+      <label>크기 <span id="hnprev" style="font-weight:400;color:#185FA5;"></span></label>
+      <!-- 호수 선택 방식 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px;">
+        <select id="fHoNum" onchange="calcSizeFromHo()" style="border:0.5px solid var(--border2);border-radius:8px;padding:8px;font-size:13px;background:var(--bg);color:var(--text);outline:none;">
+          <option value="">호수 선택</option>
+          <option value="0">0호</option>
+          <option value="1">1호</option><option value="2">2호</option><option value="3">3호</option>
+          <option value="4">4호</option><option value="5">5호</option><option value="6">6호</option>
+          <option value="8">8호</option><option value="10">10호</option><option value="12">12호</option>
+          <option value="15">15호</option><option value="20">20호</option><option value="25">25호</option>
+          <option value="30">30호</option><option value="40">40호</option><option value="50">50호</option>
+          <option value="60">60호</option><option value="80">80호</option><option value="100">100호</option>
+          <option value="120">120호</option><option value="150">150호</option><option value="200">200호</option>
+        </select>
+        <select id="fHoType" onchange="calcSizeFromHo()" style="border:0.5px solid var(--border2);border-radius:8px;padding:8px;font-size:13px;background:var(--bg);color:var(--text);outline:none;">
+          <option value="F">F형 (인물)</option>
+          <option value="P">P형 (풍경)</option>
+          <option value="M">M형 (해경)</option>
+          <option value="S">S형 (정방)</option>
+        </select>
+        <select id="fHoVariant" onchange="calcSizeFromHo()" style="border:0.5px solid var(--border2);border-radius:8px;padding:8px;font-size:13px;background:var(--bg);color:var(--text);outline:none;">
+          <option value="0">정규</option>
+          <option value="1">변형</option>
+        </select>
+      </div>
+      <!-- 직접 입력 (변형 또는 수동) -->
+      <input id="fSize" placeholder="크기 직접 입력: 53x45.5 (변형 시)" oninput="previewHN()" style="font-size:12px;color:var(--text2);"/>
+      <div style="font-size:10px;color:var(--text3);margin-top:3px;">호수 선택 시 자동 입력 · 변형이면 직접 수정 가능</div>
+    </div>
+    <!-- 액자 설정 -->
+    <div class="ff" id="frameWrap">
+      <label>액자 <span id="framePrev" style="font-weight:400;color:var(--text3);font-size:11px;"></span></label>
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer;">
+          <input type="checkbox" id="fFrameOn" onchange="toggleFrame()" style="width:16px;height:16px;cursor:pointer;"/> 액자 포함
+        </label>
+      </div>
+      <div id="frameFields" style="display:none;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">프레임 폭 (cm)</div>
+          <input id="fFrameW" type="number" placeholder="예: 3" oninput="calcFrameSize()" style="width:100%;border:0.5px solid var(--border2);border-radius:7px;padding:7px 9px;font-size:13px;background:var(--bg);color:var(--text);outline:none;"/>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">깊이 (cm)</div>
+          <input id="fFrameD" type="number" placeholder="예: 2" oninput="calcFrameSize()" style="width:100%;border:0.5px solid var(--border2);border-radius:7px;padding:7px 9px;font-size:13px;background:var(--bg);color:var(--text);outline:none;"/>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">액자 포함 크기</div>
+          <div id="frameSizeResult" style="font-size:12px;font-weight:600;color:#185FA5;padding:7px 9px;background:var(--bg2);border-radius:7px;min-height:34px;"></div>
+        </div>
+      </div>
+    </div>
     <div class="ff">
       <label>재료 <span id="mediumPreview" style="font-size:11px;font-weight:400;color:var(--text3);"></span></label>
       <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;margin-bottom:6px;">
@@ -1616,6 +1677,20 @@ function openAdd(id){
   document.getElementById('fYear2').value=w?w.year:new Date().getFullYear();
   document.getElementById('fGenre2').value=w?w.genre:'회화';
   document.getElementById('fSize').value=w?w.size:'';
+  document.getElementById('fHoNum').value='';
+  document.getElementById('fHoType').value='F';
+  document.getElementById('fHoVariant').value='0';
+  document.getElementById('fFrameOn').checked=false;
+  document.getElementById('frameFields').style.display='none';
+  document.getElementById('fFrameW').value='';
+  document.getElementById('fFrameD').value='';
+  document.getElementById('frameSizeResult').textContent='';
+  document.getElementById('framePrev').textContent='';
+  // 기존 작품이면 호수 자동 감지
+  if(w&&w.size){
+    var h=detHN(w.size);
+    if(h){document.getElementById('hnprev').textContent='→ '+h+' ('+w.size+'cm)';}
+  }
   document.getElementById('fMedium2').value=w?w.medium:'';
   document.getElementById('fMaterial').value='';
   document.getElementById('fBase').value='';
@@ -1666,7 +1741,54 @@ function loadImg(input){
     dz.querySelector('span').style.display='none';
   };r.readAsDataURL(file);
 }
-function previewHN(){var s=document.getElementById('fSize').value;var h=detHN(s);document.getElementById('hnprev').textContent=h?'→ '+h:'';}
+function calcSizeFromHo(){
+  var hoNum=document.getElementById('fHoNum').value;
+  var hoType=document.getElementById('fHoType').value;
+  var variant=document.getElementById('fHoVariant').value;
+  if(!hoNum){document.getElementById('fSize').value='';previewHN();return;}
+  var row=HT.find(function(r){return r.n===parseInt(hoNum);});
+  if(!row||!row[hoType]||!row[hoType][0]){previewHN();return;}
+  var w=row[hoType][0],h=row[hoType][1];
+  var sizeStr=w+'x'+h;
+  document.getElementById('fSize').value=sizeStr;
+  var label=hoNum+'호 '+hoType+'형'+(variant==='1'?' 변형':'');
+  document.getElementById('hnprev').textContent='→ '+label+' ('+sizeStr+'cm)';
+  calcFrameSize();
+}
+function toggleFrame(){
+  var on=document.getElementById('fFrameOn').checked;
+  var fields=document.getElementById('frameFields');
+  fields.style.display=on?'grid':'none';
+  if(!on){document.getElementById('framePrev').textContent='';}
+  else{calcFrameSize();}
+}
+function calcFrameSize(){
+  var on=document.getElementById('fFrameOn').checked;
+  if(!on)return;
+  var sizeStr=document.getElementById('fSize').value;
+  var fw=parseFloat(document.getElementById('fFrameW').value)||0;
+  var fd=parseFloat(document.getElementById('fFrameD').value)||0;
+  var resultEl=document.getElementById('frameSizeResult');
+  var prevEl=document.getElementById('framePrev');
+  if(!sizeStr||!fw){resultEl.textContent='';prevEl.textContent='';return;}
+  var m=sizeStr.match(/(\d+(?:\.\d+)?)\s*[x×X]\s*(\d+(?:\.\d+)?)/i);
+  if(!m){resultEl.textContent='';return;}
+  var cw=parseFloat(m[1]),ch=parseFloat(m[2]);
+  var fw2=cw+fw*2,fh2=ch+fw*2;
+  var result=fw2.toFixed(1)+'×'+fh2.toFixed(1)+'cm';
+  resultEl.textContent=result;
+  prevEl.textContent='(액자포함 '+result+(fd?' · 깊이'+fd+'cm':'')+')';
+}
+function previewHN(){
+  var s=document.getElementById('fSize').value;
+  var h=detHN(s);
+  var hnEl=document.getElementById('hnprev');
+  // 호수 선택 안 했을 때만 업데이트
+  if(!document.getElementById('fHoNum').value){
+    hnEl.textContent=h?'→ '+h:'';
+  }
+  calcFrameSize();
+}
 function updatePricePreview(){var v=parseInt(document.getElementById('fPrice').value)||0;document.getElementById('pricePreview').textContent=v?fmtKRW(v)+' ('+v.toLocaleString()+'원)':'';}
 function updateMediumPreview(){
   var mat=document.getElementById('fMaterial').value.trim();
@@ -2131,7 +2253,10 @@ async function deleteNote(id){if(!confirm('이 작업노트를 삭제할까요?'
 
 // SETTINGS
 function openSettings(){
-  document.getElementById('settingName').value=artist.name||'';document.getElementById('settingPhone').value=artist.phone||'';document.getElementById('settingEmail').value=artist.email||'';
+  document.getElementById('settingName').value=artist.name||'';
+  document.getElementById('settingPhone').value=artist.phone||'';
+  document.getElementById('settingEmail').value=artist.email||'';
+  document.getElementById('settingPricePerHo').value=localStorage.getItem('popol_pricePerHo')||'';
   var accEl=document.getElementById('settingAccountEmail');if(accEl)accEl.textContent=currentUser?(currentUser.email||''):'';
   var saved=localStorage.getItem('popol_session');var autoBtn=document.getElementById('autoLoginBtn');var devStatus=document.getElementById('deviceStatus');
   if(saved){if(autoBtn)autoBtn.textContent='해제';if(devStatus)devStatus.textContent='자동로그인 등록됨 ✓';}else{if(autoBtn)autoBtn.textContent='등록';if(devStatus)devStatus.textContent='자동로그인 미등록';}
@@ -2139,7 +2264,47 @@ function openSettings(){
   var nameEl=document.getElementById('deviceName');if(nameEl)nameEl.textContent=devName;
   document.getElementById('settingsOv').classList.add('on');
 }
-async function saveSettings(){artist.name=document.getElementById('settingName').value.trim();artist.phone=document.getElementById('settingPhone').value.trim();artist.email=document.getElementById('settingEmail').value.trim();if(currentUser)await saveProfileToDB();var em=document.getElementById('userEmail');if(em)em.textContent=artist.name||(currentUser?currentUser.email:'');showToast('저장됐어요');}
+async function saveSettings(){
+  artist.name=document.getElementById('settingName').value.trim();
+  artist.phone=document.getElementById('settingPhone').value.trim();
+  artist.email=document.getElementById('settingEmail').value.trim();
+  var pph=document.getElementById('settingPricePerHo').value;
+  if(pph)localStorage.setItem('popol_pricePerHo',pph);
+  if(currentUser)await saveProfileToDB();
+  var em=document.getElementById('userEmail');if(em)em.textContent=artist.name||(currentUser?currentUser.email:'');
+  showToast('저장됐어요');
+}
+async function applyPricePerHo(){
+  var pph=parseInt(document.getElementById('settingPricePerHo').value)||0;
+  if(!pph){showToast('호당 가격을 먼저 입력해주세요');return;}
+  // 가격 없는 작품 or 전체 적용 선택
+  var noPrice=works.filter(function(w){return w.size&&!w.price;});
+  var all=works.filter(function(w){return w.size;});
+  var targets=noPrice.length>0?noPrice:all;
+  if(!targets.length){showToast('사이즈가 입력된 작품이 없어요');return;}
+  var msg=noPrice.length>0
+    ?targets.length+'개 작품(가격 없는 것)에 호당 '+fmtKRW(pph)+'로 적용할까요?\n전체 적용하려면 취소 후 다시 눌러주세요.'
+    :'전체 '+targets.length+'개 작품에 호당 '+fmtKRW(pph)+'로 덮어쓸까요?';
+  if(!confirm(msg))return;
+  showLoading('가격 계산 중...',false,targets.length);
+  var done=0;
+  for(var i=0;i<targets.length;i++){
+    var w=targets[i];
+    var hn=detHN(w.size);
+    if(!hn)continue;
+    // "30호 F형" → 30 추출
+    var hoNum=parseInt(hn);
+    if(!hoNum)continue;
+    var newPrice=hoNum*pph;
+    await new Promise(function(resolve){supa.from('works').update({price:newPrice}).eq('id',w.dbId||w.id).then(resolve);});
+    done++;
+    updateLoading('가격 계산 중... ('+done+'/'+targets.length+')',done,targets.length);
+  }
+  await loadWorksFromDB();
+  hideLoading();
+  closeOv('settingsOv');
+  showToast(done+'개 작품 가격이 자동 계산됐어요 ✓');
+}
 function toggleAutoLogin(){var saved=localStorage.getItem('popol_session');var autoBtn=document.getElementById('autoLoginBtn');var devStatus=document.getElementById('deviceStatus');if(saved){localStorage.removeItem('popol_session');if(autoBtn)autoBtn.textContent='등록';if(devStatus)devStatus.textContent='자동로그인 미등록';showToast('자동로그인이 해제됐어요');}else{if(autoBtn)autoBtn.textContent='해제';if(devStatus)devStatus.textContent='자동로그인 등록됨 ✓';showToast('자동로그인이 등록됐어요');}}
 function openInquiry(){document.getElementById('inquiryText').value='';var contact=document.getElementById('inquiryContact');if(contact)contact.value=artist.email||(currentUser?currentUser.email:'');closeOv('settingsOv');document.getElementById('inquiryOv').classList.add('on');}
 async function submitInquiry(){var text=document.getElementById('inquiryText').value.trim();if(!text){showToast('문의 내용을 입력해주세요');return;}var type=document.getElementById('inquiryType').value;var contact=document.getElementById('inquiryContact').value.trim();var data={user_id:currentUser?currentUser.id:null,type:type,content:text,contact:contact,created_at:new Date().toISOString()};await new Promise(function(resolve){supa.from('inquiries').insert(data).then(resolve);});closeOv('inquiryOv');showToast('문의가 접수됐어요. 감사해요 😊');}
