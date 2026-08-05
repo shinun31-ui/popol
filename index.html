@@ -1311,3 +1311,72 @@ function calcCC(){
   resultEl.style.display="block";
 }
 
+
+// SCREEN
+function showScreen(name){
+  ['splash','loginScreen','mainNav','appScreen'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
+  if(name==='login'){var l=document.getElementById('loginScreen');l.style.display='flex';}
+  else if(name==='app'){document.getElementById('mainNav').style.display='flex';document.getElementById('appScreen').style.display='block';showCanvasCalcBtn();showTab('portfolio');}
+}
+function showTab(t){
+  ['tabP','tabU','tabCV','tabNotes','tabHnum'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
+  var fb=document.getElementById('filterBar');window.scrollTo(0,0);
+  if(t==='portfolio'){document.getElementById('tabP').style.display='block';if(fb)fb.style.display='';}
+  else if(t==='upload'){document.getElementById('tabU').style.display='block';if(fb)fb.style.display='none';}
+  else if(t==='cv'){document.getElementById('tabCV').style.display='block';if(fb)fb.style.display='none';loadCV();}
+  else if(t==='notes'){document.getElementById('tabNotes').style.display='block';if(fb)fb.style.display='none';loadNotes();}
+  else if(t==='hnum'){document.getElementById('tabHnum').style.display='block';if(fb)fb.style.display='none';initHnumTable();}
+}
+function closeOv(id){var el=document.getElementById(id);if(el)el.classList.remove('on');}
+function ovClick(e,id){if(e.target.id===id)closeOv(id);}
+var _toastT;
+function showToast(msg){var el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.classList.add('on');clearTimeout(_toastT);_toastT=setTimeout(function(){el.classList.remove('on');},2500);}
+function setLang(l){localStorage.setItem('popol_lang',l);document.getElementById('langMenu').classList.add('hide');}
+function toggleLangMenu(){document.getElementById('langMenu').classList.toggle('hide');}
+document.addEventListener('click',function(e){
+  var m=document.getElementById('langMenu'),b=document.getElementById('langBtn');
+  if(m&&b&&!m.contains(e.target)&&!b.contains(e.target))m.classList.add('hide');
+  var panel=document.getElementById('canvasCalcPanel'),btn=document.getElementById('canvasCalcBtn');
+  if(typeof _calcPanelOpen!=='undefined'&&_calcPanelOpen&&panel&&btn&&!panel.contains(e.target)&&!btn.contains(e.target)){_calcPanelOpen=false;panel.style.display='none';}
+});
+// AUTH
+async function loginWithEmail(){
+  var email=document.getElementById('loginEmail').value.trim();
+  var pw=document.getElementById('loginPassword').value;
+  var err=document.getElementById('loginError');err.textContent='';
+  if(!email||!pw){err.textContent='이메일과 비밀번호를 입력해주세요';return;}
+  var btn=document.getElementById('loginEmailBtn');btn.textContent='로그인 중...';btn.disabled=true;
+  try{
+    var r=await fetch(SURL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SKEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pw})});
+    var d=await r.json();
+    if(r.ok){localStorage.setItem('popol_session',JSON.stringify(d));currentUser=d.user||d;var em=document.getElementById('userEmail');if(em)em.textContent=currentUser.user_metadata&&currentUser.user_metadata.full_name?currentUser.user_metadata.full_name:(currentUser.email||'');await loadProfileFromDB();await loadWorksFromDB();showScreen('app');}
+    else{err.textContent=d.error_description||d.message||'로그인 실패';btn.textContent='로그인';btn.disabled=false;}
+  }catch(e){err.textContent='네트워크 오류';btn.textContent='로그인';btn.disabled=false;}
+}
+function loginWithGoogle(){location.href=SURL+'/auth/v1/authorize?provider=google&redirect_to='+encodeURIComponent('https://popol-six.vercel.app');}
+var signupMode=false;
+function toggleSignupMode(){signupMode=!signupMode;var nameEl=document.getElementById('loginArtistName'),lbl=document.getElementById('loginCardLabel'),lBtn=document.getElementById('loginEmailBtn'),sBtn=document.getElementById('signupToggleBtn');if(signupMode){nameEl.style.display='';lbl.textContent='새 계정 만들기';lBtn.textContent='가입 완료';lBtn.onclick=signupWithEmail;sBtn.textContent='로그인으로';}else{nameEl.style.display='none';lbl.textContent='이메일로 계속하기';lBtn.textContent='로그인';lBtn.onclick=loginWithEmail;sBtn.textContent='회원가입';}document.getElementById('loginError').textContent='';}
+async function signupWithEmail(){var name=document.getElementById('loginArtistName').value.trim(),email=document.getElementById('loginEmail').value.trim(),pw=document.getElementById('loginPassword').value;var err=document.getElementById('loginError');err.textContent='';if(!name){err.textContent='작가 이름을 입력해주세요';return;}if(!email||!pw){err.textContent='이메일과 비밀번호를 입력해주세요';return;}if(pw.length<6){err.textContent='비밀번호는 6자 이상이어야 해요';return;}var btn=document.getElementById('loginEmailBtn');btn.textContent='가입 중...';btn.disabled=true;try{var r=await fetch(SURL+'/auth/v1/signup',{method:'POST',headers:{'apikey':SKEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pw,data:{full_name:name}})});var d=await r.json();if(r.ok){localStorage.setItem('popol_session',JSON.stringify(d));currentUser=d.user||d;artist.name=name;await saveProfileToDB();await loadWorksFromDB();showScreen('app');}else{err.textContent=d.error_description||d.message||'가입 실패';btn.textContent='가입 완료';btn.disabled=false;}}catch(e){err.textContent='네트워크 오류';btn.textContent='가입 완료';btn.disabled=false;}}
+function logout(){var s=null;try{s=JSON.parse(localStorage.getItem('popol_session'));}catch(e){}if(s&&s.access_token)fetch(SURL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SKEY,'Authorization':'Bearer '+s.access_token}}).catch(function(){});localStorage.removeItem('popol_session');currentUser=null;works=[];artist={name:'',phone:'',email:''};sel.clear();showScreen('login');}
+// SPLASH
+(function(){
+  var sp=document.getElementById('splash');
+  var sqs=[document.getElementById('sq0'),document.getElementById('sq1'),document.getElementById('sq2'),document.getElementById('sq3')];
+  var word=document.getElementById('splashWord');
+  var lv=[1.0,0.55,0.25,0.1];var step=0;
+  sqs.forEach(function(s){if(s)s.style.opacity='0.1';});
+  function tick(){if(step<8){for(var i=0;i<4;i++)if(sqs[i])sqs[i].style.opacity=lv[((i-step)%4+4)%4];step++;setTimeout(tick,280);}else{setTimeout(function(){if(word)word.classList.add('show');},350);setTimeout(doOut,1800);}}
+  function doOut(){sp.style.transition='opacity .5s ease';sp.style.opacity='0';setTimeout(function(){sp.style.display='none';if(currentUser){showScreen('app');}else{showScreen('login');}},520);}
+  setTimeout(tick,200);
+  (async function(){
+    var hash=location.hash;
+    if(hash&&hash.includes('access_token')){var p={};hash.slice(1).split('&').forEach(function(x){var kv=x.split('=');p[kv[0]]=decodeURIComponent(kv[1]||'');});if(p.access_token){try{var ur=await fetch(SURL+'/auth/v1/user',{headers:{'apikey':SKEY,'Authorization':'Bearer '+p.access_token}});if(ur.ok){var user=await ur.json();var s={access_token:p.access_token,refresh_token:p.refresh_token||'',user:user};localStorage.setItem('popol_session',JSON.stringify(s));currentUser=user;var em=document.getElementById('userEmail');if(em)em.textContent=user.user_metadata&&user.user_metadata.full_name?user.user_metadata.full_name:(user.email||'');history.replaceState(null,'',location.pathname);await loadProfileFromDB();await loadWorksFromDB();}}catch(e){console.error(e);}return;}}
+    var saved=localStorage.getItem('popol_session');
+    if(saved){try{var s=JSON.parse(saved);if(s&&s.access_token){var r=await fetch(SURL+'/auth/v1/user',{headers:{'apikey':SKEY,'Authorization':'Bearer '+s.access_token}});if(r.ok){s.user=await r.json();localStorage.setItem('popol_session',JSON.stringify(s));currentUser=s.user;var em=document.getElementById('userEmail');if(em)em.textContent=currentUser.user_metadata&&currentUser.user_metadata.full_name?currentUser.user_metadata.full_name:(currentUser.email||'');await loadProfileFromDB();await loadWorksFromDB();return;}if(s.refresh_token){var rr=await fetch(SURL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':SKEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:s.refresh_token})});if(rr.ok){var nd=await rr.json();localStorage.setItem('popol_session',JSON.stringify(nd));currentUser=nd.user||nd;var em=document.getElementById('userEmail');if(em)em.textContent=currentUser.user_metadata&&currentUser.user_metadata.full_name?currentUser.user_metadata.full_name:(currentUser.email||'');await loadProfileFromDB();await loadWorksFromDB();return;}}localStorage.removeItem('popol_session');}}catch(e){localStorage.removeItem('popol_session');}}
+  })();
+})();
+fetchRates();
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ovs=['detailOv','addOv','prevOv','artistOv','cvAddOv','noteAddOv','noteViewOv','cvGuideOv','cvExportOv','settingsOv','inquiryOv','cvMoveOv'];for(var i=0;i<ovs.length;i++){var el=document.getElementById(ovs[i]);if(el&&el.classList.contains('on')){el.classList.remove('on');break;}}}});
+</script>
+</body>
+</html>
