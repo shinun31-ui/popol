@@ -706,7 +706,19 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
       <input id="fMedium2" placeholder="또는 직접 입력: 캔버스에 과슈" oninput="updateMediumPreview()" style="font-size:12px;color:var(--text3);"/>
       <div style="font-size:10px;color:var(--text3);margin-top:3px;">위에서 선택하면 자동 완성 · 아래에 직접 입력도 가능</div>
     </div>
-    <div class="ff"><label>가격 (원)</label><input id="fPrice" type="number" placeholder="예: 3000000" oninput="updatePricePreview()"/><div id="pricePreview" style="font-size:11px;color:var(--text3);margin-top:4px;"></div></div>
+    <div class="ff">
+      <label>정가 (원)</label>
+      <input id="fPrice" type="number" placeholder="예: 3000000" oninput="updatePricePreview()"/>
+      <div id="pricePreview" style="font-size:11px;color:var(--text3);margin-top:4px;"></div>
+    </div>
+    <div class="ff">
+      <label>할인 <span id="discountPrev" style="font-weight:400;color:#A32D2D;font-size:11px;"></span></label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <input id="fDiscountPrice" type="number" placeholder="할인 판매가 (원)" oninput="updateDiscountPreview()"/>
+        <input id="fDiscountRate" type="number" placeholder="할인율 (%)" oninput="updateDiscountFromRate()"/>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:3px;">할인가 또는 할인율 입력 시 자동 계산</div>
+    </div>
     <div class="ff"><label>작가 노트</label><textarea id="fDesc" rows="3" placeholder="작가 노트, 작품 배경 등..."></textarea></div>
     <div class="ff"><label>수상/이력</label><input id="fAward" placeholder="예: 2024 서울 청년작가상"/></div>
     <div class="ff">
@@ -1189,13 +1201,13 @@ async function loadWorksFromDB(){
   var res=await supa.from('works').select('id,title,year,genre,medium,size,description,award,price,sold,img_url,color_bg,color_fg,sort_order').eq('user_id',currentUser.id).order('sort_order',{ascending:true});
   if(res.error){console.error('loadWorks error:',res.error);return;}
   works=(res.data||[]).map(function(w){
-    return{id:w.id,title:w.title||'',year:w.year||2024,genre:w.genre||'회화',medium:w.medium||'',size:w.size||'',desc:w.description||'',award:w.award||'',note:w.note||'',price:w.price||0,sold:w.sold,img:w.img_url||null,c:[w.color_bg||PAL[0][0],w.color_fg||PAL[0][1]],dbId:w.id};
+    return{id:w.id,title:w.title||'',year:w.year||2024,genre:w.genre||'회화',medium:w.medium||'',size:w.size||'',desc:w.description||'',award:w.award||'',note:w.note||'',price:w.price||0,discountPrice:w.discount_price||0,discountRate:w.discount_rate||0,sold:w.sold,img:w.img_url||null,c:[w.color_bg||PAL[0][0],w.color_fg||PAL[0][1]],dbId:w.id,sort_order:w.sort_order||0};
   });
   updFilters();
   render();
 }
 async function saveWorkToDB(data,isEdit,dbId){
-  var row={user_id:currentUser.id,title:data.title,year:data.year,genre:data.genre,medium:data.medium||'',size:data.size||'',description:data.desc||'',award:data.award||'',note:data.note||'',price:data.price||0,sold:data.sold||false,img_url:data.img||null,color_bg:data.c?data.c[0]:PAL[0][0],color_fg:data.c?data.c[1]:PAL[0][1],sort_order:data.sort_order||0,updated_at:new Date().toISOString()};
+  var row={user_id:currentUser.id,title:data.title,year:data.year,genre:data.genre,medium:data.medium||'',size:data.size||'',description:data.desc||'',award:data.award||'',note:data.note||'',price:data.price||0,discount_price:data.discountPrice||0,discount_rate:data.discountRate||0,sold:data.sold||false,img_url:data.img||null,color_bg:data.c?data.c[0]:PAL[0][0],color_fg:data.c?data.c[1]:PAL[0][1],sort_order:data.sort_order||0,updated_at:new Date().toISOString()};
   var res=isEdit&&dbId?await supa.from('works').update(row).eq('id',dbId):await supa.from('works').insert(row).select().single();
   if(res.error){showToast('저장 실패: '+(res.error.message||JSON.stringify(res.error)));return false;}
   return true;
@@ -1572,7 +1584,7 @@ function cHtml(w){
   var imgSrc=w.img?(_imgCache[w.id]||w.img):null;
   var imgHtml=imgSrc?'<img data-src="'+imgSrc+(imgSrc.includes('supabase.co')?'?width=200&quality=40&format=webp':'')+'" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .25s;" alt=""/>':ph;
   var sold=isSold(w);var reserve=isReserve(w);var stop=isStop(w);
-  var drag=editMode?' draggable="true" ondragstart="onDragStart(event,\''+w.id+'\')" ondragover="event.preventDefault()" ondragend="onDragEnd(event)" ondrop="onDrop(event,\''+w.id+'\')"':'';
+  var drag=editMode?' draggable="true" ondragstart="onDragStart(event,\''+w.id+'\')" ondragover="event.preventDefault();onDragOver(event,\''+w.id+'\')" ondragend="onDragEnd(event)" ondrop="onDrop(event,\''+w.id+'\')" style="cursor:grab;"':'';
   var wid=w.id;
   return '<div class="card'+(s?' sel':'')+(sold?' sold-card':'')+(reserve?' reserve-card':'')+(stop?' sold-card':'')+'" data-id="'+wid+'" onclick="toggleSelById(\''+wid+'\')"'+drag+'>'
     +(sold?'<div class="sold-ov"></div><div class="sold-badge">판매 완료</div>':'')
@@ -1584,7 +1596,7 @@ function cHtml(w){
     +'<div class="cbody"><div class="ctitle'+(sold||stop?' sold-text':'')+'">'+w.title+'</div>'
     +'<div class="cmeta">'+w.year+(w.genre?' · '+w.genre:'')+'</div>'
     +(h?'<div class="cmeta">'+h+'</div>':'')
-    +(w.price&&!isSold(w)&&!isStop(w)?'<div class="price-tag">'+fmtKRW(w.price)+'</div>':'')
+    +(w.price?'<div class="price-tag"'+(isSold(w)?' style="background:#fff5f5;color:#A32D2D;border-color:rgba(163,45,45,.3);"':isStop(w)?' style="background:#f5f5f5;color:#888;text-decoration:line-through;"':'')+'>'+fmtKRW(w.price)+(w.discountPrice&&!isSold(w)?' <span style="color:#A32D2D;font-size:9px;">→'+fmtKRW(w.discountPrice)+'</span>':'')+'</div>':'')
     +'</div>'
     +'<div class="prevrow"><button class="prevbtn" onclick="event.stopPropagation();openDetail(\''+wid+'\')">미리보기</button></div>'
     +'</div>';
@@ -1695,6 +1707,9 @@ function openAdd(id){
   document.getElementById('fMaterial').value='';
   document.getElementById('fBase').value='';
   document.getElementById('mediumPreview').textContent=w&&w.medium?'→ '+w.medium:'';
+  document.getElementById('fDiscountPrice').value=w&&w.discountPrice?w.discountPrice:'';
+  document.getElementById('fDiscountRate').value=w&&w.discountRate?w.discountRate:'';
+  document.getElementById('discountPrev').textContent='';
   document.getElementById('fPrice').value=w?w.price:'';
   document.getElementById('fDesc').value=w?w.desc:'';
   document.getElementById('fAward').value=w?w.award:'';
@@ -1725,7 +1740,10 @@ async function saveWork(){
     award:document.getElementById('fAward').value.trim(),
     note:soldF==='stop'?(document.getElementById('fSoldReason').value.trim()||''):'',
     img:imgUrl,sold:soldF,price:parseInt(document.getElementById('fPrice').value)||0,
-    c:PAL[works.length%PAL.length]
+    discountPrice:parseInt(document.getElementById('fDiscountPrice').value)||0,
+    discountRate:parseFloat(document.getElementById('fDiscountRate').value)||0,
+    c:PAL[works.length%PAL.length],
+    sort_order:editId?(works.find(function(x){return x.id===editId;})||{}).sort_order||0:works.length
   };
   var ok=await saveWorkToDB(data,!!editId,editId?works.find(function(x){return x.id===editId;})?.dbId:null);
   if(ok){await loadWorksFromDB();hideLoading();closeOv('addOv');showToast('저장됐어요');}
@@ -1788,6 +1806,31 @@ function previewHN(){
     hnEl.textContent=h?'→ '+h:'';
   }
   calcFrameSize();
+}
+function updateDiscountPreview(){
+  var price=parseInt(document.getElementById('fPrice').value)||0;
+  var discPrice=parseInt(document.getElementById('fDiscountPrice').value)||0;
+  var rateEl=document.getElementById('fDiscountRate');
+  var prevEl=document.getElementById('discountPrev');
+  if(price&&discPrice){
+    var rate=Math.round((1-discPrice/price)*100);
+    rateEl.value=rate;
+    prevEl.textContent=fmtKRW(price)+' → '+fmtKRW(discPrice)+' ('+rate+'% 할인)';
+  } else {
+    prevEl.textContent='';
+  }
+}
+function updateDiscountFromRate(){
+  var price=parseInt(document.getElementById('fPrice').value)||0;
+  var rate=parseFloat(document.getElementById('fDiscountRate').value)||0;
+  var prevEl=document.getElementById('discountPrev');
+  if(price&&rate){
+    var discPrice=Math.round(price*(1-rate/100));
+    document.getElementById('fDiscountPrice').value=discPrice;
+    prevEl.textContent=fmtKRW(price)+' → '+fmtKRW(discPrice)+' ('+rate+'% 할인)';
+  } else {
+    prevEl.textContent='';
+  }
 }
 function updatePricePreview(){var v=parseInt(document.getElementById('fPrice').value)||0;document.getElementById('pricePreview').textContent=v?fmtKRW(v)+' ('+v.toLocaleString()+'원)':'';}
 function updateMediumPreview(){
