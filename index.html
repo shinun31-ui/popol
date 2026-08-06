@@ -396,6 +396,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
     <button class="btn btn-sm" onclick="showTab('cv')">CV</button>
     <button class="btn btn-sm" onclick="showTab('notes')">작업노트</button>
     <button class="btn btn-sm" onclick="openPreview()">내보내기</button>
+    <button class="btn btn-sm" onclick="refreshWorks()" title="새로고침">↺</button>
     <button class="btn btn-sm" onclick="showTab('hnum')">호수 계산기</button>
     <button class="btn btn-sm btn-dark" onclick="openAdd()">+ 추가</button>
   </div>
@@ -2544,6 +2545,54 @@ function switchCalcTab(n){[1,2,3].forEach(function(i){var content=document.getEl
 function showCanvasCalcBtn(){document.getElementById('canvasCalcBtn').style.display='block';}
 function initHnumTable(){var tbody=document.getElementById('hnTable');if(!tbody||tbody.children.length>0)return;HT.forEach(function(row){var tr=document.createElement('tr');tr.style.borderBottom='0.5px solid var(--border)';var fmt=function(arr){return arr&&arr[0]?arr[0]+'×'+arr[1]:'-';};tr.innerHTML='<td style="padding:8px 10px;text-align:center;font-weight:600;color:var(--text);">'+row.n+'호</td><td style="padding:8px 10px;text-align:center;color:var(--text2);">'+fmt(row.F)+'</td><td style="padding:8px 10px;text-align:center;color:var(--text2);">'+fmt(row.S)+'</td><td style="padding:8px 10px;text-align:center;color:var(--text2);">'+fmt(row.P)+'</td><td style="padding:8px 10px;text-align:center;color:var(--text2);">'+fmt(row.M)+'</td>';tbody.appendChild(tr);});}
 
+// EDIT MODE BULK ACTIONS
+async function bulkSetSold(val){
+  if(sel.size===0){showToast('작품을 먼저 선택해주세요');return;}
+  var ids=[...sel];
+  showLoading('상태 변경 중...',false,ids.length);
+  // 병렬로 한번에 처리
+  await Promise.all(ids.map(function(id){
+    var w=works.find(function(x){return x.id===id;});
+    if(!w)return Promise.resolve();
+    return new Promise(function(resolve){supa.from('works').update({sold:val}).eq('id',w.dbId||w.id).then(resolve);});
+  }));
+  await loadWorksFromDB();
+  hideLoading();
+  sel.clear();
+  showToast('상태가 변경됐어요');
+}
+async function deleteSelected(){
+  if(sel.size===0){showToast('삭제할 작품을 선택해주세요');return;}
+  var ids=[...sel];
+  if(!confirm(ids.length+'개 작품을 삭제할까요?'))return;
+  showLoading('삭제 중...',false,ids.length);
+  await Promise.all(ids.map(function(id){
+    var w=works.find(function(x){return x.id===id;});
+    if(!w)return Promise.resolve();
+    return new Promise(function(resolve){supa.from('works').delete().eq('id',w.dbId||w.id).then(resolve);});
+  }));
+  sel.clear();
+  await loadWorksFromDB();
+  hideLoading();
+  showToast('삭제했어요');
+}
+function selAll(){works.forEach(function(w){sel.add(w.id);});render();}
+function clearSel(){sel.clear();render();}
+function toggleEditMode(){
+  editMode=!editMode;
+  document.getElementById('editModeBtn').textContent=editMode?'완료':'편집';
+  document.getElementById('editBar').style.display=editMode?'flex':'none';
+  if(!editMode){sel.clear();}
+  render();
+  if(editMode)initTouchDrag();
+}
+
+// REFRESH
+function refreshWorks(){
+  showLoading('새로고침 중...');
+  loadWorksFromDB().then(function(){hideLoading();showToast('새로고침 완료');});
+}
+
 // UPLOAD FUNCTIONS
 var reviewItems=[];
 function handleDrop(e){
@@ -2703,7 +2752,9 @@ async function importSel(){
   if(!toAdd.length){showToast('선택된 항목이 없어요');return;}
   if(!currentUser){showToast('로그인이 필요해요');return;}
   showLoading('이미지 업로드 중... (0/'+toAdd.length+')',true,toAdd.length);
-  var done=0;var BATCH=5;var imgUrls=new Array(toAdd.length).fill(null);
+  var done=0;var BATCH=8;var imgUrls=new Array(toAdd.length).fill(null);
+
+  // 1단계: 이미지 병렬 업로드 (8개씩)
   for(var b=0;b<toAdd.length;b+=BATCH){
     if(_loadingCancelled){hideLoading();showToast('업로드가 중단됐어요');return;}
     var batch=toAdd.slice(b,b+BATCH);
@@ -2712,21 +2763,61 @@ async function importSel(){
         if(_loadingCancelled)return;
         var idx=b+bi;
         if(it.img&&it.img.startsWith('data:')){
-          try{var blob=await(await fetch(it.img)).blob();var file=new File([blob],'upload_'+Date.now()+'_'+idx+'.jpg',{type:'image/jpeg'});imgUrls[idx]=await uploadImageToDB(file);}catch(e){}
+          try{
+            var blob=await(await fetch(it.img)).blob();
+            // 이미지 압축 (1200px 이내)
+            var compressed=await compressImage(blob,1200);
+            var file=new File([compressed],'upload_'+Date.now()+'_'+idx+'.jpg',{type:'image/jpeg'});
+            imgUrls[idx]=await uploadImageToDB(file);
+          }catch(e){console.error('upload err:',idx,e);}
         }
-        done++;updateLoading('이미지 업로드 중... ('+done+'/'+toAdd.length+')',done,toAdd.length);
+        done++;
+        updateLoading('이미지 업로드 중... ('+done+'/'+toAdd.length+')',done,toAdd.length);
       })();
     }));
   }
+
   if(_loadingCancelled){hideLoading();showToast('업로드가 중단됐어요');return;}
+
+  // 2단계: DB insert (50개씩 분할)
   updateLoading('작품 정보 저장 중...',toAdd.length,toAdd.length);
   var rows=toAdd.map(function(it,i){
     return{user_id:currentUser.id,title:it.title,year:it.year||new Date().getFullYear(),genre:it.genre||'회화',medium:it.medium||'',size:it.size||'',description:'',award:'',note:'',price:it.price||0,discount_price:0,discount_rate:0,sold:false,sold_date:'',sold_gallery:'',sold_collector:'',img_url:imgUrls[i]||null,color_bg:PAL[i%PAL.length][0],color_fg:PAL[i%PAL.length][1],sort_order:works.length+i};
   });
-  await new Promise(function(resolve){supa.from('works').insert(rows).then(resolve);});
-  await loadWorksFromDB();hideLoading();
-  document.getElementById('reviewOuter').style.display='none';reviewItems=[];
-  showToast(toAdd.length+'개 작품이 추가됐어요 ✓');
+
+  var CHUNK=50;var insertOk=true;
+  for(var c=0;c<rows.length;c+=CHUNK){
+    var chunk=rows.slice(c,c+CHUNK);
+    var res=await new Promise(function(resolve){supa.from('works').insert(chunk).then(resolve);});
+    if(res&&res.error){insertOk=false;console.error('insert error:',res.error);break;}
+    updateLoading('저장 중... ('+(Math.min(c+CHUNK,rows.length))+'/'+rows.length+')',Math.min(c+CHUNK,rows.length),rows.length);
+  }
+
+  await loadWorksFromDB();
+  hideLoading();
+  document.getElementById('reviewOuter').style.display='none';
+  reviewItems=[];
+  if(insertOk){showToast(toAdd.length+'개 작품이 추가됐어요 ✓');}
+  else{showToast('일부 저장에 실패했을 수 있어요. 새로고침 확인해주세요');}
+}
+
+// 이미지 압축
+async function compressImage(blob,maxPx){
+  return new Promise(function(resolve){
+    var img=new Image();var url=URL.createObjectURL(blob);
+    img.onload=function(){
+      var w=img.width,h=img.height;
+      if(w<=maxPx&&h<=maxPx){URL.revokeObjectURL(url);resolve(blob);return;}
+      var scale=Math.min(maxPx/w,maxPx/h);
+      var canvas=document.createElement('canvas');
+      canvas.width=Math.round(w*scale);canvas.height=Math.round(h*scale);
+      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(function(b){resolve(b||blob);},'image/jpeg',0.85);
+    };
+    img.onerror=function(){URL.revokeObjectURL(url);resolve(blob);};
+    img.src=url;
+  });
 }
 
 // TOUCH DRAG - 부드러운 위젯 스타일
