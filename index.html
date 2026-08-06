@@ -746,6 +746,34 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
       <label>비고 (판매중단 사유)</label>
       <input id="fSoldReason" placeholder="예: 분실, 작가 보유, 기증, 개인 소장..."/>
     </div>
+    <!-- 판매완료 아카이빙 -->
+    <div class="ff" id="soldArchiveWrap" style="display:none;">
+      <label>판매 기록</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">판매 연도</div>
+          <select id="fSoldYear" style="width:100%;border:0.5px solid var(--border2);border-radius:8px;padding:8px;font-size:13px;background:var(--bg);color:var(--text);outline:none;"></select>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">판매 월</div>
+          <select id="fSoldMonth" style="width:100%;border:0.5px solid var(--border2);border-radius:8px;padding:8px;font-size:13px;background:var(--bg);color:var(--text);outline:none;">
+            <option value="">월 선택</option>
+            <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
+            <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+            <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+            <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:6px;">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">판매 갤러리 / 경로</div>
+        <input id="fSoldGallery" placeholder="예: 갤러리현대, 아트페어 직판, 개인 컬렉터..."/>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">소장처 (컬렉터/기관)</div>
+        <input id="fSoldCollector" placeholder="예: 개인 소장, 국립현대미술관, 홍길동..."/>
+      </div>
+    </div>
     <div class="mact"><button class="btn" onclick="closeOv('addOv')">취소</button><button class="btn btn-dark" onclick="saveWork()">저장</button></div>
   </div>
 </div>
@@ -1212,13 +1240,13 @@ async function loadWorksFromDB(){
   var res=await supa.from('works').select('id,title,year,genre,medium,size,description,award,price,sold,img_url,color_bg,color_fg,sort_order').eq('user_id',currentUser.id).order('sort_order',{ascending:true});
   if(res.error){console.error('loadWorks error:',res.error);return;}
   works=(res.data||[]).map(function(w){
-    return{id:w.id,title:w.title||'',year:w.year||2024,genre:w.genre||'회화',medium:w.medium||'',size:w.size||'',desc:w.description||'',award:w.award||'',note:w.note||'',price:w.price||0,discountPrice:w.discount_price||0,discountRate:w.discount_rate||0,sold:w.sold,img:w.img_url||null,c:[w.color_bg||PAL[0][0],w.color_fg||PAL[0][1]],dbId:w.id,sort_order:w.sort_order||0};
+    return{id:w.id,title:w.title||'',year:w.year||2024,genre:w.genre||'회화',medium:w.medium||'',size:w.size||'',desc:w.description||'',award:w.award||'',note:w.note||'',price:w.price||0,discountPrice:w.discount_price||0,discountRate:w.discount_rate||0,sold:w.sold,soldDate:w.sold_date||'',soldGallery:w.sold_gallery||'',soldCollector:w.sold_collector||'',img:w.img_url||null,c:[w.color_bg||PAL[0][0],w.color_fg||PAL[0][1]],dbId:w.id,sort_order:w.sort_order||0};
   });
   updFilters();
   render();
 }
 async function saveWorkToDB(data,isEdit,dbId){
-  var row={user_id:currentUser.id,title:data.title,year:data.year,genre:data.genre,medium:data.medium||'',size:data.size||'',description:data.desc||'',award:data.award||'',note:data.note||'',price:data.price||0,discount_price:data.discountPrice||0,discount_rate:data.discountRate||0,sold:data.sold||false,img_url:data.img||null,color_bg:data.c?data.c[0]:PAL[0][0],color_fg:data.c?data.c[1]:PAL[0][1],sort_order:data.sort_order||0,updated_at:new Date().toISOString()};
+  var row={user_id:currentUser.id,title:data.title,year:data.year,genre:data.genre,medium:data.medium||'',size:data.size||'',description:data.desc||'',award:data.award||'',note:data.note||'',price:data.price||0,discount_price:data.discountPrice||0,discount_rate:data.discountRate||0,sold:data.sold||false,sold_date:data.soldDate||'',sold_gallery:data.soldGallery||'',sold_collector:data.soldCollector||'',img_url:data.img||null,color_bg:data.c?data.c[0]:PAL[0][0],color_fg:data.c?data.c[1]:PAL[0][1],sort_order:data.sort_order||0,updated_at:new Date().toISOString()};
   var res=isEdit&&dbId?await supa.from('works').update(row).eq('id',dbId):await supa.from('works').insert(row).select().single();
   if(res.error){showToast('저장 실패: '+(res.error.message||JSON.stringify(res.error)));return false;}
   return true;
@@ -1615,25 +1643,87 @@ function cHtml(w){
 
 function setMode(m){salesMode=m==='sales';document.getElementById('modeWork').classList.toggle('on',!salesMode);document.getElementById('modeSales').classList.toggle('on',salesMode);render();}
 function renderSales(){
-  var all=sortW(allFiltered());
   var el=document.getElementById('list');el.innerHTML='';
-  var total=all.reduce(function(s,w){return s+(w.price||0);},0);
-  var sold=all.filter(isSold);var soldTotal=sold.reduce(function(s,w){return s+(w.price||0);},0);
-  el.innerHTML='<div style="padding:16px 0;border-bottom:0.5px solid var(--border);margin-bottom:16px;display:flex;gap:24px;">'
-    +'<div><div style="font-size:11px;color:var(--text3);">총 작품</div><div style="font-size:20px;font-weight:700;">'+all.length+'점</div></div>'
-    +'<div><div style="font-size:11px;color:var(--text3);">총 가액</div><div style="font-size:20px;font-weight:700;">'+fmtKRW(total)+'</div></div>'
-    +'<div><div style="font-size:11px;color:var(--text3);">판매액</div><div style="font-size:20px;font-weight:700;color:#27500A;">'+fmtKRW(soldTotal)+'</div></div>'
-    +'</div>';
-  var table=document.createElement('table');table.style.cssText='width:100%;border-collapse:collapse;font-size:12px;';
-  table.innerHTML='<thead><tr style="border-bottom:1.5px solid var(--border);"><th style="padding:6px 8px;text-align:left;">제목</th><th style="padding:6px 8px;">연도</th><th style="padding:6px 8px;">호수</th><th style="padding:6px 8px;text-align:right;">가격</th><th style="padding:6px 8px;text-align:center;">상태</th></tr></thead>';
-  var tbody=document.createElement('tbody');
-  all.forEach(function(w){
-    var tr=document.createElement('tr');tr.style.borderBottom='0.5px solid var(--border)';
-    var state=isSold(w)?'<span style="color:#A32D2D;font-size:10px;">완료</span>':isReserve(w)?'<span style="color:#8B6914;font-size:10px;">예약</span>':isStop(w)?'<span style="color:#8B4513;font-size:10px;">중단</span>':'';
-    tr.innerHTML='<td style="padding:7px 8px;font-weight:500;">'+w.title+'</td><td style="padding:7px 8px;text-align:center;color:var(--text3);">'+w.year+'</td><td style="padding:7px 8px;text-align:center;color:var(--text3);">'+(getHN(w)||'-')+'</td><td style="padding:7px 8px;text-align:right;font-weight:500;">'+(w.price?fmtKRW(w.price):'-')+'</td><td style="padding:7px 8px;text-align:center;">'+state+'</td>';
-    tbody.appendChild(tr);
+  var soldWorks=works.filter(isSold).sort(function(a,b){
+    // 판매일 기준 정렬 (없으면 제작연도 기준)
+    var da=a.soldDate||String(a.year);var db=b.soldDate||String(b.year);
+    return db.localeCompare(da);
   });
-  table.appendChild(tbody);el.appendChild(table);
+  var all=works.length;var soldCount=soldWorks.length;
+  var soldTotal=soldWorks.reduce(function(s,w){return s+(w.discountPrice||w.price||0);},0);
+  var listedTotal=soldWorks.reduce(function(s,w){return s+(w.price||0);},0);
+  var discountTotal=listedTotal-soldTotal;
+
+  // 요약 헤더
+  var header=document.createElement('div');
+  header.style.cssText='padding:16px 0;border-bottom:1.5px solid var(--border);margin-bottom:20px;';
+  header.innerHTML='<div style="display:flex;gap:20px;flex-wrap:wrap;">'
+    +'<div><div style="font-size:11px;color:var(--text3);">전체 작품</div><div style="font-size:22px;font-weight:700;">'+all+'점</div></div>'
+    +'<div><div style="font-size:11px;color:var(--text3);">판매 완료</div><div style="font-size:22px;font-weight:700;color:#27500A;">'+soldCount+'점</div></div>'
+    +'<div><div style="font-size:11px;color:var(--text3);">총 판매액</div><div style="font-size:22px;font-weight:700;">'+fmtKRW(soldTotal)+'</div></div>'
+    +(discountTotal>0?'<div><div style="font-size:11px;color:var(--text3);">총 할인액</div><div style="font-size:16px;font-weight:600;color:#A32D2D;">-'+fmtKRW(discountTotal)+'</div></div>':'')
+    +'</div>';
+  el.appendChild(header);
+
+  // 연도별 그룹핑
+  var byYear={};
+  soldWorks.forEach(function(w){
+    var yr=w.soldDate?w.soldDate.split('-')[0]:String(w.year);
+    if(!byYear[yr])byYear[yr]=[];
+    byYear[yr].push(w);
+  });
+  var years=Object.keys(byYear).sort(function(a,b){return b-a;});
+
+  years.forEach(function(yr){
+    var group=byYear[yr];
+    var yearTotal=group.reduce(function(s,w){return s+(w.discountPrice||w.price||0);},0);
+    // 연도 헤더
+    var yh=document.createElement('div');
+    yh.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:6px;border-bottom:1.5px solid var(--border);';
+    yh.innerHTML='<span style="font-size:14px;font-weight:700;color:var(--text);">'+yr+'년</span>'
+      +'<span style="font-size:13px;font-weight:600;color:#27500A;">'+fmtKRW(yearTotal)+'</span>';
+    el.appendChild(yh);
+
+    group.forEach(function(w){
+      var finalPrice=w.discountPrice||w.price||0;
+      var hasDiscount=w.discountPrice&&w.price&&w.discountPrice<w.price;
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border);';
+
+      var thumb=document.createElement('div');
+      thumb.style.cssText='width:48px;height:48px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--bg2);';
+      if(w.img)thumb.innerHTML='<img src="'+(w.img.includes('supabase.co')?w.img+'?width=80&quality=30&format=webp':w.img)+'" style="width:100%;height:100%;object-fit:cover;"/>';
+
+      var info=document.createElement('div');info.style.flex='1';
+      var titleRow='<div style="font-size:13px;font-weight:600;color:var(--text);">'+w.title+'</div>';
+      var metaRow='<div style="font-size:11px;color:var(--text3);margin-top:2px;">'
+        +[w.soldDate||(w.year+'년'),w.soldGallery,w.soldCollector].filter(Boolean).join(' · ')+'</div>';
+      var priceRow='<div style="margin-top:4px;display:flex;align-items:center;gap:8px;">';
+      if(hasDiscount){
+        priceRow+='<span style="font-size:11px;color:var(--text3);text-decoration:line-through;">'+fmtKRW(w.price)+'</span>';
+        priceRow+='<span style="font-size:13px;font-weight:600;color:#27500A;">'+fmtKRW(finalPrice)+'</span>';
+        priceRow+='<span style="font-size:10px;background:#FFF0F0;color:#A32D2D;padding:1px 6px;border-radius:4px;">-'+fmtKRW(w.price-finalPrice)+' ('+Math.round((1-finalPrice/w.price)*100)+'% 할인)</span>';
+      } else {
+        priceRow+='<span style="font-size:13px;font-weight:600;color:#27500A;">'+fmtKRW(finalPrice)+'</span>';
+      }
+      priceRow+='</div>';
+      info.innerHTML=titleRow+metaRow+priceRow;
+
+      var editBtn=document.createElement('button');
+      editBtn.textContent='수정';
+      editBtn.style.cssText='font-size:11px;padding:4px 10px;border-radius:7px;border:0.5px solid var(--border2);background:none;color:var(--text3);cursor:pointer;flex-shrink:0;';
+      editBtn.onclick=function(){openAdd(w.id);};
+
+      row.appendChild(thumb);row.appendChild(info);row.appendChild(editBtn);
+      el.appendChild(row);
+    });
+
+    var space=document.createElement('div');space.style.height='16px';el.appendChild(space);
+  });
+
+  if(!soldWorks.length){
+    el.innerHTML+='<div style="text-align:center;padding:3rem;color:var(--text3);">판매 완료 작품이 없어요</div>';
+  }
 }
 
 function setPS(n){pageSize=n;curPage=1;document.querySelectorAll('.psb').forEach(function(b){b.classList.toggle('on',parseInt(b.dataset.n)===n);});render();}
@@ -1730,6 +1820,16 @@ function setSoldF(val){
   });
   var wrap=document.getElementById('soldReasonWrap');
   if(wrap)wrap.style.display=val==='stop'?'block':'none';
+  var archiveWrap=document.getElementById('soldArchiveWrap');
+  if(archiveWrap)archiveWrap.style.display=val===true?'block':'none';
+  if(val===true){
+    var yearSel=document.getElementById('fSoldYear');
+    if(yearSel&&yearSel.options.length<=1){
+      yearSel.innerHTML='<option value="">연도 선택</option>';
+      var cy=new Date().getFullYear();
+      for(var y=cy;y>=2000;y--){yearSel.innerHTML+='<option value="'+y+'">'+y+'년</option>';}
+    }
+  }
 }
 function updatePricePreview(){
   var v=parseInt(document.getElementById('fPrice').value)||0;
@@ -1852,6 +1952,18 @@ function openAdd(id){
   setSoldF(soldF);
   document.getElementById('fSoldReason').value=w&&w.note?w.note:'';
   document.getElementById('soldReasonWrap').style.display=soldF==='stop'?'block':'none';
+  // 판매완료 아카이빙 필드
+  var sw=document.getElementById('fSoldYear');
+  if(sw){
+    sw.innerHTML='<option value="">연도 선택</option>';
+    var cy2=new Date().getFullYear();
+    for(var y2=cy2;y2>=2000;y2--){sw.innerHTML+='<option value="'+y2+'">'+y2+'년</option>';}
+    sw.value=w&&w.soldDate?w.soldDate.split('-')[0]:'';
+  }
+  var sm=document.getElementById('fSoldMonth');if(sm)sm.value=w&&w.soldDate?w.soldDate.split('-')[1]||'':'';
+  var sg=document.getElementById('fSoldGallery');if(sg)sg.value=w&&w.soldGallery?w.soldGallery:'';
+  var sc=document.getElementById('fSoldCollector');if(sc)sc.value=w&&w.soldCollector?w.soldCollector:'';
+  var aw=document.getElementById('soldArchiveWrap');if(aw)aw.style.display=soldF===true?'block':'none';
   previewHN();
   document.getElementById('addOv').classList.add('on');
 }
@@ -1870,6 +1982,9 @@ async function saveWork(){
     desc:document.getElementById('fDesc').value.trim(),
     award:document.getElementById('fAward').value.trim(),
     note:soldF==='stop'?(document.getElementById('fSoldReason').value.trim()||''):'',
+    soldDate:soldF===true?((document.getElementById('fSoldYear').value||'')+(document.getElementById('fSoldMonth').value?'-'+document.getElementById('fSoldMonth').value:'')):'' ,
+    soldGallery:soldF===true?(document.getElementById('fSoldGallery').value.trim()||''):'',
+    soldCollector:soldF===true?(document.getElementById('fSoldCollector').value.trim()||''):'',
     img:imgUrl,sold:soldF,price:parseInt(document.getElementById('fPrice').value)||0,
     discountPrice:parseInt(document.getElementById('fDiscountPrice').value)||0,
     discountRate:parseFloat(document.getElementById('fDiscountRate').value)||0,
