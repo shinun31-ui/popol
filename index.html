@@ -2729,47 +2729,125 @@ async function importSel(){
   showToast(toAdd.length+'개 작품이 추가됐어요 ✓');
 }
 
-// TOUCH DRAG
-var _drag={active:false,id:null,el:null,clone:null,ox:0,oy:0,timer:null,lastTarget:null};
+// TOUCH DRAG - 부드러운 위젯 스타일
+var _drag={active:false,id:null,el:null,clone:null,ox:0,oy:0,timer:null,lastTarget:null,placeholder:null};
+
 function initTouchDrag(){
-  var list=document.getElementById('list');if(!list||list._dragInited)return;list._dragInited=true;
+  var list=document.getElementById('list');
+  if(!list||list._dragInited)return;
+  list._dragInited=true;
+
   function getCard(el){return el?el.closest('.card[data-id]'):null;}
   function getTouch(e){return e.touches?e.touches[0]:e;}
+
   function startDrag(e,card){
     if(!editMode||!card)return;
-    var id=card.dataset.id;var rect=card.getBoundingClientRect();var pt=getTouch(e);
-    _drag.id=id;_drag.el=card;_drag.active=true;_drag.ox=pt.clientX-rect.left;_drag.oy=pt.clientY-rect.top;
-    if(navigator.vibrate)navigator.vibrate(30);
-    var clone=card.cloneNode(true);
-    clone.style.cssText='position:fixed;width:'+rect.width+'px;height:'+rect.height+'px;left:'+(pt.clientX-_drag.ox)+'px;top:'+(pt.clientY-_drag.oy)+'px;z-index:9999;pointer-events:none;opacity:.92;transform:scale(1.06) rotate(-1deg);box-shadow:0 16px 40px rgba(0,0,0,.3);border-radius:14px;transition:transform .15s ease;';
-    document.body.appendChild(clone);_drag.clone=clone;
-    card.style.opacity='0.25';card.style.transform='scale(.96)';
+    var id=card.dataset.id;
+    var rect=card.getBoundingClientRect();
+    var pt=getTouch(e);
+    _drag.id=id;_drag.el=card;_drag.active=true;
+    _drag.ox=pt.clientX-rect.left;
+    _drag.oy=pt.clientY-rect.top;
+    if(navigator.vibrate)navigator.vibrate(40);
+
+    // 플레이스홀더 - 원래 자리 표시
+    var ph=document.createElement('div');
+    ph.style.cssText='width:'+rect.width+'px;height:'+rect.height+'px;border-radius:14px;background:rgba(0,0,0,.06);border:2px dashed rgba(0,0,0,.1);flex-shrink:0;';
+    card.parentNode.insertBefore(ph,card);
+    _drag.placeholder=ph;
+
+    // 클론 생성 - 원래 카드를 fixed로 띄우기
+    card.style.cssText='position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;height:'+rect.height+'px;z-index:9999;pointer-events:none;transition:transform .15s ease,box-shadow .15s ease;will-change:transform;margin:0;';
+    card.style.transform='scale(1.08) rotate(-1.5deg)';
+    card.style.boxShadow='0 20px 50px rgba(0,0,0,.3)';
+    card.style.opacity='1';
   }
+
   function moveDrag(e){
-    if(!_drag.active||!_drag.clone)return;e.preventDefault();
-    var pt=getTouch(e);_drag.clone.style.left=(pt.clientX-_drag.ox)+'px';_drag.clone.style.top=(pt.clientY-_drag.oy)+'px';
-    _drag.clone.style.display='none';var el=document.elementFromPoint(pt.clientX,pt.clientY);_drag.clone.style.display='';
-    var target=getCard(el);var targetId=target?target.dataset.id:null;
-    if(targetId&&targetId!==_drag.id&&targetId!==_drag.lastTarget){
-      _drag.lastTarget=targetId;
-      var si=works.findIndex(function(w){return w.id===_drag.id;});var ti=works.findIndex(function(w){return w.id===targetId;});
-      if(si>=0&&ti>=0&&si!==ti){var moved=works.splice(si,1)[0];works.splice(ti,0,moved);works.forEach(function(w,i){w.sort_order=i;});render();_drag.el=document.querySelector('.card[data-id="'+_drag.id+'"]');if(_drag.el){_drag.el.style.opacity='0.25';_drag.el.style.transform='scale(.96)';}}
+    if(!_drag.active||!_drag.el)return;
+    e.preventDefault();
+    var pt=getTouch(e);
+    var x=pt.clientX-_drag.ox;
+    var y=pt.clientY-_drag.oy;
+    _drag.el.style.left=x+'px';
+    _drag.el.style.top=y+'px';
+
+    // 드롭 타겟 찾기 - 클론 숨기고 찾기
+    _drag.el.style.display='none';
+    var el2=document.elementFromPoint(pt.clientX,pt.clientY);
+    _drag.el.style.display='';
+    var target=el2?el2.closest('.card[data-id]'):null;
+
+    if(target&&target.dataset.id!==_drag.id&&target!==_drag.placeholder){
+      var tRect=target.getBoundingClientRect();
+      var tMid=tRect.top+tRect.height/2;
+      // 플레이스홀더 위치 이동
+      if(pt.clientY<tMid){
+        target.parentNode.insertBefore(_drag.placeholder,target);
+      } else {
+        target.parentNode.insertBefore(_drag.placeholder,target.nextSibling);
+      }
+      // works 배열 업데이트
+      var si=works.findIndex(function(w){return w.id===_drag.id;});
+      var ti=works.findIndex(function(w){return w.id===target.dataset.id;});
+      if(si>=0&&ti>=0&&si!==ti){
+        var moved=works.splice(si,1)[0];
+        works.splice(ti,0,moved);
+        works.forEach(function(w,i){w.sort_order=i;});
+      }
     }
   }
-  function endDrag(){
-    clearTimeout(_drag.timer);if(!_drag.active)return;
-    if(_drag.clone){_drag.clone.style.transition='transform .2s ease,opacity .2s ease';_drag.clone.style.transform='scale(1) rotate(0deg)';_drag.clone.style.opacity='0';setTimeout(function(){if(_drag.clone&&_drag.clone.parentNode)document.body.removeChild(_drag.clone);_drag.clone=null;},200);}
-    if(_drag.el){_drag.el.style.opacity='';_drag.el.style.transform='';}
-    _drag.active=false;_drag.id=null;_drag.el=null;_drag.lastTarget=null;saveOrder();
+
+  function endDrag(e){
+    clearTimeout(_drag.timer);
+    if(!_drag.active)return;
+    var card=_drag.el;
+    var ph=_drag.placeholder;
+
+    if(card&&ph){
+      // 카드를 플레이스홀더 위치로 부드럽게 이동 후 DOM 복원
+      var phRect=ph.getBoundingClientRect();
+      card.style.transition='left .2s ease,top .2s ease,transform .2s ease,box-shadow .2s ease';
+      card.style.left=phRect.left+'px';
+      card.style.top=phRect.top+'px';
+      card.style.transform='scale(1) rotate(0deg)';
+      card.style.boxShadow='';
+      setTimeout(function(){
+        // 카드 스타일 복원
+        card.style.cssText='';
+        card.style.position='';
+        // 플레이스홀더 자리에 카드 삽입
+        if(ph.parentNode){ph.parentNode.insertBefore(card,ph);ph.parentNode.removeChild(ph);}
+        _drag.placeholder=null;
+        saveOrder();
+      },200);
+    }
+
+    _drag.active=false;_drag.id=null;_drag.el=null;_drag.lastTarget=null;
   }
-  list.addEventListener('touchstart',function(e){var card=getCard(e.target);if(!card||!editMode)return;_drag.timer=setTimeout(function(){startDrag(e,card);},380);},{passive:true});
-  list.addEventListener('touchmove',function(e){if(_drag.active){moveDrag(e);}else{clearTimeout(_drag.timer);}},{passive:false});
-  list.addEventListener('touchend',function(){endDrag();},{passive:true});
-  list.addEventListener('touchcancel',function(){endDrag();},{passive:true});
-  list.addEventListener('mousedown',function(e){if(e.button!==0)return;var card=getCard(e.target);if(!card||!editMode)return;_drag.timer=setTimeout(function(){startDrag(e,card);},300);});
-  document.addEventListener('mousemove',function(e){if(_drag.active)moveDrag(e);else if(e.buttons===0)clearTimeout(_drag.timer);});
-  document.addEventListener('mouseup',function(){endDrag();});
+
+  // 터치
+  list.addEventListener('touchstart',function(e){
+    var card=getCard(e.target);if(!card||!editMode)return;
+    clearTimeout(_drag.timer);
+    _drag.timer=setTimeout(function(){startDrag(e,card);},350);
+  },{passive:true});
+  list.addEventListener('touchmove',function(e){
+    if(_drag.active){moveDrag(e);}else{clearTimeout(_drag.timer);}
+  },{passive:false});
+  list.addEventListener('touchend',function(e){endDrag(e);},{passive:true});
+  list.addEventListener('touchcancel',function(){clearTimeout(_drag.timer);if(_drag.el)_drag.el.style.cssText='';if(_drag.placeholder&&_drag.placeholder.parentNode)_drag.placeholder.parentNode.removeChild(_drag.placeholder);_drag.active=false;_drag.el=null;_drag.placeholder=null;},{passive:true});
+
+  // 마우스
+  list.addEventListener('mousedown',function(e){
+    if(e.button!==0)return;
+    var card=getCard(e.target);if(!card||!editMode)return;
+    _drag.timer=setTimeout(function(){startDrag(e,card);},250);
+  });
+  document.addEventListener('mousemove',function(e){if(_drag.active)moveDrag(e);});
+  document.addEventListener('mouseup',function(e){if(_drag.timer)clearTimeout(_drag.timer);endDrag(e);});
 }
+
 function onDragStart(e,id){}
 function onDragEnd(e){}
 function onDragOver(e,id){}
