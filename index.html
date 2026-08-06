@@ -2199,7 +2199,26 @@ var rates={KRW:1,USD:0,EUR:0,JPY:0,CNY:0};
 var selCur='KRW';
 var showPrice=false;
 function fmtPrice(n){if(!n)return'';if(selCur==='KRW')return fmtKRW(n);var r=rates[selCur]||1;var v=(n*r);var syms={USD:'$',EUR:'€',JPY:'¥',CNY:'¥'};return(syms[selCur]||'')+(selCur==='JPY'?Math.round(v).toLocaleString():v.toFixed(2));}
-function setCur(c){selCur=c;document.querySelectorAll('.cur-btn').forEach(function(b){b.classList.toggle('on',b.dataset.cur===c);});var r=rates[c];document.getElementById('rateInfo').textContent=r&&c!=='KRW'?'1₩ = '+r.toFixed(4)+c:'';openPreview();}
+function setCur(c){
+  selCur=c;
+  document.querySelectorAll('.cur-btn').forEach(function(b){b.classList.toggle('on',b.dataset.cur===c);});
+  var syms={USD:'달러',EUR:'유로',JPY:'엔',CNY:'위안'};
+  var symKeys={USD:'$',EUR:'€',JPY:'¥',CNY:'¥'};
+  var rateEl=document.getElementById('rateInfo');
+  if(c==='KRW'){
+    rateEl.textContent='';
+  } else {
+    var r=rates[c];
+    if(r&&r>0){
+      // 1외화 = 몇원 표시 (1/r = 원화 기준)
+      var wonPerUnit=Math.round(1/r);
+      rateEl.textContent='1'+symKeys[c]+' ≈ '+wonPerUnit.toLocaleString()+'원';
+    } else {
+      rateEl.textContent='환율 로딩 중...';
+    }
+  }
+  openPreview();
+}
 function togglePriceShow(){
   showPrice=!showPrice;
   var track=document.getElementById('priceToggle');
