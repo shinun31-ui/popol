@@ -2604,29 +2604,91 @@ function renderReview(){
     var form=document.createElement('div');form.style.flex='1';
     var fields=[
       {label:'제목',key:'title',type:'text',full:true},
-      {label:'연도',key:'year',type:'number'},
-      {label:'크기 (cm)',key:'size',type:'text'},
-      {label:'재료',key:'medium',type:'text'},
-      {label:'가격 (원)',key:'price',type:'number'},
     ];
     var grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:6px;';
+
+    // 제목 (전체 너비)
     fields.forEach(function(f){
       var wrap=document.createElement('div');if(f.full)wrap.style.gridColumn='1/-1';
       var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;color:var(--text3);margin-bottom:2px;';lbl.textContent=f.label;
       var inp=document.createElement('input');
       inp.type=f.type||'text';inp.value=it[f.key]||'';
       inp.style.cssText='width:100%;border:0.5px solid var(--border2);border-radius:7px;padding:6px 9px;font-size:12px;background:var(--bg);color:var(--text);outline:none;box-sizing:border-box;';
-      inp.oninput=(function(key,item){return function(){item[key]=this.type==='number'?(parseInt(this.value)||0):this.value;};})(f.key,it);
-      // 크기 입력시 호수 자동 계산
-      if(f.key==='size'){
-        var hnTag=document.createElement('div');hnTag.style.cssText='font-size:10px;color:#185FA5;margin-top:2px;';
-        inp.oninput=function(){it.size=this.value;var h=detHN(it.size);hnTag.textContent=h?'→ '+h:'';};
-        var h0=detHN(it.size);hnTag.textContent=h0?'→ '+h0:'';
-        wrap.appendChild(lbl);wrap.appendChild(inp);wrap.appendChild(hnTag);
-        grid.appendChild(wrap);return;
-      }
+      inp.oninput=(function(key,item){return function(){item[key]=this.value;};})(f.key,it);
       wrap.appendChild(lbl);wrap.appendChild(inp);grid.appendChild(wrap);
     });
+
+    // 연도 드롭다운
+    (function(){
+      var wrap=document.createElement('div');
+      var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;color:var(--text3);margin-bottom:2px;';lbl.textContent='연도';
+      var sel=document.createElement('select');
+      sel.style.cssText='width:100%;border:0.5px solid var(--border2);border-radius:7px;padding:6px 9px;font-size:12px;background:var(--bg);color:var(--text);outline:none;';
+      var cy=new Date().getFullYear();
+      for(var y=cy;y>=1970;y--){
+        var opt=document.createElement('option');opt.value=y;opt.textContent=y+'년';
+        if(it.year===y)opt.selected=true;
+        sel.appendChild(opt);
+      }
+      sel.onchange=function(){it.year=parseInt(this.value);};
+      wrap.appendChild(lbl);wrap.appendChild(sel);grid.appendChild(wrap);
+    })();
+
+    // 재료 입력
+    (function(){
+      var wrap=document.createElement('div');
+      var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;color:var(--text3);margin-bottom:2px;';lbl.textContent='재료';
+      var inp=document.createElement('input');inp.type='text';inp.value=it.medium||'';
+      inp.style.cssText='width:100%;border:0.5px solid var(--border2);border-radius:7px;padding:6px 9px;font-size:12px;background:var(--bg);color:var(--text);outline:none;box-sizing:border-box;';
+      inp.oninput=function(){it.medium=this.value;};
+      wrap.appendChild(lbl);wrap.appendChild(inp);grid.appendChild(wrap);
+    })();
+
+    // 호수 선택 (호수 + F/P/M/S)
+    (function(){
+      var wrap=document.createElement('div');wrap.style.gridColumn='1/-1';
+      var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;color:var(--text3);margin-bottom:4px;';lbl.textContent='호수';
+      var row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:6px;';
+      // 호수 숫자 드롭다운
+      var selN=document.createElement('select');
+      selN.style.cssText='width:100%;border:0.5px solid var(--border2);border-radius:7px;padding:6px 9px;font-size:12px;background:var(--bg);color:var(--text);outline:none;';
+      selN.innerHTML='<option value="">호수 선택</option>';
+      [0,1,2,3,4,5,6,8,10,12,15,20,25,30,40,50,60,80,100,120,150,200,300,500].forEach(function(n){
+        var o=document.createElement('option');o.value=n;o.textContent=n+'호';
+        selN.appendChild(o);
+      });
+      // 형식 드롭다운
+      var selT=document.createElement('select');
+      selT.style.cssText='width:100%;border:0.5px solid var(--border2);border-radius:7px;padding:6px 9px;font-size:12px;background:var(--bg);color:var(--text);outline:none;';
+      selT.innerHTML='<option value="F">F형 (인물)</option><option value="P">P형 (풍경)</option><option value="M">M형 (해경)</option><option value="S">S형 (정방)</option>';
+      // 호수 태그 (자동계산 결과)
+      var sizeTag=document.createElement('div');sizeTag.style.cssText='font-size:10px;color:#185FA5;margin-top:4px;grid-column:1/-1;';
+      // 기존 사이즈에서 호수 감지
+      if(it.size){var h0=detHN(it.size);if(h0){sizeTag.textContent='현재: '+it.size+' → '+h0;}}
+      function updateFromHo(){
+        var n=selN.value;var t=selT.value;
+        if(!n)return;
+        var row2=HT.find(function(r){return r.n===parseInt(n);});
+        if(!row2||!row2[t]||!row2[t][0])return;
+        var sz=row2[t][0]+'x'+row2[t][1];
+        it.size=sz;
+        sizeTag.textContent=n+'호 '+t+'형 → '+sz+'cm';
+      }
+      selN.onchange=updateFromHo;selT.onchange=updateFromHo;
+      row.appendChild(selN);row.appendChild(selT);
+      wrap.appendChild(lbl);wrap.appendChild(row);wrap.appendChild(sizeTag);
+      grid.appendChild(wrap);
+    })();
+
+    // 가격
+    (function(){
+      var wrap=document.createElement('div');wrap.style.gridColumn='1/-1';
+      var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;color:var(--text3);margin-bottom:2px;';lbl.textContent='가격 (원)';
+      var inp=document.createElement('input');inp.type='number';inp.value=it.price||'';
+      inp.style.cssText='width:100%;border:0.5px solid var(--border2);border-radius:7px;padding:6px 9px;font-size:12px;background:var(--bg);color:var(--text);outline:none;box-sizing:border-box;';
+      inp.oninput=function(){it.price=parseInt(this.value)||0;};
+      wrap.appendChild(lbl);wrap.appendChild(inp);grid.appendChild(wrap);
+    })();
     form.appendChild(grid);
     top.appendChild(chk);top.appendChild(thumb);top.appendChild(form);
     card.appendChild(top);
