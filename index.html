@@ -751,9 +751,9 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 </div>
 
 <!-- DETAIL MODAL -->
-<div class="ov" id="detailOv" onclick="ovClick(event,'detailOv')" style="align-items:center;overflow-y:auto;padding:16px;">
-  <div class="modal" id="detailModal" style="padding:0;width:100%;max-width:520px;margin:auto;">
-    <div style="background:var(--bg);border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.2);">
+<div class="ov" id="detailOv" onclick="ovClick(event,'detailOv')" style="align-items:center;justify-content:center;overflow-y:auto;padding:16px;box-sizing:border-box;">
+  <div class="modal" id="detailModal" style="padding:0;width:100%;max-width:560px;margin:0 auto;">
+    <div style="background:var(--bg);border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.2);overflow:hidden;">
     <!-- 상단 닫기 바 -->
     <div style="display:flex;align-items:center;justify-content:flex-end;padding:12px 16px 0;">
       <button onclick="closeOv('detailOv')" style="width:28px;height:28px;border-radius:50%;border:none;background:var(--bg2);cursor:pointer;color:var(--text);font-size:14px;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
@@ -1662,8 +1662,25 @@ function openDetail(id){
   var imgSrc=w.img?(w.img.includes('supabase.co')?w.img+'?width=600&quality=60&format=webp':w.img):'';
   var sold=isSold(w);var stop=isStop(w);
   var ph='<div style="width:100%;height:120px;background:var(--bg2);border-radius:12px;display:flex;align-items:center;justify-content:center;"><svg width="32" height="32" viewBox="0 0 28 28" fill="none"><rect x="4" y="4" width="20" height="20" rx="3" stroke="var(--text3)" stroke-width="1.5" fill="none"/></svg></div>';
+  // 이미지 즉시 표시 (저화질 먼저) + 비율에 맞게 모달 조정
   if(imgSrc){
-    document.getElementById('dImg').innerHTML='<img src="'+imgSrc+'" style="max-width:100%;max-height:55vh;width:auto;height:auto;display:block;margin:0 auto;object-fit:contain;">'+(sold?'<div class="dsoldrib">판매 완료</div>':'');
+    var thumbSrc=imgSrc.includes('supabase.co')?imgSrc+'?width=40&quality=10&format=webp':imgSrc;
+    // 즉시 저화질로 먼저 표시
+    document.getElementById('dImg').innerHTML='<img id="dImgEl" src="'+thumbSrc+'" style="max-width:100%;max-height:60vh;width:auto;height:auto;display:block;margin:0 auto;object-fit:contain;">'+(sold?'<div class="dsoldrib">판매 완료</div>':'');
+    // 고화질 로드 후 교체 + 모달 너비 조정
+    var hiImg=new Image();
+    hiImg.onload=function(){
+      var ratio=hiImg.naturalWidth/hiImg.naturalHeight;
+      var modal=document.getElementById('detailModal');
+      if(modal){
+        // 가로형(ratio>1.2)이면 모달 더 넓게
+        var maxW=Math.min(window.innerWidth-32, ratio>1.2?860:560);
+        modal.style.maxWidth=maxW+'px';
+      }
+      var el=document.getElementById('dImgEl');
+      if(el){el.src=imgSrc;}
+    };
+    hiImg.src=imgSrc;
   } else {
     document.getElementById('dImg').innerHTML=ph;
   }
