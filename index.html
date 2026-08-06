@@ -1664,20 +1664,7 @@ function openDetail(id){
   var sold=isSold(w);var stop=isStop(w);
   var ph='<div style="width:100%;height:120px;background:var(--bg2);border-radius:12px;display:flex;align-items:center;justify-content:center;"><svg width="32" height="32" viewBox="0 0 28 28" fill="none"><rect x="4" y="4" width="20" height="20" rx="3" stroke="var(--text3)" stroke-width="1.5" fill="none"/></svg></div>';
   if(imgSrc){
-    var img2=new Image();
-    img2.onload=function(){
-      var ratio=img2.naturalWidth/img2.naturalHeight;
-      var modal=document.getElementById('detailModal');
-      if(modal){
-        // 가로형이면 모달 더 넓게
-        if(ratio>1.2){modal.style.maxWidth=Math.min(Math.round(img2.naturalWidth*0.5),820)+'px';}
-        else{modal.style.maxWidth='520px';}
-      }
-      document.getElementById('dImg').innerHTML='<img src="'+imgSrc+'" style="width:100%;height:auto;display:block;object-fit:contain;">'+(sold?'<div class="dsoldrib">판매 완료</div>':'');
-    };
-    img2.onerror=function(){document.getElementById('dImg').innerHTML=ph+(sold?'<div class="dsoldrib">판매 완료</div>':'');};
-    document.getElementById('dImg').innerHTML='<div style="min-height:120px;display:flex;align-items:center;justify-content:center;"><div class="spinner"></div></div>';
-    img2.src=imgSrc;
+    document.getElementById('dImg').innerHTML='<img src="'+imgSrc+'" style="max-width:100%;max-height:55vh;width:auto;height:auto;display:block;margin:0 auto;object-fit:contain;">'+(sold?'<div class="dsoldrib">판매 완료</div>':'');
   } else {
     document.getElementById('dImg').innerHTML=ph;
   }
@@ -1984,6 +1971,80 @@ function openPreview(){
     el.appendChild(item);
   });
   document.getElementById('prevOv').classList.add('on');
+}
+
+// LOADING
+var _loadingAnim=null,_loadingCancelled=false,_loadingTotal=0;
+function showLoading(msg,cancellable,total){
+  _loadingCancelled=false;_loadingTotal=total||0;
+  var ov=document.getElementById('loadingOv');if(!ov)return;ov.style.display='block';
+  var msgEl=document.getElementById('loadingMsg');if(msgEl)msgEl.textContent=msg||'잠시만요...';
+  var bar=document.getElementById('loadingBar');if(bar)bar.style.width='0%';
+  var pct=document.getElementById('loadingPct');if(pct)pct.textContent='';
+  var cancelBtn=document.getElementById('loadingCancelBtn');if(cancelBtn){cancelBtn.style.display=cancellable?'block':'none';cancelBtn.disabled=false;cancelBtn.textContent='중단';}
+  var sqs=[document.getElementById('lsq0'),document.getElementById('lsq1'),document.getElementById('lsq2'),document.getElementById('lsq3')];
+  var lv=[1.0,0.55,0.25,0.1],step=0;sqs.forEach(function(s){if(s)s.style.opacity='0.1';});
+  clearInterval(_loadingAnim);_loadingAnim=setInterval(function(){step++;sqs.forEach(function(s,i){if(s)s.style.opacity=lv[((i-step)%4+4)%4];});},280);
+}
+function hideLoading(){clearInterval(_loadingAnim);_loadingCancelled=false;_loadingTotal=0;var ov=document.getElementById('loadingOv');if(ov)ov.style.display='none';}
+function updateLoading(msg,current,total){
+  var msgEl=document.getElementById('loadingMsg');if(msgEl)msgEl.textContent=msg;
+  var t=total||_loadingTotal;if(t&&current!=null){var pct=Math.round(current/t*100);var bar=document.getElementById('loadingBar');if(bar)bar.style.width=pct+'%';var pctEl=document.getElementById('loadingPct');if(pctEl)pctEl.textContent=pct+'%';}
+}
+function cancelLoading(){_loadingCancelled=true;var msgEl=document.getElementById('loadingMsg');if(msgEl)msgEl.textContent='중단 중...';var cancelBtn=document.getElementById('loadingCancelBtn');if(cancelBtn)cancelBtn.disabled=true;}
+
+// EXPORT
+function doExport(type){
+  var tw=sel.size>0?works.filter(function(w){return sel.has(w.id);}):works;
+  if(!tw.length){showToast('작품이 없어요');return;}
+  if(type==='csv'){
+    showLoading('엑셀 생성 중...');
+    (async function(){
+      try{
+        if(!window.XLSX){await new Promise(function(res,rej){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+        var wb=XLSX.utils.book_new();
+        var headers=['작가','이미지URL','제목','크기','호수','재료','연도','가격','판매여부'];
+        var data=[headers];
+        tw.forEach(function(w){data.push([artist.name||'',w.img||'',w.title,w.size||'-',getHN(w)||'-',w.medium||'-',w.year,w.price?fmtKRW(w.price):'-',isSold(w)?'판매완료':isReserve(w)?'예약중':isStop(w)?'판매중단':'판매가능']);});
+        var ws=XLSX.utils.aoa_to_sheet(data);
+        var colWidths=headers.map(function(_,ci){var max=headers[ci].length;data.forEach(function(row){var v=row[ci]?String(row[ci]):'';if(v.length>max)max=v.length;});return{wch:Math.min(max+4,50)};});
+        ws['!cols']=colWidths;XLSX.utils.book_append_sheet(wb,ws,'작품목록');
+        XLSX.writeFile(wb,'POPOL_'+(artist.name||'포트폴리오')+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+        hideLoading();showToast('엑셀 다운로드됐어요');
+      }catch(e){hideLoading();showToast('엑셀 생성 실패: '+e.message);}
+    })();
+  } else if(type==='pdf'){
+    var pw=window.open('','_blank','width=900,height=700,scrollbars=yes,resizable=yes');
+    var rows2=tw.map(function(w,i){
+      var h=getHN(w);
+      var imgHtml=w.img?'<img src="'+w.img+'" style="width:70px;height:70px;object-fit:contain;background:#f5f5f5;border-radius:4px;" crossorigin="anonymous"/>':'<div style="width:70px;height:70px;background:#eee;border-radius:4px;"></div>';
+      var priceStr=w.price?fmtKRW(w.price):'-';
+      var soldStr=isSold(w)?'<span style="color:#A32D2D;font-weight:600;">판매완료</span>':isReserve(w)?'<span style="color:#8B6914;font-weight:600;">예약중</span>':isStop(w)?'<span style="color:#8B4513;font-weight:600;">판매중단</span>':'판매가능';
+      return'<tr><td class="num">'+(i+1)+'</td><td class="img">'+imgHtml+'</td><td class="title"><b>'+w.title+'</b></td><td class="center">'+(w.size||'-')+'</td><td class="center">'+(h||'-')+'</td><td class="center">'+(w.medium||'-')+'</td><td class="center">'+w.year+'</td><td class="right">'+priceStr+'</td><td class="center">'+soldStr+'</td></tr>';
+    }).join('');
+    pw.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><style>@page{size:A4 landscape;margin:12mm;}body{font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:9pt;color:#111;}h2{font-size:14pt;font-weight:700;margin-bottom:2px;}p{font-size:8pt;color:#666;margin-bottom:12px;}table{width:100%;border-collapse:collapse;table-layout:auto;}th{padding:7px 8px;border-top:2px solid #111;border-bottom:1px solid #111;font-size:8pt;font-weight:600;white-space:nowrap;background:#fafafa;}td{padding:7px 8px;border-bottom:0.5px solid #e0e0e0;vertical-align:middle;white-space:nowrap;}td.title{white-space:normal;min-width:120px;}td.num{color:#aaa;text-align:center;}td.img{text-align:center;}td.center{text-align:center;}td.right{text-align:right;}tr:last-child td{border-bottom:1.5px solid #111;}</style></head><body><h2>'+(artist.name||'')+'</h2><p>'+(artist.phone||'')+(artist.phone&&artist.email?' · ':'')+( artist.email||'')+'</p><table><thead><tr><th style="text-align:center;">No.</th><th style="text-align:center;">이미지</th><th>제목</th><th style="text-align:center;">크기</th><th style="text-align:center;">호수</th><th style="text-align:center;">재료</th><th style="text-align:center;">연도</th><th style="text-align:right;">가격</th><th style="text-align:center;">판매여부</th></tr></thead><tbody>'+rows2+'</tbody></table></body></html>');
+    pw.document.close();setTimeout(function(){pw.print();},800);showToast('PDF 인쇄창이 열렸어요');
+  } else if(type==='txt'){
+    var lines=tw.map(function(w){var h=getHN(w);return[w.title,w.size,h,w.medium,w.year,w.price?fmtKRW(w.price):''].filter(Boolean).join(', ');});
+    navigator.clipboard.writeText(lines.join('\n')).then(function(){showToast(tw.length+'개 캡션이 복사됐어요');});
+  } else if(type==='img'){
+    showLoading('ZIP 압축 중... (0/'+tw.length+')',true,tw.length);
+    (async function(){
+      try{
+        if(!window.JSZip){await new Promise(function(res,rej){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+        var zip=new JSZip();
+        for(var i=0;i<tw.length;i++){
+          if(_loadingCancelled){hideLoading();showToast('중단됐어요');return;}
+          var w=tw[i];updateLoading('ZIP 압축 중... ('+(i+1)+'/'+tw.length+')',i+1,tw.length);
+          if(w.img){try{var r=await fetch(w.img);var blob=await r.blob();zip.file(w.year+'_'+w.title.replace(/[\/\\:*?"<>|]/g,'_')+'.jpg',blob);}catch(e){}}
+        }
+        updateLoading('ZIP 생성 중...',tw.length,tw.length);
+        var zipBlob=await zip.generateAsync({type:'blob'});
+        var a=document.createElement('a');a.href=URL.createObjectURL(zipBlob);a.download=(artist.name||'POPOL')+'_images_'+new Date().toISOString().slice(0,10)+'.zip';a.click();URL.revokeObjectURL(a.href);
+        hideLoading();showToast(tw.length+'개 이미지 ZIP 다운로드 완료');
+      }catch(e){hideLoading();showToast('실패: '+e.message);}
+    })();
+  }
 }
 
 // CURRENCY
