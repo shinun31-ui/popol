@@ -779,8 +779,8 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 </div>
 
 <!-- DETAIL MODAL -->
-<div class="ov" id="detailOv" onclick="ovClick(event,'detailOv')" style="align-items:center;justify-content:center;overflow-y:auto;padding:16px;box-sizing:border-box;">
-  <div class="modal" id="detailModal" style="padding:0;width:100%;max-width:560px;margin:0 auto;">
+<div class="ov" id="detailOv" onclick="ovClick(event,'detailOv')" style="align-items:center;justify-content:center;overflow-y:auto;padding:0;box-sizing:border-box;">
+  <div class="modal" id="detailModal" style="padding:0;width:calc(100% - 32px);max-width:560px;margin:16px auto;">
     <div style="background:var(--bg);border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.2);overflow:hidden;">
     <!-- 상단 닫기 바 -->
     <div style="display:flex;align-items:center;justify-content:flex-end;padding:12px 16px 0;">
@@ -2543,6 +2543,129 @@ function toggleCanvasCalc(){_calcPanelOpen=!_calcPanelOpen;document.getElementBy
 function switchCalcTab(n){[1,2,3].forEach(function(i){var content=document.getElementById('calcTabContent'+i);var tab=document.getElementById('calcTab'+i);if(!content||!tab)return;content.style.display=i===n?'block':'none';tab.style.background=i===n?'var(--bg)':'none';tab.style.color=i===n?'var(--text)':'var(--text3)';tab.style.fontWeight=i===n?'500':'400';});if(n===2&&!_ccTableInited)initCCTable();}
 function showCanvasCalcBtn(){document.getElementById('canvasCalcBtn').style.display='block';}
 function initHnumTable(){var tbody=document.getElementById('hnTable');if(!tbody||tbody.children.length>0)return;HT.forEach(function(row){var tr=document.createElement('tr');tr.style.borderBottom='0.5px solid var(--border)';var fmt=function(arr){return arr&&arr[0]?arr[0]+'×'+arr[1]:'-';};tr.innerHTML='<td style="padding:8px 10px;text-align:center;font-weight:600;color:var(--text);">'+row.n+'호</td><td style="padding:8px 10px;text-align:center;color:var(--text2);">'+fmt(row.F)+'</td><td style="padding:8px 10px;text-align:center;color:var(--text2);">'+fmt(row.S)+'</td><td style="padding:8px 10px;text-align:center;color:var(--text2);">'+fmt(row.P)+'</td><td style="padding:8px 10px;text-align:center;color:var(--text2);">'+fmt(row.M)+'</td>';tbody.appendChild(tr);});}
+
+// UPLOAD FUNCTIONS
+var reviewItems=[];
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('uzzone').classList.remove('drag');
+  handleFiles(e.dataTransfer.files);
+}
+async function readURL(file){
+  return new Promise(function(res){
+    var r=new FileReader();r.onload=function(e){res(e.target.result);};r.readAsDataURL(file);
+  });
+}
+async function handleFiles(files){
+  if(!files||!files.length)return;
+  var imgs=[];
+  for(var i=0;i<files.length;i++){
+    var f=files[i];
+    if(/\.(jpe?g|png|webp|gif)$/i.test(f.name))imgs.push(f);
+  }
+  if(!imgs.length){showToast('JPG, PNG 이미지 파일을 올려주세요');return;}
+  showLoading('파일 읽는 중... (0/'+imgs.length+')',false,imgs.length);
+  var items=[];
+  for(var i=0;i<imgs.length;i++){
+    updateLoading('파일 읽는 중... ('+(i+1)+'/'+imgs.length+')',i+1,imgs.length);
+    var url=await readURL(imgs[i]);
+    var n=imgs[i].name;
+    items.push({
+      title:detTitle(n),year:detYear(n),
+      size:detSize(n)||'',medium:detMed(n)||'',
+      price:detPrice(n)||0,genre:'회화',
+      img:url,checked:true
+    });
+  }
+  hideLoading();
+  reviewItems=items;
+  var outer=document.getElementById('reviewOuter');outer.style.display='block';
+  document.getElementById('reviewSub').textContent='총 '+items.length+'개 인식됨';
+  document.getElementById('footInfo').textContent='';
+  renderReview();
+}
+function renderReview(){
+  var el=document.getElementById('reviewBody');if(!el)return;
+  el.innerHTML='';
+  reviewItems.forEach(function(it,i){
+    var card=document.createElement('div');
+    card.style.cssText='border:0.5px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:10px;background:var(--bg2);';
+    // 체크박스 + 썸네일 + 정보
+    var top=document.createElement('div');top.style.cssText='display:flex;gap:12px;align-items:flex-start;';
+    // 체크
+    var chk=document.createElement('div');
+    chk.style.cssText='width:20px;height:20px;border-radius:5px;border:1.5px solid '+(it.checked?'#185FA5':'var(--border2)')+';background:'+(it.checked?'#185FA5':'none')+';flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:2px;';
+    if(it.checked)chk.innerHTML='<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>';
+    chk.onclick=function(){it.checked=!it.checked;renderReview();};
+    // 썸네일
+    var thumb=document.createElement('div');thumb.style.cssText='width:72px;height:72px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--bg);';
+    if(it.img){var img=document.createElement('img');img.src=it.img;img.style.cssText='width:100%;height:100%;object-fit:cover;';thumb.appendChild(img);}
+    // 정보 폼
+    var form=document.createElement('div');form.style.flex='1';
+    var fields=[
+      {label:'제목',key:'title',type:'text',full:true},
+      {label:'연도',key:'year',type:'number'},
+      {label:'크기 (cm)',key:'size',type:'text'},
+      {label:'재료',key:'medium',type:'text'},
+      {label:'가격 (원)',key:'price',type:'number'},
+    ];
+    var grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:6px;';
+    fields.forEach(function(f){
+      var wrap=document.createElement('div');if(f.full)wrap.style.gridColumn='1/-1';
+      var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;color:var(--text3);margin-bottom:2px;';lbl.textContent=f.label;
+      var inp=document.createElement('input');
+      inp.type=f.type||'text';inp.value=it[f.key]||'';
+      inp.style.cssText='width:100%;border:0.5px solid var(--border2);border-radius:7px;padding:6px 9px;font-size:12px;background:var(--bg);color:var(--text);outline:none;box-sizing:border-box;';
+      inp.oninput=(function(key,item){return function(){item[key]=this.type==='number'?(parseInt(this.value)||0):this.value;};})(f.key,it);
+      // 크기 입력시 호수 자동 계산
+      if(f.key==='size'){
+        var hnTag=document.createElement('div');hnTag.style.cssText='font-size:10px;color:#185FA5;margin-top:2px;';
+        inp.oninput=function(){it.size=this.value;var h=detHN(it.size);hnTag.textContent=h?'→ '+h:'';};
+        var h0=detHN(it.size);hnTag.textContent=h0?'→ '+h0:'';
+        wrap.appendChild(lbl);wrap.appendChild(inp);wrap.appendChild(hnTag);
+        grid.appendChild(wrap);return;
+      }
+      wrap.appendChild(lbl);wrap.appendChild(inp);grid.appendChild(wrap);
+    });
+    form.appendChild(grid);
+    top.appendChild(chk);top.appendChild(thumb);top.appendChild(form);
+    card.appendChild(top);
+    el.appendChild(card);
+  });
+  // 선택 카운트 업데이트
+  var sel=reviewItems.filter(function(r){return r.checked;}).length;
+  document.getElementById('footInfo').textContent='('+sel+'개 선택)';
+}
+async function importSel(){
+  var toAdd=reviewItems.filter(function(r){return r.checked;});
+  if(!toAdd.length){showToast('선택된 항목이 없어요');return;}
+  if(!currentUser){showToast('로그인이 필요해요');return;}
+  showLoading('이미지 업로드 중... (0/'+toAdd.length+')',true,toAdd.length);
+  var done=0;var BATCH=5;var imgUrls=new Array(toAdd.length).fill(null);
+  for(var b=0;b<toAdd.length;b+=BATCH){
+    if(_loadingCancelled){hideLoading();showToast('업로드가 중단됐어요');return;}
+    var batch=toAdd.slice(b,b+BATCH);
+    await Promise.all(batch.map(function(it,bi){
+      return (async function(){
+        if(_loadingCancelled)return;
+        var idx=b+bi;
+        if(it.img&&it.img.startsWith('data:')){
+          try{var blob=await(await fetch(it.img)).blob();var file=new File([blob],'upload_'+Date.now()+'_'+idx+'.jpg',{type:'image/jpeg'});imgUrls[idx]=await uploadImageToDB(file);}catch(e){}
+        }
+        done++;updateLoading('이미지 업로드 중... ('+done+'/'+toAdd.length+')',done,toAdd.length);
+      })();
+    }));
+  }
+  if(_loadingCancelled){hideLoading();showToast('업로드가 중단됐어요');return;}
+  updateLoading('작품 정보 저장 중...',toAdd.length,toAdd.length);
+  var rows=toAdd.map(function(it,i){
+    return{user_id:currentUser.id,title:it.title,year:it.year||new Date().getFullYear(),genre:it.genre||'회화',medium:it.medium||'',size:it.size||'',description:'',award:'',note:'',price:it.price||0,discount_price:0,discount_rate:0,sold:false,sold_date:'',sold_gallery:'',sold_collector:'',img_url:imgUrls[i]||null,color_bg:PAL[i%PAL.length][0],color_fg:PAL[i%PAL.length][1],sort_order:works.length+i};
+  });
+  await new Promise(function(resolve){supa.from('works').insert(rows).then(resolve);});
+  await loadWorksFromDB();hideLoading();
+  document.getElementById('reviewOuter').style.display='none';reviewItems=[];
+  showToast(toAdd.length+'개 작품이 추가됐어요 ✓');
+}
 
 // TOUCH DRAG
 var _drag={active:false,id:null,el:null,clone:null,ox:0,oy:0,timer:null,lastTarget:null};
