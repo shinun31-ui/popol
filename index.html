@@ -1959,12 +1959,12 @@ function openPreview(){
   var el=document.getElementById('pList');el.innerHTML='';
   tw.forEach(function(w,i){
     var h=getHN(w);var sold=isSold(w);var reserve=isReserve(w);
-    var imgHtml=w.img?'<img src="'+(w.img.includes('supabase.co')?w.img+'?width=80&quality=20&format=webp':w.img)+'" style="width:100%;height:100%;object-fit:cover;"/>':'<div style="width:100%;height:100%;background:var(--bg2);"></div>';
+    var imgHtml=w.img?'<img src="'+(w.img.includes('supabase.co')?w.img+'?width=80&quality=20&format=webp':w.img)+'" style="width:100%;height:100%;object-fit:cover;"/>':'<div style="width:100%;height:100%;background:var(--bg2);border-radius:7px;"></div>';
     var item=document.createElement('div');item.className='pitem'+(sold?' psold':'');
     item.innerHTML=(sold?'<div class="psoldb"></div>':'')
       +'<div class="pnum">'+(i+1)+'</div>'
       +'<div class="pthumb">'+imgHtml+'</div>'
-      +'<div class="pinfo"><div class="ptrow">'+w.title+(h?'<span class="phn">'+h+'</span>':'')+(sold?'<span class="pstag">완료</span>':reserve?'<span class="pstag" style="background:#FFF8E6;color:#8B6914;border-color:rgba(139,105,20,.3);">예약</span>':'')+'</div>'
+      +'<div class="pinfo"><div class="ptrow">'+w.title+(h?'<span class="phn">'+h+'</span>':'')+(sold?'<span class="pstag">완료</span>':reserve?'<span class="pstag" style="background:#FFF8E6;color:#8B6914;">예약</span>':'')+'</div>'
       +'<div class="pmeta">'+w.year+(w.genre?' · '+w.genre:'')+(w.size?' · '+w.size:'')+(w.medium?' · '+w.medium:'')+'</div>'
       +(showPrice&&w.price?'<div class="pmeta" style="color:#27500A;font-weight:600;">'+fmtPrice(w.price)+'</div>':'')
       +'</div>';
@@ -2048,6 +2048,12 @@ function doExport(type){
 }
 
 // CURRENCY
+var rates={KRW:1,USD:0,EUR:0,JPY:0,CNY:0};
+var selCur='KRW';
+var showPrice=false;
+function fmtPrice(n){if(!n)return'';if(selCur==='KRW')return fmtKRW(n);var r=rates[selCur]||1;var v=(n*r);var syms={USD:'$',EUR:'€',JPY:'¥',CNY:'¥'};return(syms[selCur]||'')+(selCur==='JPY'?Math.round(v).toLocaleString():v.toFixed(2));}
+function setCur(c){selCur=c;document.querySelectorAll('.cur-btn').forEach(function(b){b.classList.toggle('on',b.dataset.cur===c);});var r=rates[c];document.getElementById('rateInfo').textContent=r&&c!=='KRW'?'1₩ = '+r.toFixed(4)+c:'';openPreview();}
+function togglePriceShow(){showPrice=!showPrice;document.getElementById('priceToggle').classList.toggle('on',showPrice);openPreview();}
 async function fetchRates(){try{var r=await fetch('https://api.exchangerate-api.com/v4/latest/KRW');var d=await r.json();if(d.rates){rates.USD=d.rates.USD;rates.EUR=d.rates.EUR;rates.JPY=d.rates.JPY;rates.CNY=d.rates.CNY;}}catch(e){}}
 
 // CV
