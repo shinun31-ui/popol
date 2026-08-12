@@ -283,6 +283,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
       <div class="ff"><label>작가명</label><input id="settingName" placeholder="작가 이름"/></div>
       <div class="ff"><label>연락처</label><input id="settingPhone" placeholder="010-0000-0000"/></div>
       <div class="ff"><label>이메일</label><input id="settingEmail" placeholder="artist@email.com"/></div>
+      <div class="ff"><label>작업실 주소</label><input id="settingAddress" placeholder="예: 서울시 성동구 성수동 ..."/></div>
       <!-- 호당가 설정 -->
       <div class="ff">
         <label>호당 가격 (원)</label>
@@ -317,8 +318,61 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
     </div>
 
     <div style="display:flex;gap:8px;margin-top:16px;padding-top:16px;border-top:0.5px solid var(--border);">
+      <button class="btn btn-sm" onclick="openBusinessCard()" style="flex:1;text-align:center;">🪪 명함 만들기</button>
       <button class="btn btn-sm" onclick="openInquiry()" style="flex:1;text-align:center;">💬 문의하기</button>
       <button class="btn btn-sm" onclick="logout();closeOv('settingsOv')" style="flex:1;text-align:center;color:var(--red);">로그아웃</button>
+    </div>
+  </div>
+</div>
+
+<!-- 명함 모달 -->
+<div class="ov" id="businessCardOv" onclick="ovClick(event,'businessCardOv')">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <h2>명함 만들기</h2>
+      <button class="modal-close" onclick="closeOv('businessCardOv')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <!-- 명함 미리보기 -->
+    <div id="bcCard" style="width:100%;aspect-ratio:1.75;background:#2C2C2A;border-radius:14px;padding:32px 36px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;margin-bottom:16px;position:relative;overflow:hidden;">
+      <!-- 상단: 서명 이미지 -->
+      <div id="bcSignWrap" style="height:52px;display:flex;align-items:flex-start;">
+        <img id="bcSignImg" src="" style="max-height:52px;max-width:180px;object-fit:contain;display:none;opacity:0.9;"/>
+      </div>
+      <!-- 하단: 작가 정보 -->
+      <div>
+        <div id="bcName" style="font-size:28px;font-weight:700;color:#F1EFE8;letter-spacing:.02em;margin-bottom:14px;line-height:1.2;"></div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div id="bcPhone" style="font-size:13px;color:rgba(241,239,232,.5);letter-spacing:.05em;"></div>
+          <div id="bcEmail" style="font-size:13px;color:rgba(241,239,232,.5);letter-spacing:.05em;"></div>
+          <div id="bcAddress" style="font-size:13px;color:rgba(241,239,232,.5);letter-spacing:.03em;"></div>
+        </div>
+      </div>
+    </div>
+    <!-- 서명 업로드 -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:600;">서명 / 사인 이미지</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="nav-btn" onclick="document.getElementById('bcSignInput').click()">이미지 업로드</button>
+        <button class="nav-btn" id="bcSignClearBtn" onclick="clearBcSign()" style="display:none;color:var(--red);">제거</button>
+        <span style="font-size:11px;color:var(--text3);">PNG 권장 (투명 배경)</span>
+      </div>
+      <input type="file" id="bcSignInput" accept="image/*" style="display:none;" onchange="loadBcSign(this)"/>
+    </div>
+    <!-- 색상 선택 -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;">배경 색상</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="bcColors">
+        <div onclick="setBcColor('#2C2C2A','#F1EFE8')" style="width:28px;height:28px;border-radius:50%;background:#2C2C2A;cursor:pointer;border:2px solid #185FA5;"></div>
+        <div onclick="setBcColor('#1a1a18','#F1EFE8')" style="width:28px;height:28px;border-radius:50%;background:#1a1a18;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcColor('#F1EFE8','#2C2C2A')" style="width:28px;height:28px;border-radius:50%;background:#F1EFE8;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcColor('#185FA5','#F1EFE8')" style="width:28px;height:28px;border-radius:50%;background:#185FA5;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcColor('#27500A','#F1EFE8')" style="width:28px;height:28px;border-radius:50%;background:#27500A;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcColor('#A32D2D','#F1EFE8')" style="width:28px;height:28px;border-radius:50%;background:#A32D2D;cursor:pointer;border:2px solid transparent;"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="nav-btn" style="flex:1;text-align:center;" onclick="downloadBusinessCard()">이미지로 저장</button>
+      <button class="nav-btn nav-btn-dark" style="flex:1;text-align:center;" onclick="shareBusinessCard()">공유하기</button>
     </div>
   </div>
 </div>
@@ -1183,7 +1237,7 @@ var supa={
 
 // DATA
 var works=[],sel=new Set(),editId=null,pendingImg=null,pendingImgFile=null,soldF=false;
-var artist={name:'',phone:'',email:''};
+var artist={name:'',phone:'',email:'',address:''};
 var pageSize=9999,curPage=1,editMode=false,dragSrcId=null;
 var showPrice=true,selCur='KRW',rates={KRW:1,USD:0,EUR:0,JPY:0,CNY:0};
 var salesMode=false;
@@ -1287,7 +1341,7 @@ async function uploadImageToDB(file){
 async function loadProfileFromDB(){
   if(!currentUser)return;
   var res=await supa.from('profiles').select('*').eq('id',currentUser.id);
-  if(res.data&&res.data.length>0){var p=res.data[0];artist.name=p.artist_name||'';artist.phone=p.phone||'';artist.email=p.email||'';}
+  if(res.data&&res.data.length>0){var p=res.data[0];artist.name=p.artist_name||'';artist.phone=p.phone||'';artist.email=p.email||'';artist.address=p.address||'';}
 }
 async function saveProfileToDB(){
   if(!currentUser)return;
@@ -2569,8 +2623,113 @@ async function saveNote(){var title=document.getElementById('noteTitle').value.t
 async function deleteNote(id){if(!confirm('이 작업노트를 삭제할까요?'))return;await new Promise(function(resolve){supa.from('series_notes').delete().eq('id',id).then(resolve);});await loadNotes();showToast('삭제됐어요');}
 
 // SETTINGS
-function openSettings(){document.getElementById('settingName').value=artist.name||'';document.getElementById('settingPhone').value=artist.phone||'';document.getElementById('settingEmail').value=artist.email||'';document.getElementById('settingPricePerHo').value=localStorage.getItem('popol_pricePerHo')||'';var accEl=document.getElementById('settingAccountEmail');if(accEl)accEl.textContent=currentUser?(currentUser.email||''):'';var saved=localStorage.getItem('popol_session');var autoBtn=document.getElementById('autoLoginBtn');var devStatus=document.getElementById('deviceStatus');if(saved){if(autoBtn)autoBtn.textContent='해제';if(devStatus)devStatus.textContent='자동로그인 등록됨 ✓';}else{if(autoBtn)autoBtn.textContent='등록';if(devStatus)devStatus.textContent='자동로그인 미등록';}var ua=navigator.userAgent;var devName='이 기기';if(/iPhone/.test(ua))devName='iPhone';else if(/iPad/.test(ua))devName='iPad';else if(/Macintosh/.test(ua))devName='Mac';else if(/Android/.test(ua))devName='Android';else if(/Windows/.test(ua))devName='Windows PC';var nameEl=document.getElementById('deviceName');if(nameEl)nameEl.textContent=devName;document.getElementById('settingsOv').classList.add('on');}
-async function saveSettings(){artist.name=document.getElementById('settingName').value.trim();artist.phone=document.getElementById('settingPhone').value.trim();artist.email=document.getElementById('settingEmail').value.trim();var pph=document.getElementById('settingPricePerHo').value;if(pph)localStorage.setItem('popol_pricePerHo',pph);if(currentUser)await saveProfileToDB();var em=document.getElementById('userEmail');if(em)em.textContent=artist.name||(currentUser?currentUser.email:'');showToast('저장됐어요');}
+// 명함
+var _bcBg='#2C2C2A', _bcFg='#F1EFE8', _bcSignData=null;
+function openBusinessCard(){
+  closeOv('settingsOv');
+  document.getElementById('bcName').textContent=artist.name||'작가명';
+  var ph=document.getElementById('bcPhone');
+  var em=document.getElementById('bcEmail');
+  var ad=document.getElementById('bcAddress');
+  ph.textContent=artist.phone||'';ph.style.display=artist.phone?'block':'none';
+  em.textContent=artist.email||'';em.style.display=artist.email?'block':'none';
+  ad.textContent=artist.address||'';ad.style.display=artist.address?'block':'none';
+  document.getElementById('businessCardOv').classList.add('on');
+}
+function loadBcSign(input){
+  var file=input.files[0];if(!file)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    _bcSignData=e.target.result;
+    var img=document.getElementById('bcSignImg');
+    img.src=_bcSignData;img.style.display='block';
+    document.getElementById('bcSignClearBtn').style.display='block';
+  };
+  r.readAsDataURL(file);
+  input.value='';
+}
+function clearBcSign(){
+  _bcSignData=null;
+  var img=document.getElementById('bcSignImg');
+  img.src='';img.style.display='none';
+  document.getElementById('bcSignClearBtn').style.display='none';
+}
+function setBcColor(bg,fg){
+  _bcBg=bg;_bcFg=fg;
+  var card=document.getElementById('bcCard');
+  card.style.background=bg;
+  document.getElementById('bcName').style.color=fg;
+  var alpha=fg==='#2C2C2A'?'rgba(44,44,42,0.45)':'rgba(241,239,232,0.5)';
+  document.getElementById('bcPhone').style.color=alpha;
+  document.getElementById('bcEmail').style.color=alpha;
+  var ad=document.getElementById('bcAddress');if(ad)ad.style.color=alpha;
+  document.getElementById('bcColors').querySelectorAll('div').forEach(function(d){
+    var onclick=d.getAttribute('onclick')||'';
+    d.style.border=onclick.includes("'"+bg+"'")?'2px solid #185FA5':'2px solid transparent';
+  });
+}
+async function downloadBusinessCard(){
+  var name=artist.name||'작가명';
+  var phone=artist.phone||'';
+  var email=artist.email||'';
+  var address=artist.address||'';
+  var bg=_bcBg;var fg=_bcFg;
+  var alpha=fg==='#2C2C2A'?'rgba(44,44,42,0.5)':'rgba(241,239,232,0.5)';
+  var W=1800,H=1028; // 고해상도 2x
+
+  var canvas=document.createElement('canvas');
+  canvas.width=W;canvas.height=H;
+  var ctx=canvas.getContext('2d');
+
+  // 배경
+  ctx.fillStyle=bg;
+  ctx.beginPath();ctx.roundRect(0,0,W,H,28*2);ctx.fill();
+
+  // 서명 이미지
+  if(_bcSignData){
+    await new Promise(function(res){
+      var sImg=new Image();
+      sImg.onload=function(){
+        var maxW=360,maxH=104;
+        var scale=Math.min(maxW/sImg.width,maxH/sImg.height);
+        ctx.globalAlpha=0.9;
+        ctx.drawImage(sImg,104,88,sImg.width*scale,sImg.height*scale);
+        ctx.globalAlpha=1.0;res();
+      };
+      sImg.onerror=res;sImg.src=_bcSignData;
+    });
+  }
+
+  // 이름 (크게)
+  ctx.fillStyle=fg;
+  ctx.font='bold 84px -apple-system, "Apple SD Gothic Neo", sans-serif';
+  ctx.fillText(name,104,H-190);
+
+  // 연락처 (크게)
+  ctx.fillStyle=alpha;
+  ctx.font='36px -apple-system, "Apple SD Gothic Neo", sans-serif';
+  var contactY=H-112;
+  if(phone){ctx.fillText(phone,104,contactY);contactY+=52;}
+  if(email){ctx.fillText(email,104,contactY);contactY+=52;}
+  if(address){ctx.fillText(address,104,contactY);}
+
+  // PNG 다운로드
+  canvas.toBlob(function(blob){
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download=(artist.name||'POPOL')+'_명함.png';a.click();
+    URL.revokeObjectURL(url);
+    showToast('명함 PNG가 다운로드됐어요');
+  },'image/png');
+}
+async function shareBusinessCard(){
+  var name=artist.name||'작가명';
+  var text=name+'\n'+(artist.phone?artist.phone+'\n':'')+(artist.email||'');
+  if(navigator.share){try{await navigator.share({title:name,text:text});return;}catch(e){}}
+  navigator.clipboard.writeText(text).then(function(){showToast('명함 정보가 복사됐어요');});
+}
+
+function openSettings(){document.getElementById('settingName').value=artist.name||'';document.getElementById('settingPhone').value=artist.phone||'';document.getElementById('settingEmail').value=artist.email||'';document.getElementById('settingAddress').value=artist.address||'';document.getElementById('settingPricePerHo').value=localStorage.getItem('popol_pricePerHo')||'';var accEl=document.getElementById('settingAccountEmail');if(accEl)accEl.textContent=currentUser?(currentUser.email||''):'';var saved=localStorage.getItem('popol_session');var autoBtn=document.getElementById('autoLoginBtn');var devStatus=document.getElementById('deviceStatus');if(saved){if(autoBtn)autoBtn.textContent='해제';if(devStatus)devStatus.textContent='자동로그인 등록됨 ✓';}else{if(autoBtn)autoBtn.textContent='등록';if(devStatus)devStatus.textContent='자동로그인 미등록';}var ua=navigator.userAgent;var devName='이 기기';if(/iPhone/.test(ua))devName='iPhone';else if(/iPad/.test(ua))devName='iPad';else if(/Macintosh/.test(ua))devName='Mac';else if(/Android/.test(ua))devName='Android';else if(/Windows/.test(ua))devName='Windows PC';var nameEl=document.getElementById('deviceName');if(nameEl)nameEl.textContent=devName;document.getElementById('settingsOv').classList.add('on');}
+async function saveSettings(){artist.name=document.getElementById('settingName').value.trim();artist.phone=document.getElementById('settingPhone').value.trim();artist.email=document.getElementById('settingEmail').value.trim();artist.address=document.getElementById('settingAddress').value.trim();var pph=document.getElementById('settingPricePerHo').value;if(pph)localStorage.setItem('popol_pricePerHo',pph);if(currentUser)await saveProfileToDB();var em=document.getElementById('userEmail');if(em)em.textContent=artist.name||(currentUser?currentUser.email:'');showToast('저장됐어요');}
 function toggleAutoLogin(){var saved=localStorage.getItem('popol_session');var autoBtn=document.getElementById('autoLoginBtn');var devStatus=document.getElementById('deviceStatus');if(saved){localStorage.removeItem('popol_session');if(autoBtn)autoBtn.textContent='등록';if(devStatus)devStatus.textContent='자동로그인 미등록';showToast('자동로그인이 해제됐어요');}else{if(autoBtn)autoBtn.textContent='해제';if(devStatus)devStatus.textContent='자동로그인 등록됨 ✓';showToast('자동로그인이 등록됐어요');}}
 function openInquiry(){document.getElementById('inquiryText').value='';var contact=document.getElementById('inquiryContact');if(contact)contact.value=artist.email||(currentUser?currentUser.email:'');closeOv('settingsOv');document.getElementById('inquiryOv').classList.add('on');}
 async function submitInquiry(){var text=document.getElementById('inquiryText').value.trim();if(!text){showToast('문의 내용을 입력해주세요');return;}var type=document.getElementById('inquiryType').value;var contact=document.getElementById('inquiryContact').value.trim();var data={user_id:currentUser?currentUser.id:null,type:type,content:text,contact:contact,created_at:new Date().toISOString()};await new Promise(function(resolve){supa.from('inquiries').insert(data).then(resolve);});closeOv('inquiryOv');showToast('문의가 접수됐어요 😊');}
