@@ -359,15 +359,38 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
       <input type="file" id="bcSignInput" accept="image/*" style="display:none;" onchange="loadBcSign(this)"/>
     </div>
     <!-- 색상 선택 -->
-    <div style="margin-bottom:16px;">
+    <div style="margin-bottom:14px;">
       <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;">배경 색상</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="bcColors">
-        <div onclick="setBcColor('#2C2C2A','#F1EFE8')" style="width:28px;height:28px;border-radius:50%;background:#2C2C2A;cursor:pointer;border:2px solid #185FA5;"></div>
-        <div onclick="setBcColor('#1a1a18','#F1EFE8')" style="width:28px;height:28px;border-radius:50%;background:#1a1a18;cursor:pointer;border:2px solid transparent;"></div>
-        <div onclick="setBcColor('#F1EFE8','#2C2C2A')" style="width:28px;height:28px;border-radius:50%;background:#F1EFE8;cursor:pointer;border:2px solid transparent;"></div>
-        <div onclick="setBcColor('#185FA5','#F1EFE8')" style="width:28px;height:28px;border-radius:50%;background:#185FA5;cursor:pointer;border:2px solid transparent;"></div>
-        <div onclick="setBcColor('#27500A','#F1EFE8')" style="width:28px;height:28px;border-radius:50%;background:#27500A;cursor:pointer;border:2px solid transparent;"></div>
-        <div onclick="setBcColor('#A32D2D','#F1EFE8')" style="width:28px;height:28px;border-radius:50%;background:#A32D2D;cursor:pointer;border:2px solid transparent;"></div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;" id="bcColors">
+        <div onclick="setBcColor('#2C2C2A','#F1EFE8')" style="width:26px;height:26px;border-radius:50%;background:#2C2C2A;cursor:pointer;border:2px solid #185FA5;"></div>
+        <div onclick="setBcColor('#1a1a18','#F1EFE8')" style="width:26px;height:26px;border-radius:50%;background:#1a1a18;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcColor('#F1EFE8','#2C2C2A')" style="width:26px;height:26px;border-radius:50%;background:#F1EFE8;cursor:pointer;border:2px solid transparent;border:0.5px solid #ccc;"></div>
+        <div onclick="setBcColor('#ffffff','#2C2C2A')" style="width:26px;height:26px;border-radius:50%;background:#ffffff;cursor:pointer;border:0.5px solid #ccc;"></div>
+        <div onclick="setBcColor('#185FA5','#F1EFE8')" style="width:26px;height:26px;border-radius:50%;background:#185FA5;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcColor('#042C53','#F1EFE8')" style="width:26px;height:26px;border-radius:50%;background:#042C53;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcColor('#27500A','#F1EFE8')" style="width:26px;height:26px;border-radius:50%;background:#27500A;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcColor('#1D9E75','#F1EFE8')" style="width:26px;height:26px;border-radius:50%;background:#1D9E75;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcColor('#A32D2D','#F1EFE8')" style="width:26px;height:26px;border-radius:50%;background:#A32D2D;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcColor('#D85A30','#F1EFE8')" style="width:26px;height:26px;border-radius:50%;background:#D85A30;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcColor('#BA7517','#F1EFE8')" style="width:26px;height:26px;border-radius:50%;background:#BA7517;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcColor('#534AB7','#F1EFE8')" style="width:26px;height:26px;border-radius:50%;background:#534AB7;cursor:pointer;border:2px solid transparent;"></div>
+      </div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;">글씨 색상</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;" id="bcTextColors">
+        <div onclick="setBcFg('#F1EFE8')" style="width:26px;height:26px;border-radius:50%;background:#F1EFE8;cursor:pointer;border:2px solid #185FA5;border:0.5px solid #ccc;"></div>
+        <div onclick="setBcFg('#ffffff')" style="width:26px;height:26px;border-radius:50%;background:#ffffff;cursor:pointer;border:2px solid transparent;border:0.5px solid #ccc;"></div>
+        <div onclick="setBcFg('#2C2C2A')" style="width:26px;height:26px;border-radius:50%;background:#2C2C2A;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcFg('#1a1a18')" style="width:26px;height:26px;border-radius:50%;background:#1a1a18;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcFg('#185FA5')" style="width:26px;height:26px;border-radius:50%;background:#185FA5;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcFg('#A32D2D')" style="width:26px;height:26px;border-radius:50%;background:#A32D2D;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcFg('#D85A30')" style="width:26px;height:26px;border-radius:50%;background:#D85A30;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcFg('#BA7517')" style="width:26px;height:26px;border-radius:50%;background:#BA7517;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcFg('#27500A')" style="width:26px;height:26px;border-radius:50%;background:#27500A;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcFg('#1D9E75')" style="width:26px;height:26px;border-radius:50%;background:#1D9E75;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcFg('#534AB7')" style="width:26px;height:26px;border-radius:50%;background:#534AB7;cursor:pointer;border:2px solid transparent;"></div>
+        <div onclick="setBcFg('#D4537E')" style="width:26px;height:26px;border-radius:50%;background:#D4537E;cursor:pointer;border:2px solid transparent;"></div>
       </div>
     </div>
     <div style="display:flex;gap:8px;">
@@ -2653,6 +2676,20 @@ function clearBcSign(){
   var img=document.getElementById('bcSignImg');
   img.src='';img.style.display='none';
   document.getElementById('bcSignClearBtn').style.display='none';
+}
+function setBcFg(fg){
+  _bcFg=fg;
+  document.getElementById('bcName').style.color=fg;
+  var alpha=fg==='#2C2C2A'||fg==='#1a1a18'?'rgba(44,44,42,0.45)':'rgba(241,239,232,0.5)';
+  // 밝은 색상이면 알파 더 진하게
+  document.getElementById('bcPhone').style.color=alpha;
+  document.getElementById('bcEmail').style.color=alpha;
+  var ad=document.getElementById('bcAddress');if(ad)ad.style.color=alpha;
+  // 서명 이미지 색상 반영 불필요 (이미지 자체)
+  document.getElementById('bcTextColors').querySelectorAll('div').forEach(function(d){
+    var onclick=d.getAttribute('onclick')||'';
+    d.style.border=onclick.includes("'"+fg+"'")?'2px solid #185FA5':'2px solid transparent';
+  });
 }
 function setBcColor(bg,fg){
   _bcBg=bg;_bcFg=fg;
