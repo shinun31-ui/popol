@@ -20,6 +20,17 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 .splash-logo .sq{border-radius:5px;background:#F1EFE8;transition:opacity .28s ease;}
 .splash-word{font-size:28px;font-weight:800;font-style:italic;letter-spacing:.05em;color:#F1EFE8;opacity:0;transition:opacity .5s ease;}
 .splash-word.show{opacity:1;}
+/* NAV RESPONSIVE */
+.nav-btns{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;}
+@media(max-width:900px){
+  .nav-btns{display:none;}
+  #navHamBtn{display:flex !important;}
+}
+@media(max-width:480px){
+  .nav-wordmark{display:none;}
+  .user-bar span{display:none;}
+  .logout-btn:first-of-type{display:none;}
+}
 /* NAV */
 #mainNav{display:none;align-items:center;justify-content:space-between;padding:0 16px;height:52px;background:var(--bg);border-bottom:0.5px solid var(--border);position:fixed;top:0;left:0;right:0;z-index:50;}
 .nav-logo{display:flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none;}
@@ -380,7 +391,26 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
     <span class="nav-wordmark">POPOL</span>
   </div>
   <div class="nav-right">
-    <div class="user-bar"><span id="userEmail"></span><button class="logout-btn" onclick="openSettings()">⚙️ 설정</button><button class="logout-btn" onclick="logout()">로그아웃</button></div>
+    <!-- 데스크탑: 항상 보이는 버튼들 -->
+    <div class="nav-btns" id="navBtns">
+      <button class="btn btn-sm" onclick="showTab('portfolio')">홈</button>
+      <button class="btn btn-sm" id="editModeBtn" onclick="toggleEditMode()">편집</button>
+      <button class="btn btn-sm" onclick="showTab('upload')">간편 업로드</button>
+      <button class="btn btn-sm" onclick="showTab('cv')">CV</button>
+      <button class="btn btn-sm" onclick="showTab('notes')">작업노트</button>
+      <button class="btn btn-sm" onclick="openPreview()">내보내기</button>
+      <button class="btn btn-sm" onclick="refreshWorks()" title="새로고침">↺</button>
+      <button class="btn btn-sm" onclick="toggleCanvasCalc()">📐</button>
+      <button class="btn btn-sm btn-dark" onclick="openAdd()">+ 추가</button>
+    </div>
+    <!-- 햄버거 버튼 (좁은 화면) -->
+    <button class="btn btn-sm" id="navHamBtn" onclick="toggleNavMenu()" style="display:none;">☰</button>
+    <!-- 설정/로그아웃 -->
+    <div class="user-bar">
+      <span id="userEmail" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      <button class="logout-btn" onclick="openSettings()">⚙️</button>
+      <button class="logout-btn" onclick="logout()">로그아웃</button>
+    </div>
     <div style="position:relative;">
       <button class="lang-btn" id="langBtn" onclick="toggleLangMenu()"><span id="langBtnLabel">한국어</span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
       <div class="lang-menu hide" id="langMenu">
@@ -390,15 +420,18 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
         <div class="lang-opt" onclick="setLang('zh')">🇨🇳 中文</div>
       </div>
     </div>
-    <button class="btn btn-sm" onclick="showTab('portfolio')">홈</button>
-    <button class="btn btn-sm" id="editModeBtn" onclick="toggleEditMode()">편집</button>
-    <button class="btn btn-sm" onclick="showTab('upload')">간편 업로드</button>
-    <button class="btn btn-sm" onclick="showTab('cv')">CV</button>
-    <button class="btn btn-sm" onclick="showTab('notes')">작업노트</button>
-    <button class="btn btn-sm" onclick="openPreview()">내보내기</button>
-    <button class="btn btn-sm" onclick="refreshWorks()" title="새로고침">↺</button>
-    <button class="btn btn-sm" onclick="showTab('hnum')">호수 계산기</button>
-    <button class="btn btn-sm btn-dark" onclick="openAdd()">+ 추가</button>
+  </div>
+  <!-- 드롭다운 메뉴 (좁은 화면) -->
+  <div id="navDropdown" style="display:none;position:fixed;top:52px;left:0;right:0;background:var(--bg);border-bottom:0.5px solid var(--border);z-index:49;padding:8px 12px;display:none;flex-direction:column;gap:4px;box-shadow:0 4px 16px rgba(0,0,0,.1);">
+    <button class="btn btn-sm" style="text-align:left;" onclick="showTab('portfolio');toggleNavMenu()">홈</button>
+    <button class="btn btn-sm" style="text-align:left;" id="editModeBtnMob" onclick="toggleEditMode();toggleNavMenu()">편집</button>
+    <button class="btn btn-sm" style="text-align:left;" onclick="showTab('upload');toggleNavMenu()">간편 업로드</button>
+    <button class="btn btn-sm" style="text-align:left;" onclick="showTab('cv');toggleNavMenu()">CV</button>
+    <button class="btn btn-sm" style="text-align:left;" onclick="showTab('notes');toggleNavMenu()">작업노트</button>
+    <button class="btn btn-sm" style="text-align:left;" onclick="openPreview();toggleNavMenu()">내보내기</button>
+    <button class="btn btn-sm" style="text-align:left;" onclick="refreshWorks();toggleNavMenu()">↺ 새로고침</button>
+    <button class="btn btn-sm" style="text-align:left;" onclick="toggleCanvasCalc();toggleNavMenu()">📐 호수 계산기</button>
+    <button class="btn btn-sm btn-dark" style="text-align:left;" onclick="openAdd();toggleNavMenu()">+ 추가</button>
   </div>
 </nav>
 
@@ -1447,6 +1480,19 @@ function closeOv(id){var el=document.getElementById(id);if(el)el.classList.remov
 function ovClick(e,id){if(e.target.id===id)closeOv(id);}
 var _toastT;
 function showToast(msg){var el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.classList.add('on');clearTimeout(_toastT);_toastT=setTimeout(function(){el.classList.remove('on');},2500);}
+var _navMenuOpen=false;
+function toggleNavMenu(){
+  _navMenuOpen=!_navMenuOpen;
+  var dd=document.getElementById('navDropdown');
+  if(dd)dd.style.display=_navMenuOpen?'flex':'none';
+}
+document.addEventListener('click',function(e){
+  var ham=document.getElementById('navHamBtn');
+  var dd=document.getElementById('navDropdown');
+  if(_navMenuOpen&&dd&&ham&&!dd.contains(e.target)&&!ham.contains(e.target)){
+    _navMenuOpen=false;dd.style.display='none';
+  }
+});
 function setLang(l){localStorage.setItem('popol_lang',l);document.getElementById('langMenu').classList.add('hide');}
 function toggleLangMenu(){document.getElementById('langMenu').classList.toggle('hide');}
 document.addEventListener('click',function(e){
@@ -2752,24 +2798,33 @@ async function importSel(){
   if(!toAdd.length){showToast('선택된 항목이 없어요');return;}
   if(!currentUser){showToast('로그인이 필요해요');return;}
   showLoading('이미지 업로드 중... (0/'+toAdd.length+')',true,toAdd.length);
-  var done=0;var BATCH=8;var imgUrls=new Array(toAdd.length).fill(null);
+  var done=0;
+  var BATCH=6;
+  var imgUrls=new Array(toAdd.length).fill(null);
+  var uploadId=Date.now(); // 이번 업로드 고유 ID
 
-  // 1단계: 이미지 병렬 업로드 (8개씩)
+  // 1단계: 이미지 업로드 - 각 항목 인덱스를 명확히 바인딩
   for(var b=0;b<toAdd.length;b+=BATCH){
     if(_loadingCancelled){hideLoading();showToast('업로드가 중단됐어요');return;}
-    var batch=toAdd.slice(b,b+BATCH);
+    var batchStart=b;
+    var batch=toAdd.slice(batchStart,batchStart+BATCH);
+
     await Promise.all(batch.map(function(it,bi){
+      var itemIdx=batchStart+bi; // 클로저에 인덱스 고정
       return (async function(){
         if(_loadingCancelled)return;
-        var idx=b+bi;
         if(it.img&&it.img.startsWith('data:')){
           try{
             var blob=await(await fetch(it.img)).blob();
-            // 이미지 압축 (1200px 이내)
             var compressed=await compressImage(blob,1200);
-            var file=new File([compressed],'upload_'+Date.now()+'_'+idx+'.jpg',{type:'image/jpeg'});
-            imgUrls[idx]=await uploadImageToDB(file);
-          }catch(e){console.error('upload err:',idx,e);}
+            // 고유 파일명: uploadId + itemIdx 조합으로 절대 중복 없게
+            var fname=uploadId+'_'+itemIdx+'_'+Math.random().toString(36).slice(2,7)+'.jpg';
+            var file=new File([compressed],fname,{type:'image/jpeg'});
+            var url=await uploadImageToDB(file);
+            imgUrls[itemIdx]=url; // 정확한 인덱스에 저장
+          }catch(e){
+            console.error('upload err idx='+itemIdx,e);
+          }
         }
         done++;
         updateLoading('이미지 업로드 중... ('+done+'/'+toAdd.length+')',done,toAdd.length);
@@ -2779,26 +2834,47 @@ async function importSel(){
 
   if(_loadingCancelled){hideLoading();showToast('업로드가 중단됐어요');return;}
 
-  // 2단계: DB insert (50개씩 분할)
+  // 2단계: DB insert - toAdd[i]와 imgUrls[i] 1:1 대응 검증
   updateLoading('작품 정보 저장 중...',toAdd.length,toAdd.length);
   var rows=toAdd.map(function(it,i){
-    return{user_id:currentUser.id,title:it.title,year:it.year||new Date().getFullYear(),genre:it.genre||'회화',medium:it.medium||'',size:it.size||'',description:'',award:'',note:'',price:it.price||0,discount_price:0,discount_rate:0,sold:false,sold_date:'',sold_gallery:'',sold_collector:'',img_url:imgUrls[i]||null,color_bg:PAL[i%PAL.length][0],color_fg:PAL[i%PAL.length][1],sort_order:works.length+i};
+    return{
+      user_id:currentUser.id,
+      title:it.title||'제목없음',
+      year:parseInt(it.year)||new Date().getFullYear(),
+      genre:it.genre||'회화',
+      medium:it.medium||'',
+      size:it.size||'',
+      description:'',award:'',note:'',
+      price:parseInt(it.price)||0,
+      discount_price:0,discount_rate:0,
+      sold:false,sold_date:'',sold_gallery:'',sold_collector:'',
+      img_url:imgUrls[i]||null, // i번째 항목의 i번째 URL
+      color_bg:PAL[i%PAL.length][0],color_fg:PAL[i%PAL.length][1],
+      sort_order:works.length+i
+    };
   });
 
+  // 50개씩 순차 insert
   var CHUNK=50;var insertOk=true;
   for(var c=0;c<rows.length;c+=CHUNK){
     var chunk=rows.slice(c,c+CHUNK);
     var res=await new Promise(function(resolve){supa.from('works').insert(chunk).then(resolve);});
-    if(res&&res.error){insertOk=false;console.error('insert error:',res.error);break;}
-    updateLoading('저장 중... ('+(Math.min(c+CHUNK,rows.length))+'/'+rows.length+')',Math.min(c+CHUNK,rows.length),rows.length);
+    if(res&&res.error){
+      insertOk=false;
+      console.error('insert error chunk '+(c/CHUNK),res.error);
+      showToast('저장 오류 발생. 새로고침 후 확인해주세요');
+      break;
+    }
+    updateLoading('저장 중... '+Math.min(c+CHUNK,rows.length)+'/'+rows.length,Math.min(c+CHUNK,rows.length),rows.length);
   }
 
   await loadWorksFromDB();
   hideLoading();
-  document.getElementById('reviewOuter').style.display='none';
-  reviewItems=[];
-  if(insertOk){showToast(toAdd.length+'개 작품이 추가됐어요 ✓');}
-  else{showToast('일부 저장에 실패했을 수 있어요. 새로고침 확인해주세요');}
+  if(insertOk){
+    document.getElementById('reviewOuter').style.display='none';
+    reviewItems=[];
+    showToast(toAdd.length+'개 작품 업로드 완료 ✓');
+  }
 }
 
 // 이미지 압축
@@ -2821,7 +2897,145 @@ async function compressImage(blob,maxPx){
 }
 
 // TOUCH DRAG - 부드러운 위젯 스타일
-var _drag={active:false,id:null,el:null,clone:null,ox:0,oy:0,timer:null,lastTarget:null,placeholder:null};
+var _drag={active:false,id:null,el:null,clone:null,ox:0,oy:0,timer:null,placeholder:null};
+var _saveOrderTimer=null;
+
+function saveOrder(){
+  // 디바운스: 마지막 호출 후 1초 뒤에만 DB 저장
+  clearTimeout(_saveOrderTimer);
+  _saveOrderTimer=setTimeout(function(){
+    // works 배열의 현재 순서를 sort_order에 반영
+    works.forEach(function(w,i){w.sort_order=i;});
+    // 한 번에 전체 업데이트 (순차적으로, 백그라운드)
+    (async function(){
+      for(var i=0;i<works.length;i++){
+        await new Promise(function(resolve){
+          supa.from('works').update({sort_order:works[i].sort_order}).eq('id',works[i].dbId||works[i].id).then(resolve);
+        });
+      }
+    })();
+  },1000);
+}
+
+function initTouchDrag(){
+  var list=document.getElementById('list');
+  if(!list||list._dragInited)return;
+  list._dragInited=true;
+
+  function getCard(el){return el?el.closest('.card[data-id]'):null;}
+  function getTouch(e){return e.touches?e.touches[0]:e;}
+
+  function startDrag(e,card){
+    if(!editMode||!card)return;
+    var id=card.dataset.id;
+    var rect=card.getBoundingClientRect();
+    var pt=getTouch(e);
+    _drag.id=id;_drag.el=card;_drag.active=true;
+    _drag.ox=pt.clientX-rect.left;
+    _drag.oy=pt.clientY-rect.top;
+    if(navigator.vibrate)navigator.vibrate(30);
+
+    // 플레이스홀더
+    var ph=document.createElement('div');
+    ph.style.cssText='width:'+rect.width+'px;height:'+rect.height+'px;border-radius:14px;background:rgba(0,0,0,.05);border:2px dashed rgba(0,0,0,.1);flex-shrink:0;box-sizing:border-box;';
+    card.parentNode.insertBefore(ph,card);
+    _drag.placeholder=ph;
+
+    // 카드를 fixed로
+    card.style.cssText='position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;z-index:9999;pointer-events:none;margin:0;border-radius:14px;transform:scale(1.06) rotate(-1deg);box-shadow:0 16px 40px rgba(0,0,0,.25);transition:transform .12s ease,box-shadow .12s ease;will-change:left,top;';
+  }
+
+  function moveDrag(e){
+    if(!_drag.active||!_drag.el)return;
+    e.preventDefault();
+    var pt=getTouch(e);
+    // GPU 가속: left/top 대신 translate 사용
+    _drag.el.style.left=(pt.clientX-_drag.ox)+'px';
+    _drag.el.style.top=(pt.clientY-_drag.oy)+'px';
+
+    // 드롭 타겟
+    _drag.el.style.display='none';
+    var under=document.elementFromPoint(pt.clientX,pt.clientY);
+    _drag.el.style.display='';
+    var target=under?under.closest('.card[data-id]'):null;
+
+    if(target&&target.dataset.id!==_drag.id){
+      var tRect=target.getBoundingClientRect();
+      // 플레이스홀더 이동만 - works 배열은 건드리지 않음
+      if(pt.clientY<tRect.top+tRect.height/2){
+        if(target.previousSibling!==_drag.placeholder)
+          target.parentNode.insertBefore(_drag.placeholder,target);
+      } else {
+        if(target.nextSibling!==_drag.placeholder)
+          target.parentNode.insertBefore(_drag.placeholder,target.nextSibling);
+      }
+    }
+  }
+
+  function endDrag(){
+    clearTimeout(_drag.timer);
+    if(!_drag.active)return;
+    var card=_drag.el;
+    var ph=_drag.placeholder;
+    _drag.active=false;_drag.el=null;_drag.placeholder=null;_drag.id=null;
+
+    if(!card||!ph){return;}
+
+    var phRect=ph.getBoundingClientRect();
+    // 착지 애니메이션
+    card.style.transition='left .18s ease,top .18s ease,transform .18s ease,box-shadow .18s ease';
+    card.style.left=phRect.left+'px';
+    card.style.top=phRect.top+'px';
+    card.style.transform='scale(1) rotate(0deg)';
+    card.style.boxShadow='';
+
+    setTimeout(function(){
+      card.style.cssText=''; // 스타일 전부 초기화
+      if(ph.parentNode){
+        ph.parentNode.insertBefore(card,ph);
+        ph.parentNode.removeChild(ph);
+      }
+      // 이제 DOM 순서 기반으로 works 배열 재정렬
+      var newOrder=[];
+      document.querySelectorAll('.card[data-id]').forEach(function(c){
+        var w=works.find(function(x){return x.id===c.dataset.id;});
+        if(w)newOrder.push(w);
+      });
+      if(newOrder.length===works.length){
+        works.length=0;
+        newOrder.forEach(function(w){works.push(w);});
+      }
+      saveOrder(); // 드롭 완료 후 1번만 저장
+    },180);
+  }
+
+  // 터치
+  list.addEventListener('touchstart',function(e){
+    var card=getCard(e.target);if(!card||!editMode)return;
+    clearTimeout(_drag.timer);
+    _drag.timer=setTimeout(function(){startDrag(e,card);},350);
+  },{passive:true});
+  list.addEventListener('touchmove',function(e){
+    if(_drag.active){moveDrag(e);}else{clearTimeout(_drag.timer);}
+  },{passive:false});
+  list.addEventListener('touchend',function(){endDrag();},{passive:true});
+  list.addEventListener('touchcancel',function(){
+    clearTimeout(_drag.timer);
+    if(_drag.el){_drag.el.style.cssText='';}
+    if(_drag.placeholder&&_drag.placeholder.parentNode)_drag.placeholder.parentNode.removeChild(_drag.placeholder);
+    _drag.active=false;_drag.el=null;_drag.placeholder=null;
+  },{passive:true});
+
+  // 마우스
+  list.addEventListener('mousedown',function(e){
+    if(e.button!==0)return;
+    var card=getCard(e.target);if(!card||!editMode)return;
+    clearTimeout(_drag.timer);
+    _drag.timer=setTimeout(function(){startDrag(e,card);},250);
+  });
+  document.addEventListener('mousemove',function(e){if(_drag.active)moveDrag(e);});
+  document.addEventListener('mouseup',function(){if(_drag.active)endDrag();else clearTimeout(_drag.timer);});
+}
 
 function initTouchDrag(){
   var list=document.getElementById('list');
