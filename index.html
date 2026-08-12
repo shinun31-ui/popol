@@ -21,18 +21,21 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 .splash-word{font-size:28px;font-weight:800;font-style:italic;letter-spacing:.05em;color:#F1EFE8;opacity:0;transition:opacity .5s ease;}
 .splash-word.show{opacity:1;}
 /* NAV RESPONSIVE */
-.nav-btns{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;}
-@media(max-width:900px){
-  .nav-btns{display:none;}
-  #navHamBtn{display:flex !important;}
+.nav-btns{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;}
+.nav-btn{white-space:nowrap;font-size:12px;padding:4px 10px;}
+/* 1100px 이하 - 글자 작게 */
+@media(max-width:1100px){
+  .nav-btn{font-size:11px;padding:4px 7px;}
+  .nav-wordmark{font-size:15px;}
 }
-@media(max-width:480px){
-  .nav-wordmark{display:none;}
+/* 850px 이하 - 작업노트 → 노트 */
+@media(max-width:850px){
+  .nav-btn{font-size:11px;padding:3px 6px;}
   .user-bar span{display:none;}
-  .logout-btn:first-of-type{display:none;}
+  .logout-btn{font-size:11px;padding:2px 6px;}
 }
 /* NAV */
-#mainNav{display:none;align-items:center;justify-content:space-between;padding:0 16px;height:52px;background:var(--bg);border-bottom:0.5px solid var(--border);position:fixed;top:0;left:0;right:0;z-index:50;}
+#mainNav{display:none;align-items:center;justify-content:space-between;padding:0 12px;height:52px;background:var(--bg);border-bottom:0.5px solid var(--border);position:fixed;top:0;left:0;right:0;z-index:50;gap:8px;}
 .nav-logo{display:flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none;}
 .nav-icon{display:grid;grid-template-columns:1fr 1fr;gap:3px;width:24px;height:24px;}
 .nav-icon div{border-radius:2px;background:var(--text);}
@@ -391,28 +394,24 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
     <span class="nav-wordmark">POPOL</span>
   </div>
   <div class="nav-right">
-    <!-- 데스크탑: 항상 보이는 버튼들 -->
-    <div class="nav-btns" id="navBtns">
-      <button class="btn btn-sm" onclick="showTab('portfolio')">홈</button>
-      <button class="btn btn-sm" id="editModeBtn" onclick="toggleEditMode()">편집</button>
-      <button class="btn btn-sm" onclick="showTab('upload')">간편 업로드</button>
-      <button class="btn btn-sm" onclick="showTab('cv')">CV</button>
-      <button class="btn btn-sm" onclick="showTab('notes')">작업노트</button>
-      <button class="btn btn-sm" onclick="openPreview()">내보내기</button>
-      <button class="btn btn-sm" onclick="refreshWorks()" title="새로고침">↺</button>
-      <button class="btn btn-sm" onclick="toggleCanvasCalc()">📐</button>
-      <button class="btn btn-sm btn-dark" onclick="openAdd()">+ 추가</button>
+    <div class="nav-btns">
+      <button class="btn btn-sm nav-btn" onclick="showTab('portfolio')"><span class="nav-label">홈</span></button>
+      <button class="btn btn-sm nav-btn" id="editModeBtn" onclick="toggleEditMode()"><span class="nav-label">편집</span></button>
+      <button class="btn btn-sm nav-btn" onclick="showTab('upload')"><span class="nav-label">업로드</span></button>
+      <button class="btn btn-sm nav-btn" onclick="showTab('cv')"><span class="nav-label">CV</span></button>
+      <button class="btn btn-sm nav-btn" onclick="showTab('notes')"><span class="nav-label">작업노트</span></button>
+      <button class="btn btn-sm nav-btn" onclick="openPreview()"><span class="nav-label">내보내기</span></button>
+      <button class="btn btn-sm nav-btn" onclick="refreshWorks()" title="새로고침"><span class="nav-label">↺</span></button>
+      <button class="btn btn-sm nav-btn" onclick="toggleCanvasCalc()"><span class="nav-label">📐</span></button>
+      <button class="btn btn-sm btn-dark nav-btn" onclick="openAdd()"><span class="nav-label">+ 추가</span></button>
     </div>
-    <!-- 햄버거 버튼 (좁은 화면) -->
-    <button class="btn btn-sm" id="navHamBtn" onclick="toggleNavMenu()" style="display:none;">☰</button>
-    <!-- 설정/로그아웃 -->
     <div class="user-bar">
-      <span id="userEmail" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
-      <button class="logout-btn" onclick="openSettings()">⚙️</button>
+      <span id="userEmail" style="max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;"></span>
+      <button class="logout-btn" onclick="openSettings()" title="설정">⚙️</button>
       <button class="logout-btn" onclick="logout()">로그아웃</button>
     </div>
     <div style="position:relative;">
-      <button class="lang-btn" id="langBtn" onclick="toggleLangMenu()"><span id="langBtnLabel">한국어</span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <button class="lang-btn" id="langBtn" onclick="toggleLangMenu()"><span id="langBtnLabel">한</span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
       <div class="lang-menu hide" id="langMenu">
         <div class="lang-opt" onclick="setLang('ko')">🇰🇷 한국어</div>
         <div class="lang-opt" onclick="setLang('en')">🇺🇸 English</div>
@@ -420,18 +419,6 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
         <div class="lang-opt" onclick="setLang('zh')">🇨🇳 中文</div>
       </div>
     </div>
-  </div>
-  <!-- 드롭다운 메뉴 (좁은 화면) -->
-  <div id="navDropdown" style="display:none;position:fixed;top:52px;left:0;right:0;background:var(--bg);border-bottom:0.5px solid var(--border);z-index:49;padding:8px 12px;display:none;flex-direction:column;gap:4px;box-shadow:0 4px 16px rgba(0,0,0,.1);">
-    <button class="btn btn-sm" style="text-align:left;" onclick="showTab('portfolio');toggleNavMenu()">홈</button>
-    <button class="btn btn-sm" style="text-align:left;" id="editModeBtnMob" onclick="toggleEditMode();toggleNavMenu()">편집</button>
-    <button class="btn btn-sm" style="text-align:left;" onclick="showTab('upload');toggleNavMenu()">간편 업로드</button>
-    <button class="btn btn-sm" style="text-align:left;" onclick="showTab('cv');toggleNavMenu()">CV</button>
-    <button class="btn btn-sm" style="text-align:left;" onclick="showTab('notes');toggleNavMenu()">작업노트</button>
-    <button class="btn btn-sm" style="text-align:left;" onclick="openPreview();toggleNavMenu()">내보내기</button>
-    <button class="btn btn-sm" style="text-align:left;" onclick="refreshWorks();toggleNavMenu()">↺ 새로고침</button>
-    <button class="btn btn-sm" style="text-align:left;" onclick="toggleCanvasCalc();toggleNavMenu()">📐 호수 계산기</button>
-    <button class="btn btn-sm btn-dark" style="text-align:left;" onclick="openAdd();toggleNavMenu()">+ 추가</button>
   </div>
 </nav>
 
