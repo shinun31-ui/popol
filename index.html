@@ -21,16 +21,21 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 .splash-word{font-size:28px;font-weight:800;font-style:italic;letter-spacing:.05em;color:#F1EFE8;opacity:0;transition:opacity .5s ease;}
 .splash-word.show{opacity:1;}
 /* NAV RESPONSIVE */
-.nav-btns{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;}
-.nav-btn{white-space:nowrap;font-size:12px;padding:4px 10px;}
+.nav-btns{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;}
+.nav-btn{font-size:12px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border2);background:none;color:var(--text2);cursor:pointer;white-space:nowrap;transition:color .1s,background .1s;}
+.nav-btn:hover{color:var(--text);background:var(--bg2);}
+.nav-btn:active{transform:scale(.94);opacity:.7;transition:transform .08s,opacity .08s;}
+.nav-btn.active{background:var(--charcoal);color:#F1EFE8;border-color:var(--charcoal);}
+.nav-btn-dark{background:var(--charcoal);color:#F1EFE8;border-color:var(--charcoal);}
+.nav-btn-dark:hover{opacity:.85;}
 /* 1100px 이하 - 글자 작게 */
 @media(max-width:1100px){
-  .nav-btn{font-size:11px;padding:4px 7px;}
+  .nav-btn{font-size:11px;padding:3px 7px;}
   .nav-wordmark{font-size:15px;}
 }
-/* 850px 이하 - 작업노트 → 노트 */
+/* 850px 이하 */
 @media(max-width:850px){
-  .nav-btn{font-size:11px;padding:3px 6px;}
+  .nav-btn{font-size:11px;padding:3px 5px;}
   .user-bar span{display:none;}
   .logout-btn{font-size:11px;padding:2px 6px;}
 }
@@ -395,15 +400,15 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
   </div>
   <div class="nav-right">
     <div class="nav-btns">
-      <button class="btn btn-sm nav-btn" onclick="showTab('portfolio')"><span class="nav-label">홈</span></button>
-      <button class="btn btn-sm nav-btn" id="editModeBtn" onclick="toggleEditMode()"><span class="nav-label">편집</span></button>
-      <button class="btn btn-sm nav-btn" onclick="showTab('upload')"><span class="nav-label">업로드</span></button>
-      <button class="btn btn-sm nav-btn" onclick="showTab('cv')"><span class="nav-label">CV</span></button>
-      <button class="btn btn-sm nav-btn" onclick="showTab('notes')"><span class="nav-label">작업노트</span></button>
-      <button class="btn btn-sm nav-btn" onclick="openPreview()"><span class="nav-label">내보내기</span></button>
-      <button class="btn btn-sm nav-btn" onclick="refreshWorks()" title="새로고침"><span class="nav-label">↺</span></button>
-      <button class="btn btn-sm nav-btn" onclick="toggleCanvasCalc()"><span class="nav-label">📐</span></button>
-      <button class="btn btn-sm btn-dark nav-btn" onclick="openAdd()"><span class="nav-label">+ 추가</span></button>
+      <button class="nav-btn" onclick="showTab('portfolio')">홈</button>
+      <button class="nav-btn" id="editModeBtn" onclick="toggleEditMode()">편집</button>
+      <button class="nav-btn" onclick="showTab('upload')">업로드</button>
+      <button class="nav-btn" onclick="showTab('cv')">CV</button>
+      <button class="nav-btn" onclick="showTab('notes')">작업노트</button>
+      <button class="nav-btn" onclick="openPreview()">내보내기</button>
+      <button class="nav-btn" onclick="refreshWorks()" title="새로고침">↺</button>
+      <button class="nav-btn" onclick="toggleCanvasCalc()">📐</button>
+      <button class="nav-btn nav-btn-dark" onclick="openAdd()">+ 추가</button>
     </div>
     <div class="user-bar">
       <span id="userEmail" style="max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;"></span>
