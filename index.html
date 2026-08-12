@@ -407,7 +407,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
       <button class="nav-btn" onclick="showTab('notes')">작업노트</button>
       <button class="nav-btn" onclick="openPreview()">내보내기</button>
       <button class="nav-btn" onclick="refreshWorks()" title="새로고침">↺</button>
-      <button class="nav-btn" onclick="toggleCanvasCalc()">📐</button>
+      <button class="nav-btn" onclick="toggleCanvasCalc()">호수 계산기</button>
       <button class="nav-btn nav-btn-dark" onclick="openAdd()">+ 추가</button>
     </div>
     <div class="user-bar">
@@ -430,12 +430,12 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
 <!-- EDIT BAR -->
 <div id="editBar">
   <span style="font-size:12px;color:var(--text3);" id="editSelCount"></span>
-  <button class="btn btn-sm" onclick="selAll()">전체 선택</button>
-  <button class="btn btn-sm" onclick="bulkSetSold(false)">판매중</button>
-  <button class="btn btn-sm" onclick="bulkSetSold('reserve')">예약중</button>
-  <button class="btn btn-sm" onclick="bulkSetSold(true)">판매완료</button>
-  <button class="btn btn-sm" onclick="bulkSetSold('stop')" style="color:#8B4513;">판매중단</button>
-  <button class="btn btn-sm" style="color:var(--red);" onclick="deleteSelected()">삭제</button>
+  <button class="nav-btn" onclick="selAll()">전체 선택</button>
+  <button class="nav-btn" onclick="bulkSetSold(false)">판매중</button>
+  <button class="nav-btn" onclick="bulkSetSold('reserve')">예약중</button>
+  <button class="nav-btn" onclick="bulkSetSold(true)">판매완료</button>
+  <button class="nav-btn" onclick="bulkSetSold('stop')" style="color:#8B4513;">판매중단</button>
+  <button class="nav-btn" onclick="deleteSelected()" style="color:var(--red);">삭제</button>
 </div>
 
 <!-- APP SCREEN -->
@@ -532,14 +532,14 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
           <div style="font-size:12px;color:var(--text3);margin-top:2px;">이력을 관리하고 선택해서 내보내요</div>
         </div>
         <div style="display:flex;gap:8px;">
-          <button class="btn btn-sm" onclick="document.getElementById('cvGuideOv').classList.add('on')" style="color:var(--text2);">📄 파일 업로드</button>
+          <button class="nav-btn" onclick="document.getElementById('cvGuideOv').classList.add('on')" style="color:var(--text2);">📄 파일 업로드</button>
           <input type="file" id="cvFileInput" accept=".docx,.txt" style="display:none;" onchange="handleCVFile(this)"/>
           <span id="cvSelCount" style="font-size:12px;color:#185FA5;font-weight:500;"></span>
-          <button class="btn btn-sm" onclick="cvSelSet.size===cvItems.length?cvSelSet.clear():cvItems.forEach(function(c){cvSelSet.add(c.id);});renderCV();" style="color:var(--text2);">전체선택</button>
-          <button class="btn btn-sm" onclick="openCVMove()" style="color:var(--text2);" id="cvMoveBtn">섹션 이동</button>
-          <button class="btn btn-sm" onclick="deleteCVSelected()" style="color:var(--red);">선택 삭제</button>
-          <button class="btn btn-sm btn-blue" onclick="document.getElementById('cvExportSubtitle').textContent=cvSelSet.size>0?cvSelSet.size+'개 선택된 이력을 내보냅니다':'전체 이력을 내보냅니다 (선택하면 선택만 내보내기)';document.getElementById('cvExportOv').classList.add('on')">내보내기</button>
-          <button class="btn btn-sm btn-dark" onclick="openCVAdd()">+ 추가</button>
+          <button class="nav-btn" onclick="cvSelSet.size===cvItems.length?cvSelSet.clear():cvItems.forEach(function(c){cvSelSet.add(c.id);});renderCV();" style="color:var(--text2);">전체선택</button>
+          <button class="nav-btn" onclick="openCVMove()" style="color:var(--text2);" id="cvMoveBtn">섹션 이동</button>
+          <button class="nav-btn" onclick="deleteCVSelected()" style="color:var(--red);">선택 삭제</button>
+          <button class="nav-btn nav-btn-dark" onclick="document.getElementById('cvExportSubtitle').textContent=cvSelSet.size>0?cvSelSet.size+'개 선택된 이력을 내보냅니다':'전체 이력을 내보냅니다 (선택하면 선택만 내보내기)';document.getElementById('cvExportOv').classList.add('on')">내보내기</button>
+          <button class="nav-btn nav-btn-dark" onclick="openCVAdd()">+ 추가</button>
         </div>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
@@ -573,7 +573,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
           <div style="font-size:18px;font-weight:700;">작업노트</div>
           <div style="font-size:12px;color:var(--text3);margin-top:2px;">시리즈별 작업 기록을 관리해요</div>
         </div>
-        <button class="btn btn-sm btn-dark" onclick="openNoteAdd()">+ 새 시리즈</button>
+        <button class="nav-btn nav-btn-dark" onclick="openNoteAdd()">+ 새 시리즈</button>
       </div>
       <div style="position:relative;margin-bottom:8px;">
         <input id="noteSearchInput" type="text" placeholder="🔍  작업노트 검색... (제목, 내용 키워드)" oninput="noteSearch()" style="width:100%;border:0.5px solid var(--border2);border-radius:10px;padding:10px 36px 10px 14px;font-size:13px;background:var(--bg2);color:var(--text);outline:none;box-sizing:border-box;"/>
@@ -800,7 +800,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
         <input id="fSoldCollector" placeholder="예: 개인 소장, 국립현대미술관, 홍길동..."/>
       </div>
     </div>
-    <div class="mact"><button class="btn" onclick="closeOv('addOv')">취소</button><button class="btn btn-dark" onclick="saveWork()">저장</button></div>
+    <div class="mact"><button class="nav-btn" onclick="closeOv('addOv')">취소</button><button class="nav-btn nav-btn-dark" onclick="saveWork()">저장</button></div>
   </div>
 </div>
 
@@ -890,7 +890,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
       <div class="ff"><label>장소/기관</label><input id="cvVenue" placeholder="갤러리명"/></div>
       <div class="ff"><label>지역</label><input id="cvLocation2" placeholder="서울, 뉴욕 등"/></div>
     </div>
-    <div class="mact"><button class="btn" onclick="closeOv('cvAddOv')">취소</button><button class="btn btn-dark" onclick="saveCVItem()">저장</button></div>
+    <div class="mact"><button class="nav-btn" onclick="closeOv('cvAddOv')">취소</button><button class="nav-btn nav-btn-dark" onclick="saveCVItem()">저장</button></div>
   </div>
 </div>
 
@@ -1029,7 +1029,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-ap
       <div class="ff"><label>기간</label><input id="notePeriod" placeholder="예: 2022-2024"/></div>
     </div>
     <div class="ff"><label>작업노트</label><textarea id="noteText" rows="8" placeholder="작품에 대한 작가 노트를 자유롭게 적어주세요..."></textarea></div>
-    <div class="mact"><button class="btn" onclick="closeOv('noteAddOv')">취소</button><button class="btn btn-dark" onclick="saveNote()">저장</button></div>
+    <div class="mact"><button class="nav-btn" onclick="closeOv('noteAddOv')">취소</button><button class="nav-btn nav-btn-dark" onclick="saveNote()">저장</button></div>
   </div>
 </div>
 
